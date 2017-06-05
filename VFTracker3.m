@@ -354,10 +354,9 @@ function landmarksListBox_Callback(hObject, eventdata, handles)
     listBoxSelection = listBoxSelection(1);
     globalStudyInfo.currentlyTrackedLandmark = Data.JoveLandmarks(listBoxSelection);
     Utilities.CustomPrinters.printInfo(sprintf('Current landmark is %s', char(globalStudyInfo.currentlyTrackedLandmark)));
-    figure(gcf); %This is supposed to bring the focus back to the app figure's gray area but it does not work as expected.
+    figure(gcf);%This is supposed to bring the focus back to the app figure's gray area but it does not work as expected.
+    uicontrol(handles.text9);
     Render(handles);
-    
-
 
 
 % --- Executes during object creation, after setting all properties.
@@ -1119,7 +1118,7 @@ release(videoFileWriter);
 Utilities.CustomPrinters.printInfo('Done writing video file');
 
 
-% --- Executes on key press with focus on landmarksListBox and none of its controls.
+    % --- Executes on key press with focus on landmarksListBox and none of its controls.
 function landmarksListBox_KeyPressFcn(hObject, eventdata, handles)
 % hObject    handle to landmarksListBox (see GCBO)
 % eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
