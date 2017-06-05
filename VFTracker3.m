@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 05-Jun-2017 09:40:39
+% Last Modified by GUIDE v2.5 05-Jun-2017 09:56:54
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1135,4 +1135,3 @@ function text11_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to text11 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-
