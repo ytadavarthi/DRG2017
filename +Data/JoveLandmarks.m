@@ -4,7 +4,7 @@ classdef JoveLandmarks < uint8
     
    enumeration
       Mandible (1);
-      Skull (2);
+      Hard_Palate (2);
       C1 (3);
       C2 (4);
       C4 (5);

@@ -1,5 +1,7 @@
 function varargout = VFTracker3(varargin)
 % VFTRACKER3 MATLAB code for VFTracker3.fig
+% C:/Users/pouri/OneDrive/Documents/MCG/research/MATLAB/Tracker/DRG2017
+
 %      VFTRACKER3, by itself, creates a new VFTRACKER3 or raises the existing
 %      singleton*.
 %
@@ -22,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 10-Jun-2015 14:09:42
+% Last Modified by GUIDE v2.5 05-Jun-2017 09:40:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -136,6 +138,9 @@ pointerShape = [ ...
     [fileName, pathName] = uigetfile({'*'});
     fullFileName = strcat(pathName, fileName);
     
+    %display file name
+    handles.text11.String = fileName;
+    
     %%% Uncomment to load a file direclty without the file chooser:
     %fullFileName = 'C:\Users\johndoe\Desktop\ThirdRevision\testvideo.avi';
     %fileName = 'testvideo.avi';
@@ -186,7 +191,9 @@ pointerShape = [ ...
     set(handles.frameViewer, 'XLim', [0 vfVideoStructure.resolution(2)]);
     set(handles.frameViewer, 'YLim', [0 vfVideoStructure.resolution(1)]);
     
-    
+    %Correct aspect ratio
+    set(handles.frameViewer, 'DataAspectRatio', [1 1 1]);
+    set(handles.frameViewer, 'PlotBoxAspectRatio', [2 2 2]);
 
 
     %Set up the handles.landmarksListBox
@@ -1110,3 +1117,23 @@ end
 
 release(videoFileWriter);
 Utilities.CustomPrinters.printInfo('Done writing video file');
+
+
+% --- Executes on key press with focus on landmarksListBox and none of its controls.
+function landmarksListBox_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to landmarksListBox (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+uicontrol(handles.text9);
+
+
+
+% --- Executes during object creation, after setting all properties.
+function text11_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to text11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
