@@ -28,11 +28,14 @@ classdef StudyCoordinates < handle
        function result = getCoordinate(obj, frameIndex, landmark)
            result = obj.coordinates{frameIndex}.coordinates{uint8(landmark)};
        end
-%        
-%        function deleteCoordinate(obj, frameIndex, landmark)
-%           obj.coordinates{ 
-%        end
-%        
+       
+       function deleteLaterCoordinates(obj, frameIndex, numFrames, landmark)
+           for i = frameIndex:numFrames
+                obj.coordinates{i}.coordinates{uint8(landmark)} = [];
+                obj.trackedStatus{frameIndex}.statuses{landmark} = Data.TrackingType.Untracked; 
+           end
+       end
+       
        function setTrackedStatus(obj, frameIndex, landmark, trackingStatus)
           obj.trackedStatus{frameIndex}.statuses{landmark} = trackingStatus; 
        end

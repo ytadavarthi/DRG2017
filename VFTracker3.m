@@ -1202,6 +1202,13 @@ function deletebutton_Callback(hObject, eventdata, handles)
 % hObject    handle to deletebutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    currentFrameIndex = floor(get(handles.frameScrubber, 'Value'));
+    currentLandmark = globalStudyInfo.currentlyTrackedLandmark;
+    numFramesTotal = globalStudyInfo.vfVideoStructure.numFrames;
+    globalStudyInfo.studyCoordinates.deleteLaterCoordinates(currentFrameIndex, numFramesTotal, currentLandmark);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    Render(handles);
 
 
 % --- Executes on button press in startButton.
