@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 05-Jun-2017 09:56:54
+% Last Modified by GUIDE v2.5 05-Jun-2017 10:58:45
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1129,9 +1129,61 @@ function landmarksListBox_KeyPressFcn(hObject, eventdata, handles)
 uicontrol(handles.text9);
 
 
-
-% --- Executes during object creation, after setting all properties.
-function text11_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to text11 (see GCBO)
+% --- Executes on button press in pushbutton1.
+function pushbutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.hold_position = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text12, 'String', globalStudyInfo.hold_position);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+    
+% --- Executes on button press in pushbutton2.
+function pushbutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.ramus_mandible = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text13, 'String', globalStudyInfo.ramus_mandible);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+    
+% --- Executes on button press in pushbutton3.
+function pushbutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.hyoid_burst = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text14, 'String', globalStudyInfo.hyoid_burst);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+    
+% --- Executes on button press in pushbutton4.
+function pushbutton4_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.ues_closure = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text15, 'String', globalStudyInfo.ues_closure);
+
+% --- Executes on button press in pushbutton5.
+function pushbutton5_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.at_rest = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text16, 'String', globalStudyInfo.at_rest);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+
+% --- Executes on button press in deletebutton.
+function deletebutton_Callback(hObject, eventdata, handles)
+% hObject    handle to deletebutton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

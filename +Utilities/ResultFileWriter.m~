@@ -13,6 +13,11 @@ function ResultFileWriter(globalStudyInfo)
     %disp(b)
     tableColumnLabels = {};
     tableColumnLabels{end+1} = 'FrameNumber';
+%     tableColumnLabels{end+1} = 'hold_position';
+%     tableColumnLabels{end+1} = 'ramus_mandible';
+%     tableColumnLabels{end+1} = 'hyoid_burst';
+%     tableColumnLabels{end+1} = 'ues_closure';
+%     tableColumnLabels{end+1} = 'at_rest';
     
     for i = 1:numLandmarks
        tableColumnLabels{end+1} = strcat(b{i}, '_x');
@@ -65,32 +70,19 @@ function ResultFileWriter(globalStudyInfo)
 
     % kinematics frame number array for timing calculations
     
-    cell1 = table2cell(t1);
+    cell1 = table2cell(t1)
 
-    cell2 = cell(1,41)
+    cell2 = cells(1,41)
     cell2(1, 1:5) = {'hold_position' 'ramus_mandible' 'hyoid_burst' 'ues_closure' 'at_rest'};
     
     cell3 = cell(1,41)
     cell3(1, 1:5) = {globalStudyInfo.hold_position globalStudyInfo.ramus_mandible, globalStudyInfo.hyoid_burst, globalStudyInfo.ues_closure, globalStudyInfo.at_rest};
-    
-    kinematics_cell = [cell2; cell3];
-    totalKinematicsTable = cell2table(kinematics_cell);
 
     totalCell = [cell2; cell3; tableColumnLabels; cell1];
     totalTable = cell2table(totalCell);
     
-    %writing third file instead of concatenating kinematics frame numbers
-    kinematicsFileName = fullfile(pathString, strcat(name, '_kinematics_.txt'));
-    writetable(totalKinematicsTable, kinematicsFileName, 'Delimiter', '\t', 'WriteVariableNames', false);
-    Utilities.CustomPrinters.printInfo(sprintf('Done writing Kinematics results'));
-
-    
     %adding coordinate
-    %uncomment to get concatenated file
-%     writetable(totalTable, fullResultFileName, 'Delimiter', '\t', 'WriteVariableNames', false);
-
-    %comment
-    writetable(t1, fullResultFileName, 'Delimiter', '\t');
+    writetable(totalTable, fullResultFileName, 'Delimiter', '\t');
     Utilities.CustomPrinters.printInfo(sprintf('Done writing results'));
     
     morphoJFileName = fullfile(pathString, strcat(name, '_morphoj_.txt'));

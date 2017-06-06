@@ -1,5 +1,7 @@
 function varargout = VFTracker3(varargin)
 % VFTRACKER3 MATLAB code for VFTracker3.fig
+% C:/Users/pouri/OneDrive/Documents/MCG/research/MATLAB/Tracker/DRG2017
+
 %      VFTRACKER3, by itself, creates a new VFTRACKER3 or raises the existing
 %      singleton*.
 %
@@ -22,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 06-Jun-2015 17:38:26
+% Last Modified by GUIDE v2.5 05-Jun-2017 10:58:45
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -133,12 +135,19 @@ pointerShape = [ ...
         set(handles.appFigure, 'PointerShapeCData', pointerShape);
         set(handles.appFigure, 'PointerShapeHotSpot', pointerHotSpot);
 
-
-    [fileName, pathName] = uigetfile({'*.avi'});
+    [fileName, pathName] = uigetfile({'*'});
     fullFileName = strcat(pathName, fileName);
+    
+    %display file name
+    handles.text11.String = fileName;
+    
+    %%% Uncomment to load a file direclty without the file chooser:
     %fullFileName = 'C:\Users\johndoe\Desktop\ThirdRevision\testvideo.avi';
     %fileName = 'testvideo.avi';
     %pathName = 'C:\Users\johndoe\Desktop\ThirdRevision\';
+    
+    
+    clear('globalStudyInfo');
     globalStudyInfo = Data.GlobalStudyInfo;
     
     %globalStudyInfo.fullFileName = fullFileName;
@@ -182,7 +191,9 @@ pointerShape = [ ...
     set(handles.frameViewer, 'XLim', [0 vfVideoStructure.resolution(2)]);
     set(handles.frameViewer, 'YLim', [0 vfVideoStructure.resolution(1)]);
     
-    
+    %Correct aspect ratio
+    set(handles.frameViewer, 'DataAspectRatio', [1 1 1]);
+    set(handles.frameViewer, 'PlotBoxAspectRatio', [2 2 2]);
 
 
     %Set up the handles.landmarksListBox
@@ -198,24 +209,14 @@ pointerShape = [ ...
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    %Check if an excel file with the same name exists
-    disp(fileName)
-    
+    %Checking if a results file exists
     [pathStr, name, ext] = fileparts(strcat(pathName, fileName));
-    expectedFullExcelFileName = fullfile(pathStr, strcat(name, '.xlsx'))
-    %Does the excel file exist?
+    expectedFullExcelFileName = fullfile(pathStr, strcat(name, '.txt'))
+
     if (exist(expectedFullExcelFileName, 'file'))
-        disp('file exists');
+        Utilities.CustomPrinters.printInfo('Previously saved annotation results exist. Loading...');
         %Read the table
-        inputTable = readtable(expectedFullExcelFileName);
+        inputTable = readtable(expectedFullExcelFileName, 'Delimiter', '\t');
         inputDataArray = table2array(inputTable(:, 2:end));
         
         [a, b] = enumeration('Data.JoveLandmarks');
@@ -227,9 +228,9 @@ pointerShape = [ ...
                 globalStudyInfo.studyCoordinates.setCoordinate(frameIndex, Data.JoveLandmarks(landmarkIndex+1), currentCoordinate);
             end
         end
-        
+        Utilities.CustomPrinters.printInfo('Done loading saved annotations');
     else
-        disp('file does not exist')
+        Utilities.CustomPrinters.printInfo('No previously saved annotations exist');
     end
     
     
@@ -238,19 +239,27 @@ pointerShape = [ ...
     %globalStudyInfo.studyCoordinates.trackingStatus cell array.
     expectedFullTrackingStatusFileName = fullfile(pathStr, strcat(name, '_tracking_status.mat'));
     if (exist (expectedFullTrackingStatusFileName, 'file'))
-       disp('tracking status file exists, loading.....'); 
+       Utilities.CustomPrinters.printInfo('Tracking information exists for previous session. Loading...');
        loadedMatFile = load(expectedFullTrackingStatusFileName);
        globalStudyInfo.studyCoordinates.trackedStatus = loadedMatFile.('savedTrackedStatus');
+       Utilities.CustomPrinters.printInfo('Done loading previous session''s tracking information');
     else
-        disp('tracking status file does note exist');
+        Utilities.CustomPrinters.printInfo('No previous session''s tracking information exists');
     end
     
     
     
     
+    %Update the GUI elements that display the parameters for the Harris
+    %corner detector and the KLT tracker
+    set(handles.harrisCornerDetectorMinQualityEditBox, 'String', num2str(globalStudyInfo.harrisFeatureDetectorParameters.minQuality));
+    set(handles.harrisCornerDetectorFilterSize, 'String', num2str(globalStudyInfo.harrisFeatureDetectorParameters.filterSize));
+    set(handles.harrisCornerDetectorSearchRadiusEditBox, 'String', num2str(globalStudyInfo.harrisFeatureDetectorParameters.searchRadius));
+    set(handles.numPyramidLevelsEditBox, 'String', num2str(globalStudyInfo.kltTrackerParameters.numPyramidLevels));
+    set(handles.blockSizeEditBox, 'String', num2str(globalStudyInfo.kltTrackerParameters.blockSize));
     
     
-    
+        
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     
     %Render the first frame
@@ -344,9 +353,10 @@ function landmarksListBox_Callback(hObject, eventdata, handles)
     listBoxSelection = get(handles.landmarksListBox, 'Value');
     listBoxSelection = listBoxSelection(1);
     globalStudyInfo.currentlyTrackedLandmark = Data.JoveLandmarks(listBoxSelection);
-    disp(globalStudyInfo.currentlyTrackedLandmark)
+    Utilities.CustomPrinters.printInfo(sprintf('Current landmark is %s', char(globalStudyInfo.currentlyTrackedLandmark)));
+    figure(gcf);%This is supposed to bring the focus back to the app figure's gray area but it does not work as expected.
+    uicontrol(handles.text9);
     Render(handles);
-
 
 
 % --- Executes during object creation, after setting all properties.
@@ -547,7 +557,7 @@ function performTracking(handles)
     
     numFrames = globalStudyInfo.vfVideoStructure.numFrames;
     currentlyTrackedLandmark = globalStudyInfo.currentlyTrackedLandmark;
-    disp(currentlyTrackedLandmark)
+%    disp(currentlyTrackedLandmark)
     
     currentFrameIndex = floor(get(handles.frameScrubber, 'Value'));
     currentFrame = globalStudyInfo.vfVideoStructure.videoFrames{currentFrameIndex};
@@ -569,21 +579,27 @@ function performTracking(handles)
     
        
         
-        cornerSearchRadius = 3;
+        cornerSearchRadius = globalStudyInfo.harrisFeatureDetectorParameters.searchRadius;
+        harrisFeatureDetectorMinQuality = globalStudyInfo.harrisFeatureDetectorParameters.minQuality;
+        harrisFeatureDetectorFilterSize = globalStudyInfo.harrisFeatureDetectorParameters.filterSize;
+        %Utilities.CustomPrinters.printInfo(sprintf('About to call Harris Feature Detector with search radius = [%s], Min Quality = %s, Filter Size = %s', num2str(cornerSearchRadius ), num2str(harrisFeatureDetectorMinQuality), num2str(harrisFeatureDetectorFilterSize)));
         
-        cornersDetected = detectHarrisFeatures(currentFrame, 'MinQuality', 0.01, 'ROI', [(chosenPointX - cornerSearchRadius) (chosenPointY - cornerSearchRadius) (2 * cornerSearchRadius + 1) (2 * cornerSearchRadius + 1)]);
+        cornersDetected = detectHarrisFeatures(currentFrame, 'MinQuality', harrisFeatureDetectorMinQuality, 'ROI', [(chosenPointX - cornerSearchRadius) (chosenPointY - cornerSearchRadius) (2 * cornerSearchRadius + 1) (2 * cornerSearchRadius + 1)], 'FilterSize', harrisFeatureDetectorFilterSize);
         if (size(cornersDetected.Location, 1) == 0)
             cornersFound = false;
-            disp('no corners detected');
+            Utilities.CustomPrinters.printWarning('No Harris corners detected. Increase search window or try a different spot');
+%            disp('no corners detected');
             set(handles.feedbackLabel, 'String', 'No corners detected');
         else
-            disp('corners detected');
+%            disp('corners detected');
+            Utilities.CustomPrinters.printInfo('Harris corner detected');
             cornersFound = true;
             set(handles.feedbackLabel, 'String', '');
         end
     end
     
     
+    set(handles.feedbackLabel, 'String', 'Tracking...');
     
     %By how much does the corner that is about to be tracked exceed the
     %point chosen by the user?
@@ -598,10 +614,11 @@ function performTracking(handles)
     
     
     
-    Utilities.CustomPrinters.printInfo(sprintf('About to initiate KLT tracker with Block size = [%s], Number Pyramid Levels = %s, Max Iterations = %s', globalStudyInfo., globalStudyInfo., globalStudyInfo.kltMaxIterations));    v = vision.PointTracker('NumPyramidLevels', globalStudyInfo.kltNumPyramidLevels, 'BlockSize', globalStudyInfo.kltBlockSize, 'MaxIterations', globalStudyInfo.kltMaxIterations);
+    %Utilities.CustomPrinters.printInfo(sprintf('About to initiate KLT tracker with Block size = [%s], Number Pyramid Levels = %s, Max Iterations = %s', num2str(globalStudyInfo.kltTrackerParameters.blockSize), num2str(globalStudyInfo.kltTrackerParameters.numPyramidLevels), num2str(globalStudyInfo.kltTrackerParameters.maxIterations)));    
+    v = vision.PointTracker('NumPyramidLevels', globalStudyInfo.kltTrackerParameters.numPyramidLevels, 'BlockSize', globalStudyInfo.kltTrackerParameters.blockSize, 'MaxIterations', globalStudyInfo.kltTrackerParameters.maxIterations);
     initialize(v, cornersDetected.Location(1, :), currentFrame);
      
-     
+     Utilities.CustomPrinters.printInfo('Hold on while tracking is being done....');
      while(currentFrameIndex < numFrames)
          nextFrame = globalStudyInfo.vfVideoStructure.videoFrames{currentFrameIndex + 1};
          nextFrame = preprocessImage(handles, nextFrame);
@@ -616,7 +633,8 @@ function performTracking(handles)
             globalStudyInfo.studyCoordinates.setTrackedStatus(currentFrameIndex, currentlyTrackedLandmark, Data.TrackingType.Automatic);
          end
      end
-     
+     Utilities.CustomPrinters.printInfo('Tracking is done');
+     set(handles.feedbackLabel, 'String', '');
      Render(handles);
     
 
@@ -682,7 +700,7 @@ function frameViewer_ButtonDownFcn(hObject, eventdata, handles)
 
 
 function imageButtownDownFcn()
-    disp('called image button down callback')
+%    disp('called image button down callback')
 
 
 % --------------------------------------------------------------------
@@ -771,60 +789,20 @@ globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
 oldFeedbackLabelMessage = get(handles.feedbackLabel, 'String');
 set(handles.feedbackLabel, 'String', 'Saving...');
 Utilities.ResultFileWriter(globalStudyInfo);
-set(handles.feedbackLabel, 'String', oldFeedbackLabelMessage);
+set(handles.feedbackLabel, 'String', '');
 
 
 % --------------------------------------------------------------------
-function WriteVideo_ClickedCallback(hObject, eventdata, handles)
-% hObject    handle to WriteVideo (see GCBO)
+function WriteHighResVideo_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to WriteHighResVideo (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-    numFrames = globalStudyInfo.vfVideoStructure.numFrames;
+VideoWriterCallback(handles, 'high');   
     
-    [pathstr, name, ext] = fileparts(globalStudyInfo.vfVideoStructure.fileName);
-    
-    videoFileName = fullfile(pathstr, strcat(name, '_video.avi'));
-    
-    disp(videoFileName)
-    
-    
-    videoFileWriter = vision.VideoFileWriter(videoFileName);
-    
-    %Draw the landmark annotations
-    numLandmarks = Data.JoveLandmarks.numLandmarks;
-    [m, s] = enumeration('Data.JoveLandmarks');
-    
-    for i = 1:numFrames
-        %This works by running the framescrubber through all the notches,
-        %reading the cdata, and writing it to the videofile writer
-        
-        %Get the frame data from the vfvideostructure
-        currentFrame = globalStudyInfo.vfVideoStructure.videoFrames{i};
-    
-       for j = 1:numLandmarks
-         currentCoordinate = globalStudyInfo.studyCoordinates.getCoordinate(i, j);
-         if (~isempty(currentCoordinate))
-             if (isempty(cell2mat(regexp(s(j), '_gt'))))
-                landmarkColour = 'green';
-             else
-                 landmarkColour = 'red';
-             end
-            currentFrame = insertMarker(currentFrame, currentCoordinate, 'color', landmarkColour);
-         end
-       end
-       
-       %Insert the frame number at the top left
-       currentFrame = insertText(currentFrame, [1 1], sprintf('%d / %d', i, numFrames));
-       
-       step(videoFileWriter, currentFrame);
-    end
-    
-            
-    
-    release(videoFileWriter);
 
 
+    
+    
 % --------------------------------------------------------------------
 function CreateSlitImageMenuButton_Callback(hObject, eventdata, handles)
 % hObject    handle to CreateSlitImageMenuButton (see GCBO)
@@ -874,17 +852,18 @@ function CreateSlitImageMenuButton_Callback(hObject, eventdata, handles)
 
 
 % --------------------------------------------------------------------
-function debug_pitstop_ClickedCallback(hObject, eventdata, handles)
-% hObject    handle to debug_pitstop (see GCBO)
+function WriteLowResVideo_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to WriteLowResVideo (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-disp('debug pitstop called');
-globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-fullFileName = globalStudyInfo.vfVideoStructure.fileName;
-[pathstr, name, ext] = fileparts(fullFileName);
-trackingResultFullFileName = fullfile(pathstr, strcat(name, '_tracking_status.mat'));
-savedTrackedStatus = globalStudyInfo.studyCoordinates.trackedStatus;
-save(trackingResultFullFileName, 'savedTrackedStatus');
+VideoWriterCallback(handles, 'low');
+% disp('debug pitstop called');
+% globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+% fullFileName = globalStudyInfo.vfVideoStructure.fileName;
+% [pathstr, name, ext] = fileparts(fullFileName);
+% trackingResultFullFileName = fullfile(pathstr, strcat(name, '_tracking_status.mat'));
+% savedTrackedStatus = globalStudyInfo.studyCoordinates.trackedStatus;
+% save(trackingResultFullFileName, 'savedTrackedStatus');
 
 
 
@@ -895,7 +874,7 @@ function numPyramidLevelsEditBox_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of numPyramidLevelsEditBox as text
 %        str2double(get(hObject,'String')) returns contents of numPyramidLevelsEditBox as a double
-disp('Num Pyramid levels text bos callback');
+%disp('Num Pyramid levels text bos callback');
 
 globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
 
@@ -910,7 +889,7 @@ catch
 end
 set(hObject, 'String', value);
 
-globalStudyInfo.kltNumPyramidLevels;
+globalStudyInfo.kltTrackerParameters.numPyramidLevels = value;
 setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
 
@@ -935,9 +914,9 @@ function blockSizeEditBox_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of blockSizeEditBox as text
 %        str2double(get(hObject,'String')) returns contents of blockSizeEditBox as a double
-disp('block size edit box callback called');
+%disp('block size edit box callback called');
 globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-globalStudyInfo.kltBlockSize;
+
 value = get(hObject, 'String');   
 try
     value = uint8(str2num(value));
@@ -947,6 +926,8 @@ try
 catch
     
 end
+
+globalStudyInfo.kltTrackerParameters.blockSize = value;
 
 setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
@@ -963,3 +944,246 @@ function blockSizeEditBox_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on scroll wheel click while the figure is in focus.
+function appFigure_WindowScrollWheelFcn(hObject, eventdata, handles)
+% hObject    handle to appFigure (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.FIGURE)
+%	VerticalScrollCount: signed integer indicating direction and number of clicks
+%	VerticalScrollAmount: number of lines scrolled for each click
+% handles    structure with handles and user data (see GUIDATA)
+scrollDelta = eventdata.VerticalScrollCount;
+globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+totalFrames = globalStudyInfo.vfVideoStructure.numFrames;
+%frameScrubber
+currentFrame = get(handles.frameScrubber, 'Value');
+if (scrollDelta > 0 && currentFrame ~= totalFrames)
+    currentFrame = currentFrame + 1;
+elseif (scrollDelta < 0 && currentFrame ~= 1)
+    currentFrame = currentFrame - 1;
+end
+
+set(handles.frameScrubber, 'Value', currentFrame);
+
+
+% --- Executes on mouse press over figure background, over a disabled or
+% --- inactive control, or over an axes background.
+function appFigure_WindowButtonUpFcn(hObject, eventdata, handles)
+% hObject    handle to appFigure (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%disp('figure button up')
+uicontrol(handles.frameScrubber);
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over landmarksListBox.
+function landmarksListBox_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to landmarksListBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+figure(gca)
+axes(handles.frameViewer);
+uicontrol(handles.frameScrubber);   
+
+
+
+function harrisCornerDetectorMinQualityEditBox_Callback(hObject, eventdata, handles)
+% hObject    handle to harrisCornerDetectorMinQualityEditBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of harrisCornerDetectorMinQualityEditBox as text
+%        str2double(get(hObject,'String')) returns contents of harrisCornerDetectorMinQualityEditBox as a double
+globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+value = str2double(get(hObject, 'String'));
+globalStudyInfo.harrisFeatureDetectorParameters.minQuality = value;
+setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+% --- Executes during object creation, after setting all properties.
+function harrisCornerDetectorMinQualityEditBox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to harrisCornerDetectorMinQualityEditBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function harrisCornerDetectorFilterSize_Callback(hObject, eventdata, handles)
+% hObject    handle to harrisCornerDetectorFilterSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of harrisCornerDetectorFilterSize as text
+%        str2double(get(hObject,'String')) returns contents of harrisCornerDetectorFilterSize as a double
+globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+value = str2double(get(hObject, 'String'));
+globalStudyInfo.harrisFeatureDetectorParameters.filterSize = value;
+setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+
+% --- Executes during object creation, after setting all properties.
+function harrisCornerDetectorFilterSize_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to harrisCornerDetectorFilterSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function harrisCornerDetectorSearchRadiusEditBox_Callback(hObject, eventdata, handles)
+% hObject    handle to harrisCornerDetectorSearchRadiusEditBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of harrisCornerDetectorSearchRadiusEditBox as text
+%        str2double(get(hObject,'String')) returns contents of harrisCornerDetectorSearchRadiusEditBox as a double
+globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+value = str2double(get(hObject, 'String'));
+globalStudyInfo.harrisFeatureDetectorParameters.searchRadius = value;
+setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+% --- Executes during object creation, after setting all properties.
+function harrisCornerDetectorSearchRadiusEditBox_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to harrisCornerDetectorSearchRadiusEditBox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+function VideoWriterCallback(handles, resolution)
+globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+numFrames = globalStudyInfo.vfVideoStructure.numFrames;
+
+[pathstr, name, ext] = fileparts(globalStudyInfo.vfVideoStructure.fileName);
+
+videoFileWriter = vision.VideoFileWriter();
+
+if (strcmp(resolution, 'low'))
+    videoFileName = fullfile(pathstr, strcat(name, '_video.mp4'));
+    videoFileWriter.FileFormat = 'MPEG4';
+else
+    videoFileName = fullfile(pathstr, strcat(name, '_video.avi'));
+end
+videoFileWriter.Filename = videoFileName;
+Utilities.CustomPrinters.printInfo(sprintf('Writing video as %s. Hold on...', videoFileName));
+
+%Draw the landmark annotations
+numLandmarks = Data.JoveLandmarks.numLandmarks;
+[m, s] = enumeration('Data.JoveLandmarks');
+
+for i = 1:numFrames
+    %This works by running the framescrubber through all the notches,
+    %reading the cdata, and writing it to the videofile writer
+
+    %Get the frame data from the vfvideostructure
+    currentFrame = globalStudyInfo.vfVideoStructure.videoFrames{i};
+
+   for j = 1:numLandmarks
+     currentCoordinate = globalStudyInfo.studyCoordinates.getCoordinate(i, j);
+     if (~isempty(currentCoordinate))
+         if (isempty(cell2mat(regexp(s(j), '_gt'))))
+            landmarkColour = 'green';
+         else
+             landmarkColour = 'red';
+         end
+        currentFrame = insertMarker(currentFrame, currentCoordinate, 'color', landmarkColour);
+     end
+   end
+
+   %Insert the frame number at the top left
+   currentFrame = insertText(currentFrame, [1 1], sprintf('%d / %d', i, numFrames));
+
+   step(videoFileWriter, currentFrame);
+end
+
+
+release(videoFileWriter);
+Utilities.CustomPrinters.printInfo('Done writing video file');
+
+
+    % --- Executes on key press with focus on landmarksListBox and none of its controls.
+function landmarksListBox_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to landmarksListBox (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+uicontrol(handles.text9);
+
+
+% --- Executes on button press in pushbutton1.
+function pushbutton1_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.hold_position = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text12, 'String', globalStudyInfo.hold_position);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+    
+% --- Executes on button press in pushbutton2.
+function pushbutton2_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.ramus_mandible = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text13, 'String', globalStudyInfo.ramus_mandible);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+    
+% --- Executes on button press in pushbutton3.
+function pushbutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = Data.GlobalStudyInfo;
+    globalStudyInfo.hyoid_burst = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text14, 'String', globalStudyInfo.hyoid_burst);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+    
+% --- Executes on button press in pushbutton4.
+function pushbutton4_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = Data.GlobalStudyInfo;
+    globalStudyInfo.ues_closure = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text15, 'String', globalStudyInfo.ues_closure);
+
+% --- Executes on button press in pushbutton5.
+function pushbutton5_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = Data.GlobalStudyInfo;
+    globalStudyInfo.at_rest = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text16, 'String', globalStudyInfo.at_rest);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+
+% --- Executes on button press in deletebutton.
+function deletebutton_Callback(hObject, eventdata, handles)
+% hObject    handle to deletebutton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

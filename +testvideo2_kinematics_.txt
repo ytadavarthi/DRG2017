@@ -1,0 +1,2 @@
+hold_position	ramus_mandible	hyoid_burst	ues_closure	at_rest																																				
+1	6	10	13	18																																				

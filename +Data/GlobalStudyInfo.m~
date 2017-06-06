@@ -5,12 +5,6 @@ classdef GlobalStudyInfo < handle
       studyImageProcessingInfo;
       studyCoordinates;
       
-       %Kinematic Frame Numbers
-      hold_position;
-      ramus_mandible;
-      hyoid_burst;
-      ues_closure;
-      at_rest;
       
       %Global sessoin info
       currentlyTrackedLandmark = Data.JoveLandmarks.Mandible;
@@ -28,6 +22,8 @@ classdef GlobalStudyInfo < handle
       %These will supercede he above 3 parameters
       harrisFeatureDetectorParameters = ImageProcessing.HarrisFeatureDetectorParameters;
       kltTrackerParameters = ImageProcessing.KLTParameters;
+      
+      %Kinemat
       
       
    end
