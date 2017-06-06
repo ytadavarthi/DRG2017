@@ -5,12 +5,14 @@ classdef GlobalStudyInfo < handle
       studyImageProcessingInfo;
       studyCoordinates;
       
-       %Kinematic Frame Numbers
+      %Kinematic Frame Numbers
       hold_position;
       ramus_mandible;
       hyoid_burst;
       ues_closure;
       at_rest;
+      start_frame;
+      end_frame;
       
       %Global sessoin info
       currentlyTrackedLandmark = Data.JoveLandmarks.Mandible;

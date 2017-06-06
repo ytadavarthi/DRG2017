@@ -64,30 +64,35 @@ function ResultFileWriter(globalStudyInfo)
 %     writetable(t3, fullResultFileName, 'Delimiter', '\t');
 
     % kinematics frame number array for timing calculations
+    [m n] = size(t1);
     
     cell1 = table2cell(t1);
-
-    cell2 = cell(1,41)
-    cell2(1, 1:5) = {'hold_position' 'ramus_mandible' 'hyoid_burst' 'ues_closure' 'at_rest'};
     
-    cell3 = cell(1,41)
-    cell3(1, 1:5) = {globalStudyInfo.hold_position globalStudyInfo.ramus_mandible, globalStudyInfo.hyoid_burst, globalStudyInfo.ues_closure, globalStudyInfo.at_rest};
+    
+    cell2 = cell(1,n);
+    cell2(1, 1:7) = {'start_frame' 'hold_position' 'ramus_mandible' 'hyoid_burst' 'ues_closure' 'at_rest' 'end_frame'};
+    
+    cell3 = cell(1,n);
+    cell3(1, 1:7) = {globalStudyInfo.start_frame globalStudyInfo.hold_position globalStudyInfo.ramus_mandible, globalStudyInfo.hyoid_burst, globalStudyInfo.ues_closure, globalStudyInfo.at_rest globalStudyInfo.end_frame};
     
     kinematics_cell = [cell2; cell3];
     totalKinematicsTable = cell2table(kinematics_cell);
 
+%     totalCell = [cell2; cell3; tableColumnLabels; cell1];
+%     totalTable = cell2table(totalCell);
+    
     totalCell = [cell2; cell3; tableColumnLabels; cell1];
     totalTable = cell2table(totalCell);
     
     %writing third file instead of concatenating kinematics frame numbers
-    kinematicsFileName = fullfile(pathString, strcat(name, '_kinematics_.txt'));
-    writetable(totalKinematicsTable, kinematicsFileName, 'Delimiter', '\t', 'WriteVariableNames', false);
-    Utilities.CustomPrinters.printInfo(sprintf('Done writing Kinematics results'));
+%     kinematicsFileName = fullfile(pathString, strcat(name, '_kinematics_.txt'));
+%     writetable(totalKinematicsTable, kinematicsFileName, 'Delimiter', '\t', 'WriteVariableNames', false);
+%     Utilities.CustomPrinters.printInfo(sprintf('Done writing Kinematics results'));
 
     
     %adding coordinate
     %uncomment to get concatenated file
-%     writetable(totalTable, fullResultFileName, 'Delimiter', '\t', 'WriteVariableNames', false);
+    %writetable(totalTable, fullResultFileName, 'Delimiter', '\t', 'WriteVariableNames', false);
 
     %comment
     writetable(t1, fullResultFileName, 'Delimiter', '\t');
@@ -95,7 +100,8 @@ function ResultFileWriter(globalStudyInfo)
     
     morphoJFileName = fullfile(pathString, strcat(name, '_morphoj_.txt'));
     Utilities.CustomPrinters.printInfo(sprintf('Writing MorphoJ annotation results to %s', morphoJFileName));
-    writetable(t2, morphoJFileName, 'Delimiter', '\t');
+    writetable(totalTable, morphoJFileName, 'Delimiter', '\t', 'WriteVariableNames', false);
+    %writetable(t2, morphoJFileName, 'Delimiter', '\t');
     Utilities.CustomPrinters.printInfo(sprintf('Done writing results'));
     
     %Now write the tracking status in a separate MATLAB file

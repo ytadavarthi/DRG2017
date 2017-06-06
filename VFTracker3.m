@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 05-Jun-2017 10:58:45
+% Last Modified by GUIDE v2.5 06-Jun-2017 13:29:00
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -218,6 +218,21 @@ pointerShape = [ ...
         %Read the table
         inputTable = readtable(expectedFullExcelFileName, 'Delimiter', '\t');
         inputDataArray = table2array(inputTable(:, 2:end));
+        
+        %loading frame information for push buttons.
+        morphoJTable = readtable('+testvideo2_morphoj_.txt','Delimiter','\t', 'ReadVariableNames',false);
+        morphoJTable = table2cell(morphoJTable);
+        
+        %set frame information to each textbox corresponding to push
+        %buttons
+        set(handles.text12, 'String', num2str(morphoJTable{2,2}));
+        set(handles.text13, 'String', num2str(morphoJTable{2,3}));
+        set(handles.text14, 'String', num2str(morphoJTable{2,4}));
+        set(handles.text15, 'String', num2str(morphoJTable{2,5}));
+        set(handles.text16, 'String', num2str(morphoJTable{2,6}));
+        set(handles.text17, 'String', num2str(morphoJTable{2,1}));
+        set(handles.text18, 'String', num2str(morphoJTable{2,7}));
+        
         
         [a, b] = enumeration('Data.JoveLandmarks');
         numLandmarks = numel(b);
@@ -1187,3 +1202,24 @@ function deletebutton_Callback(hObject, eventdata, handles)
 % hObject    handle to deletebutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in startButton.
+function startButton_Callback(hObject, eventdata, handles)
+% hObject    handle to startButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.start_frame = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text17, 'String', globalStudyInfo.start_frame);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+% --- Executes on button press in endButton.
+function endButton_Callback(hObject, eventdata, handles)
+% hObject    handle to endButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.end_frame = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text18, 'String', globalStudyInfo.end_frame);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
