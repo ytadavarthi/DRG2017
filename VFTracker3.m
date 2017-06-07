@@ -220,18 +220,21 @@ pointerShape = [ ...
         inputDataArray = table2array(inputTable(:, 2:end));
         
         %loading frame information for push buttons.
-        morphoJTable = readtable('+testvideo2_morphoj_.txt','Delimiter','\t', 'ReadVariableNames',false);
+        morphoJTable = readtable([pathStr '\' name '_morphoj_.txt'],'Delimiter','\t', 'ReadVariableNames',false);
         morphoJTable = table2cell(morphoJTable);
         
-        %set frame information to each textbox corresponding to push
-        %buttons
-        set(handles.text12, 'String', num2str(morphoJTable{2,2}));
-        set(handles.text13, 'String', num2str(morphoJTable{2,3}));
-        set(handles.text14, 'String', num2str(morphoJTable{2,4}));
-        set(handles.text15, 'String', num2str(morphoJTable{2,5}));
-        set(handles.text16, 'String', num2str(morphoJTable{2,6}));
-        set(handles.text17, 'String', num2str(morphoJTable{2,1}));
-        set(handles.text18, 'String', num2str(morphoJTable{2,7}));
+        if morphoJTable{1,1} == 'start_frame'
+            
+            %set frame information to each textbox corresponding to push
+            %buttons
+            set(handles.text12, 'String', num2str(morphoJTable{2,2}));
+            set(handles.text13, 'String', num2str(morphoJTable{2,3}));
+            set(handles.text14, 'String', num2str(morphoJTable{2,4}));
+            set(handles.text15, 'String', num2str(morphoJTable{2,5}));
+            set(handles.text16, 'String', num2str(morphoJTable{2,6}));
+            set(handles.text17, 'String', num2str(morphoJTable{2,1}));
+            set(handles.text18, 'String', num2str(morphoJTable{2,7}));
+        end
         
         
         [a, b] = enumeration('Data.JoveLandmarks');

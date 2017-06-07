@@ -64,9 +64,9 @@ function ResultFileWriter(globalStudyInfo)
 %     writetable(t3, fullResultFileName, 'Delimiter', '\t');
 
     % kinematics frame number array for timing calculations
-    [m n] = size(t1);
+    [m n] = size(t2);
     
-    cell1 = table2cell(t1);
+    cell1 = table2cell(t2);
     
     
     cell2 = cell(1,n);

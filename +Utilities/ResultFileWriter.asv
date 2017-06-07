@@ -64,16 +64,16 @@ function ResultFileWriter(globalStudyInfo)
 %     writetable(t3, fullResultFileName, 'Delimiter', '\t');
 
     % kinematics frame number array for timing calculations
-    [m n] = size(t1);
+    [m n] = size(t2);
     
-    cell1 = table2cell(t1);
+    cell1 = table2cell(t2);
     
-    %n should be 41
+    
     cell2 = cell(1,n);
     cell2(1, 1:7) = {'start_frame' 'hold_position' 'ramus_mandible' 'hyoid_burst' 'ues_closure' 'at_rest' 'end_frame'};
     
     cell3 = cell(1,n);
-    cell3(1, 1:7) = {globalStudyInfo.start_frame globalStudyInfo.hold_position globalStudyInfo.ramus_mandible, globalStudyInfo.hyoid_burst, globalStudyInfo.ues_closure, globalStudyInfo.at_rest globalStudyInfo.hold_position};
+    cell3(1, 1:7) = {globalStudyInfo.start_frame globalStudyInfo.hold_position globalStudyInfo.ramus_mandible, globalStudyInfo.hyoid_burst, globalStudyInfo.ues_closure, globalStudyInfo.at_rest globalStudyInfo.end_frame};
     
     kinematics_cell = [cell2; cell3];
     totalKinematicsTable = cell2table(kinematics_cell);
