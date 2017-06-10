@@ -42,12 +42,29 @@ function finalCell = compile_coordinateData(dataStruct,fileNames)
         classifierData = dataStruct(i).classifierData;
         coordinateData = dataStruct(i).coordinateData;
         
-        %remove extraneous frames
-        firstFrame = str2double(classifierData{2,1});
-        lastFrame = str2double(classifierData{2,7});
-        relevantCoordinates = coordinateData(firstFrame+1:lastFrame+1,:); 
-        columnLabels = coordinateData(1,:);
-        coordinateData = vertcat(columnLabels,relevantCoordinates);
+        %remove extraneous frames if first and last frame are indicated:
+        if isempty(classifierData{2,1}) && isempty(classifierData{2,7})
+            
+        elseif isempty(classifierData{2,1}) && ~isempty(classifierData{2,7})
+            firstFrame = 2;
+            lastFrame = str2double(classifierData{2,7});
+            relevantCoordinates = coordinateData(firstFrame+1:lastFrame+1,:); 
+            columnLabels = coordinateData(1,:);
+            coordinateData = vertcat(columnLabels,relevantCoordinates);
+            
+        elseif isempty(classifierData{2,7}) && ~isempty(classifierData{2,1})
+            firstFrame = str2double(classifierData{2,1});
+            relevantCoordinates = coordinateData(firstFrame+1:end,:); 
+            columnLabels = coordinateData(1,:);
+            coordinateData = vertcat(columnLabels,relevantCoordinates);
+            
+        else
+            firstFrame = str2double(classifierData{2,1});
+            lastFrame = str2double(classifierData{2,7});
+            relevantCoordinates = coordinateData(firstFrame+1:lastFrame+1,:); 
+            columnLabels = coordinateData(1,:);
+            coordinateData = vertcat(columnLabels,relevantCoordinates);
+        end
     
         %rename ID column
         [m n k] = size(coordinateData);
@@ -61,7 +78,7 @@ function finalCell = compile_coordinateData(dataStruct,fileNames)
        
     end
     finalTable = cell2table(finalCell);
-    formatOut = 'dd-mm-yy';
+    formatOut = 'dd-mm-yy HH-MM';
     date = datestr(now,formatOut);
     writetable(finalTable,['coordinates ' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
 end
@@ -76,6 +93,7 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
 %     
 %     [m n] = size(finalCell);
     secondColumn = {};
+    classifierColumns = {};
     for i = 1:length(dataStruct)
         %extract data from structure
         classifierData = dataStruct(i).classifierData;
@@ -87,19 +105,23 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
             s.(dataStruct(i).classifierData{1,j}) = str2double(dataStruct(i).classifierData{2,j});  
         end
         
-        %calculate which frames are in each phase
+        %calculate which frames are in each phase.
         Frames_preO  = s.start_frame:(s.hold_position-1);
         Frames_O     = s.hold_position:(s.hyoid_burst-1);
         Frames_P     = s.hyoid_burst:(s.ues_closure-1);
         Frames_E     = s.ues_closure:s.at_rest;
         Frames_postE = (s.at_rest+1):s.end_frame;
         
+        if isempty(s.at_rest) || s.at_rest > s.end_frame
+            Frames_E = s.ues_closure:s.end_frame;
+        end
+        
         %swallowPhaseData(:,i) = cell(m-1,1);
-        swallowPhaseData(Frames_preO,i)  = {'Pre-Oral Phase'};
-        swallowPhaseData(Frames_O,i)     = {'Oral Phase'};
-        swallowPhaseData(Frames_P,i)     = {'Pharyngeal Phase'};
-        swallowPhaseData(Frames_E,i)     = {'Esophageal Phase'};
-        swallowPhaseData(Frames_postE,i) = {'post-Esophageal Phase'};
+        swallowPhaseData(Frames_preO,i)  = {'Pre-Oral Transport'};
+        swallowPhaseData(Frames_O,i)     = {'Oral Transport'};
+        swallowPhaseData(Frames_P,i)     = {'Pharyngeal Stage'};
+        swallowPhaseData(Frames_E,i)     = {'Esophageal Stage'};
+        swallowPhaseData(Frames_postE,i) = {'Post-Esophageal Stage'};
         
         %get rid of blank cells created when start frame > 1 or when one
         %video's frames # is larger than others
@@ -109,20 +131,26 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
         %create second column
         secondColumn = [secondColumn;swallowPhaseData_no_blanks];
         
+        %finds the independent variables inputted by user into uitable and
+        %repeats them for every frame, creating extra long column.
+        ind_vars = outputData(1+i,2:end);
+        %[m n] = size(coordinateData);
+        long_col_of_ind_vars = repmat(ind_vars,[length(swallowPhaseData_no_blanks),1]);
+        classifierColumns = [classifierColumns;long_col_of_ind_vars];
     end
   
     %add 'Swallow Phase' to top of second column
-    secondColumn = [{'Swallow Phase'}; secondColumn];
+    secondColumn = [{'Swallow Stage'}; secondColumn];
     
-    data = [firstColumn secondColumn];
+    %add classifier titles to classifierColumns
+    classifierColumns = [outputData(1,2:end);classifierColumns];
     
+    finalTable = cell2table([firstColumn secondColumn classifierColumns]);
     
-%     data = [firstColumn secondColumn];
-%     data{1,100} = [];
-%     t = uitable();
-%     t.Data = data(2:end,:);
-%     t.ColumnName = data(1,:);
-%     t.ColumnEditable = true;
+    %write table with correct filename
+    formatOut = 'dd-mm-yy HH-MM';
+    date = datestr(now,formatOut);
+    writetable(finalTable,['Classifiers ' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
         
 end
 
