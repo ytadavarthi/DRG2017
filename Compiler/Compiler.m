@@ -4,7 +4,7 @@ function Compiler
     %[pathName fileName ext] = fileparts([pathName fileNameMinusExt{1}]);
     
     fileNames = {'Norm030_Tsp_Pud_morphoj_' 'Norm030_Tsp_Thn_morphoj_' 'Norm141_Tsp_Pud_morphoj_' 'Norm141_Tsp_Thn_morphoj_'};
-    pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Compiler\';
+    pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
     
     file = [pathName fileNames{1} '.txt'];
     cell = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
@@ -68,6 +68,9 @@ end
 
 function compile_classifierData(dataStruct, fileNames, finalCell)
     
+    %Create GUI for use-input independent variables
+    [~, outputData] = GUI(fileNames);
+
     %create first column from compile_coordinateData function
     firstColumn = finalCell(:,1);
 %     
@@ -112,7 +115,7 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
     secondColumn = [{'Swallow Phase'}; secondColumn];
     
     data = [firstColumn secondColumn];
-    outputTable = GUI(data);
+    
     
 %     data = [firstColumn secondColumn];
 %     data{1,100} = [];
