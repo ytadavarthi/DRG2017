@@ -3,9 +3,9 @@ function Compiler
     
     %[pathName fileName ext] = fileparts([pathName fileNameMinusExt{1}]);
     
-    fileNames = {'Norm030_Tsp_Pud_morphoj_' 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
-    pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
-%     pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
+    fileNames = { 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
+    % pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
+    pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
     
     file = [pathName fileNames{1} '.txt'];
     cell = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
@@ -24,8 +24,8 @@ function Compiler
     end
     dataStruct = struct('coordinateData',coordinateData,'classifierData',classifierData);
     
-%     finalCell = compile_coordinateData(dataStruct,fileNames);
-%     compile_classifierData(dataStruct,fileNames,finalCell);
+    finalCell = compile_coordinateData(dataStruct,fileNames);
+    compile_classifierData(dataStruct,fileNames,finalCell);
     
 
     %%%%start of kinematics functions%%%
@@ -42,15 +42,15 @@ function Compiler
     le = laryngealElevation(doubleCell);
     ps = pharyngealShortening(doubleCell);
 
-    disp(ahm);
-    disp(shm);
-    disp(hyExMand);
-    disp(hyExVert);
-    disp(alm);
-    disp(slm);
-    disp(hla);
-    disp(le);
-    disp(ps);
+%     disp(ahm);
+%     disp(shm);
+%     disp(hyExMand);
+%     disp(hyExVert);
+%     disp(alm);
+%     disp(slm);
+%     disp(hla);
+%     disp(le);
+%     disp(ps);
 
 end
 
