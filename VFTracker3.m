@@ -227,6 +227,7 @@ pointerShape = [ ...
             
             %set frame information to each textbox corresponding to push
             %buttons
+            
             set(handles.text12, 'String', num2str(morphoJTable{2,2}));
             set(handles.text13, 'String', num2str(morphoJTable{2,3}));
             set(handles.text14, 'String', num2str(morphoJTable{2,4}));
@@ -234,6 +235,18 @@ pointerShape = [ ...
             set(handles.text16, 'String', num2str(morphoJTable{2,6}));
             set(handles.text17, 'String', num2str(morphoJTable{2,1}));
             set(handles.text18, 'String', num2str(morphoJTable{2,7}));
+            
+            
+            globalStudyInfo.hold_position  = num2str(morphoJTable{2,2});
+            globalStudyInfo.ramus_mandible = num2str(morphoJTable{2,3});
+            globalStudyInfo.hyoid_burst    = num2str(morphoJTable{2,4});
+            globalStudyInfo.ues_closure    = num2str(morphoJTable{2,5});
+            globalStudyInfo.at_rest        = num2str(morphoJTable{2,6});
+            globalStudyInfo.start_frame    = num2str(morphoJTable{2,1});
+            globalStudyInfo.end_frame      = num2str(morphoJTable{2,7});
+            
+            %setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
         end
         
         
@@ -1127,7 +1140,52 @@ for i = 1:numFrames
 
    %Insert the frame number at the top left
    currentFrame = insertText(currentFrame, [1 1], sprintf('%d / %d', i, numFrames));
-
+   
+   %Insert push button frames
+   if i == str2double(globalStudyInfo.start_frame)
+       frameSize = size(currentFrame);
+       position_x = floor(frameSize(2)/4);
+       position_y = 1;
+       currentFrame = insertText(currentFrame,[position_x position_y], 'Start Frame');
+       
+   elseif i == str2double(globalStudyInfo.end_frame)
+       frameSize = size(currentFrame);
+       position_x = floor(frameSize(2)/4);
+       position_y = 1;
+       currentFrame = insertText(currentFrame,[position_x position_y], 'End Frame');
+   end
+   
+   if i == str2double(globalStudyInfo.hold_position)
+       frameSize = size(currentFrame);
+       position_x = floor(frameSize(2)*3/4);
+       position_y = 1;
+       currentFrame = insertText(currentFrame,[position_x position_y], 'Hold Position');
+       
+   elseif i == str2double(globalStudyInfo.ramus_mandible)
+       frameSize = size(currentFrame);
+       position_x = floor(frameSize(2)*3/4);
+       position_y = 1;
+       currentFrame = insertText(currentFrame,[position_x position_y], 'Ramus Mandible');
+       
+   elseif i == str2double(globalStudyInfo.hyoid_burst)
+       frameSize = size(currentFrame);
+       position_x = floor(frameSize(2)*3/4);
+       position_y = 1;
+       currentFrame = insertText(currentFrame,[position_x position_y], 'Hyoid Burst');
+       
+   elseif i == str2double(globalStudyInfo.ues_closure)
+       frameSize = size(currentFrame);
+       position_x = floor(frameSize(2)*3/4);
+       position_y = 1;
+       currentFrame = insertText(currentFrame,[position_x position_y], 'UES Closure');
+   
+   elseif i == str2double(globalStudyInfo.at_rest)
+       frameSize = size(currentFrame);
+       position_x = floor(frameSize(2)*3/4);
+       position_y = 1;
+       currentFrame = insertText(currentFrame,[position_x position_y], 'At Rest');
+   end
+       
    step(videoFileWriter, currentFrame);
 end
 
@@ -1188,6 +1246,7 @@ function pushbutton4_Callback(hObject, eventdata, handles)
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
     globalStudyInfo.ues_closure = floor(get(handles.frameScrubber, 'Value'));
     set(handles.text15, 'String', globalStudyInfo.ues_closure);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
 % --- Executes on button press in pushbutton5.
 function pushbutton5_Callback(hObject, eventdata, handles)
