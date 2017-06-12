@@ -23,10 +23,12 @@ function Compiler
         
     end
     dataStruct = struct('coordinateData',coordinateData,'classifierData',classifierData);
-%     
+    
 %     finalCell = compile_coordinateData(dataStruct,fileNames);
 %     compile_classifierData(dataStruct,fileNames,finalCell);
     
+
+    %%%%start of kinematics functions%%%
     doubleCell = cell2doubleSansLabels(dataStruct, 1);
 
     ahm = anteriorHyoidMovement(doubleCell);
