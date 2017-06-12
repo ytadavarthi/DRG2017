@@ -3,9 +3,8 @@ function Compiler
     
     %[pathName fileName ext] = fileparts([pathName fileNameMinusExt{1}]);
     
-    fileNames = {'Norm030_Tsp_Pud_morphoj_' 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
+    fileNames = {'Norm030_Tsp_Pud_morphoj_' 'Norm030_Tsp_Thn_morphoj_' 'Norm141_Tsp_Pud_morphoj_' 'Norm141_Tsp_Thn_morphoj_'};
     pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
-%     pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
     
     file = [pathName fileNames{1} '.txt'];
     cell = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
@@ -23,33 +22,33 @@ function Compiler
         
     end
     dataStruct = struct('coordinateData',coordinateData,'classifierData',classifierData);
-    
+%     
 %     finalCell = compile_coordinateData(dataStruct,fileNames);
 %     compile_classifierData(dataStruct,fileNames,finalCell);
     
-
-    %%%%start of kinematics functions%%%
     doubleCell = cell2doubleSansLabels(dataStruct, 1);
 
-    ahm = anteriorHyoidMovement(doubleCell);
-    shm = superiorHyoidMovement(doubleCell);
-    hyExMand = hyoidExcursionToMandible(doubleCell);
-    hyExVert = hyoidExcursionToVertebrae(doubleCell);
-    alm = antLargyngealMovement(doubleCell);
-    slm = supLargyngealMovement(doubleCell);
-    hla = hyolaryngealApproximation(doubleCell);
-    %??????does laryngeal elevation use c1 or c2??????
-    le = laryngealElevation(doubleCell);
-    ps = pharyngealShortening(doubleCell);
+%     ahm = anteriorHyoidMovement(doubleCell);
+%     shm = superiorHyoidMovement(doubleCell);
+%     hyExMand = hyoidExcursionToMandible(doubleCell);
+%     hyExVert = hyoidExcursionToVertebrae(doubleCell);
+%     alm = antLargyngealMovement(doubleCell);
+%     slm = supLargyngealMovement(doubleCell);
+%     hla = hyolaryngealApproximation(doubleCell);
+    ps = phayngealShortening(doubleCell);
 
-    disp(ahm);
-    disp(shm);
-    disp(hyExMand);
-    disp(hyExVert);
-    disp(alm);
-    disp(slm);
-    disp(hla);
-    disp(le);
+%     
+%     %??????does laryngeal elevation use c1 or c2??????
+%     le = laryngealElevation(doubleCell);
+% 
+%     disp(ahm);
+%     disp(shm);
+%     disp(hyExMand);
+%     disp(hyExVert);
+%     disp(alm);
+%     disp(slm);
+%     disp(hla);
+%     disp(le);
     disp(ps);
 
 end
@@ -67,88 +66,37 @@ function finalCell = compile_coordinateData(dataStruct,fileNames)
         classifierData = dataStruct(i).classifierData;
         coordinateData = dataStruct(i).coordinateData;
         
-        %remove extraneous frames (rows) if first and last frame are indicated:
-        if isempty(classifierData{2,1}) && isempty(classifierData{2,7})
-            
-        elseif isempty(classifierData{2,1}) && ~isempty(classifierData{2,7})
-            firstFrame = 2;
-            lastFrame = str2double(classifierData{2,7});
-            relevantCoordinates = coordinateData(firstFrame+1:lastFrame+1,:); 
-            columnLabels = coordinateData(1,:);
-            coordinateData = vertcat(columnLabels,relevantCoordinates);
-            
-        elseif isempty(classifierData{2,7}) && ~isempty(classifierData{2,1})
-            firstFrame = str2double(classifierData{2,1});
-            relevantCoordinates = coordinateData(firstFrame+1:end,:); 
-            columnLabels = coordinateData(1,:);
-            coordinateData = vertcat(columnLabels,relevantCoordinates);
-            
-        else
-            firstFrame = str2double(classifierData{2,1});
-            lastFrame = str2double(classifierData{2,7});
-            relevantCoordinates = coordinateData(firstFrame+1:lastFrame+1,:); 
-            columnLabels = coordinateData(1,:);
-            coordinateData = vertcat(columnLabels,relevantCoordinates);
-        end
-        
- 
+        %remove extraneous frames
+        firstFrame = str2double(classifierData{2,1});
+        lastFrame = str2double(classifierData{2,7});
+        relevantCoordinates = coordinateData(firstFrame+1:lastFrame+1,:); 
+        columnLabels = coordinateData(1,:);
+        coordinateData = vertcat(columnLabels,relevantCoordinates);
+    
+        %rename ID column
         [m n k] = size(coordinateData);
             
-                    
-        %Rename ID Column
         for j = 1:m-1
             coordinateData{j+1,1} = [fileNames{i} num2str(j)];
         end
         
-        %Find all unAnnotated Columns
-        unAnnotated = [false];
-        for j = 2:n
-            %unAnnotated = [unAnnotated all(diff(sort(str2double(coordinateData(2:end,j)))) == 0)];
-            unAnnotated = [unAnnotated all(str2double(coordinateData(2:end,j)) == 0)];
-            if any(j == 3:2:n) && unAnnotated(j-1) == true
-                unAnnotated(j) = true;
-            end
-        end
-        
-        %remove unAnnotated Columns, including column headers
-        coordinateData = coordinateData(2:end,~unAnnotated);
-        if i == 1
-            finalCell = finalCell(~unAnnotated);
-        end
-        
-        %make sure same number of landmarks were annotated
-        previousSize = size(finalCell);
-        currentSize = size(coordinateData);
-        if previousSize(2) ~= currentSize(2)
-            error('Inconsistent number of landmarks were annotated!')
-        end
-        
-        
         %create finalCell
-        finalCell = [finalCell;coordinateData];
+        finalCell = [finalCell;coordinateData(2:end,:)];
        
     end
-    
-    %remove extra columns
-    
-    
     finalTable = cell2table(finalCell);
-    formatOut = 'dd-mm-yy HH-MM';
+    formatOut = 'dd-mm-yy';
     date = datestr(now,formatOut);
     writetable(finalTable,['coordinates ' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
 end
 
 function compile_classifierData(dataStruct, fileNames, finalCell)
     
-    %Create GUI for use-input independent variables
-    [~, outputData] = GUI(fileNames);
-
     %create first column from compile_coordinateData function
     firstColumn = finalCell(:,1);
 %     
 %     [m n] = size(finalCell);
     secondColumn = {};
-    classifierColumns = {};
     for i = 1:length(dataStruct)
         %extract data from structure
         classifierData = dataStruct(i).classifierData;
@@ -160,23 +108,19 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
             s.(dataStruct(i).classifierData{1,j}) = str2double(dataStruct(i).classifierData{2,j});  
         end
         
-        %calculate which frames are in each phase.
+        %calculate which frames are in each phase
         Frames_preO  = s.start_frame:(s.hold_position-1);
         Frames_O     = s.hold_position:(s.hyoid_burst-1);
         Frames_P     = s.hyoid_burst:(s.ues_closure-1);
         Frames_E     = s.ues_closure:s.at_rest;
         Frames_postE = (s.at_rest+1):s.end_frame;
         
-        if isempty(s.at_rest) || s.at_rest > s.end_frame
-            Frames_E = s.ues_closure:s.end_frame;
-        end
-        
         %swallowPhaseData(:,i) = cell(m-1,1);
-        swallowPhaseData(Frames_preO,i)  = {'Pre-Oral Transport'};
-        swallowPhaseData(Frames_O,i)     = {'Oral Transport'};
-        swallowPhaseData(Frames_P,i)     = {'Pharyngeal Stage'};
-        swallowPhaseData(Frames_E,i)     = {'Esophageal Stage'};
-        swallowPhaseData(Frames_postE,i) = {'Post-Esophageal Stage'};
+        swallowPhaseData(Frames_preO,i)  = {'Pre-Oral Phase'};
+        swallowPhaseData(Frames_O,i)     = {'Oral Phase'};
+        swallowPhaseData(Frames_P,i)     = {'Pharyngeal Phase'};
+        swallowPhaseData(Frames_E,i)     = {'Esophageal Phase'};
+        swallowPhaseData(Frames_postE,i) = {'post-Esophageal Phase'};
         
         %get rid of blank cells created when start frame > 1 or when one
         %video's frames # is larger than others
@@ -186,26 +130,20 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
         %create second column
         secondColumn = [secondColumn;swallowPhaseData_no_blanks];
         
-        %finds the independent variables inputted by user into uitable and
-        %repeats them for every frame, creating extra long column.
-        ind_vars = outputData(1+i,2:end);
-        %[m n] = size(coordinateData);
-        long_col_of_ind_vars = repmat(ind_vars,[length(swallowPhaseData_no_blanks),1]);
-        classifierColumns = [classifierColumns;long_col_of_ind_vars];
     end
   
     %add 'Swallow Phase' to top of second column
-    secondColumn = [{'Swallow Stage'}; secondColumn];
+    secondColumn = [{'Swallow Phase'}; secondColumn];
     
-    %add classifier titles to classifierColumns
-    classifierColumns = [outputData(1,2:end);classifierColumns];
+    data = [firstColumn secondColumn];
+    outputTable = GUI(data);
     
-    finalTable = cell2table([firstColumn secondColumn classifierColumns]);
-    
-    %write table with correct filename
-    formatOut = 'dd-mm-yy HH-MM';
-    date = datestr(now,formatOut);
-    writetable(finalTable,['Classifiers ' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
+%     data = [firstColumn secondColumn];
+%     data{1,100} = [];
+%     t = uitable();
+%     t.Data = data(2:end,:);
+%     t.ColumnName = data(1,:);
+%     t.ColumnEditable = true;
         
 end
 
@@ -531,25 +469,25 @@ function ps = pharyngealShortening(doubleCell)
       allMovements = zeros(1,doubleCellSize(1));
 
     for i = 1:doubleCellSize(1)
-        hpx = doubleCell(i,3);
-        hpy = doubleCell(i,4);
-        uesX = doubleCell(i,11);
-        uesY = doubleCell(i,12);
+        c1x = doubleCell(i,5);
+        c1y = doubleCell(i,6);
+        postCricX = doubleCell(i,13);
+        postCricY = doubleCell(i,14);
 
-        hpUES_points = [hpx, hpy; uesX, uesY];
+        c1PostCric_points = [c1x, c1y; postCricX, postCricY];
 
         %get lengths of each set of points to form edge and add to array
-        hpUES_dist = pdist(hpUES_points,'euclidean');
-        allMovements(i) = hpUES_dist;
+        c1PostCric_dist = pdist(c1PostCric_points,'euclidean');
+        allMovements(i) = c1PostCric_dist;
 
     end
     
     %superior largyngeal movement is difference between max and min dist 
-    maxps = max(allMovements);
+    maxle = max(allMovements);
     %finding nonzero min
-    minps = min(allMovements(allMovements>0));
+    minle = min(allMovements(allMovements>0));
 
-    ps = maxps - minps;
+    ps = maxle - minle;
 end
 
 
