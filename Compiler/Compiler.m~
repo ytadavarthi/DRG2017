@@ -35,7 +35,7 @@ function Compiler
 %     alm = antLargyngealMovement(doubleCell);
 %     slm = supLargyngealMovement(doubleCell);
 %     hla = hyolaryngealApproximation(doubleCell);
-    ps = pharyngealShortening(doubleCell);
+    ps = phayngealShortening(doubleCell);
 
 %     
 %     %??????does laryngeal elevation use c1 or c2??????
@@ -469,25 +469,25 @@ function ps = pharyngealShortening(doubleCell)
       allMovements = zeros(1,doubleCellSize(1));
 
     for i = 1:doubleCellSize(1)
-        hpx = doubleCell(i,3);
-        hpy = doubleCell(i,4);
-        uesX = doubleCell(i,11);
-        uesY = doubleCell(i,12);
+        c1x = doubleCell(i,5);
+        c1y = doubleCell(i,6);
+        postCricX = doubleCell(i,13);
+        postCricY = doubleCell(i,14);
 
-        hpUES_points = [hpx, hpy; uesX, uesY];
+        c1PostCric_points = [c1x, c1y; postCricX, postCricY];
 
         %get lengths of each set of points to form edge and add to array
-        hpUES_dist = pdist(hpUES_points,'euclidean');
-        allMovements(i) = hpUES_dist;
+        c1PostCric_dist = pdist(c1PostCric_points,'euclidean');
+        allMovements(i) = c1PostCric_dist;
 
     end
     
     %superior largyngeal movement is difference between max and min dist 
-    maxps = max(allMovements);
+    maxle = max(allMovements);
     %finding nonzero min
-    minps = min(allMovements(allMovements>0));
+    minle = min(allMovements(allMovements>0));
 
-    ps = maxps - minps;
+    ps = maxle - minle;
 end
 
 
