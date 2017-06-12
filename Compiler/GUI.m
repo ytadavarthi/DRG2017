@@ -60,6 +60,9 @@ function GUI_OpeningFcn(hObject, eventdata, handles, varargin)
 %     t.ColumnEditable = true;
     
     fileNames = ['Swallow ID'; varargin{1}'];
+    
+    fileNames{1} = ['<html><b>' fileNames{1} '</b><html>'];
+  
     handles.uitable1.Data = fileNames; %handles.uitable1.Data = fileNames(2:end,:);
     
     %handles.uitable1.ColumnName = fileNames(1,:);
@@ -81,11 +84,6 @@ handles.outputData = [];
 guidata(hObject, handles);
 % UIWAIT makes GUI wait for user response (see UIRESUME)
 uiwait(handles.GUI);
-
-
-
-
-
 
 
 
@@ -124,33 +122,8 @@ function pushbutton1_Callback(hObject, eventdata, handles)
     columnWidth = fitColumns(handles.uitable1.Data);
     handles.uitable1.ColumnWidth = columnWidth;
 
-    
-    
 
 
-
-% function edit1_Callback(hObject, eventdata, handles)
-% % hObject    handle to edit1 (see GCBO)
-% % eventdata  reserved - to be defined in a future version of MATLAB
-% % handles    structure with handles and user data (see GUIDATA)
-% 
-% % Hints: get(hObject,'String') returns contents of edit1 as text
-% %        str2double(get(hObject,'String')) returns contents of edit1 as a double
-
-
-% % --- Executes during object creation, after setting all properties.
-% function edit1_CreateFcn(hObject, eventdata, handles)
-% % hObject    handle to edit1 (see GCBO)
-% % eventdata  reserved - to be defined in a future version of MATLAB
-% % handles    empty - handles not created until after all CreateFcns called
-% 
-% % Hint: edit controls usually have a white background on Windows.
-% %       See ISPC and COMPUTER.
-% if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-%     set(hObject,'BackgroundColor','white');
-% end
-% 
-% 
 % % --- Executes when entered data in editable cell(s) in uitable1.
 function uitable1_CellEditCallback(hObject, eventdata, handles)
 % hObject    handle to uitable1 (see GCBO)
@@ -162,6 +135,10 @@ function uitable1_CellEditCallback(hObject, eventdata, handles)
 %	Error: error string when failed to convert EditData to appropriate value for Data
 % handles    structure with handles and user data (see GUIDATA)
 
+    % Make bold
+    if eventdata.Indices(1) == 1 && ~isempty(eventdata.NewData)
+        handles.uitable1.Data{eventdata.Indices(1),eventdata.Indices(2)} = ['<html><b>' eventdata.NewData '<html></b>'];
+    end
     % Fit Columns
     columnWidth = fitColumns(handles.uitable1.Data);
     handles.uitable1.ColumnWidth = columnWidth;
@@ -179,16 +156,6 @@ function done_Callback(hObject, eventdata, handles)
     
     uiresume(handles.GUI);
     
-%     if isequal(get(hObject, 'waitstatus'), 'waiting')
-%     % The GUI is still in UIWAIT, us UIRESUME
-%     uiresume(hObject);
-%     else
-%     % The GUI is no longer waiting, just close it
-%     delete(hObject);
-%     end
-   
-
-
 
 % --- Executes on key press with focus on uitable1 and none of its controls.
 function uitable1_KeyPressFcn(hObject, eventdata, handles)
@@ -516,6 +483,9 @@ function columnWidth = fitColumns(data)
     for i = 1:dataSize(2)
         for j = 1:dataSize(1)
             len = length(data{j,i});
+            if j == 1
+                len = length(data{j,i}) - length('<html><b></b><html>');
+            end
             
             if(len>maxLen(1,i))
                 maxLen(1,i) = len;

@@ -80,9 +80,9 @@ function finalCell = compile_coordinateData(dataStruct,fileNames)
         for j = 2:n
             %unAnnotated = [unAnnotated all(diff(sort(str2double(coordinateData(2:end,j)))) == 0)];
             unAnnotated = [unAnnotated all(str2double(coordinateData(2:end,j)) == 0)];
-            if any(j == 3:2:n) && unAnnotated(j-1) == true
-                unAnnotated(j) = true;
-            end
+            if any(j == 2:2:n)
+                
+                
         end
         
         %remove unAnnotated Columns, including column headers
