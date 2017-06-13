@@ -3,7 +3,7 @@ function Compiler
     
     %[pathName fileName ext] = fileparts([pathName fileNameMinusExt{1}]);
     
-    fileNames = { 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
+    fileNames = { 'Norm030_Tsp_Pud_morphoj_' 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
     % pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
     pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
     
@@ -146,7 +146,7 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
     %create first column from compile_coordinateData function
     firstColumn = finalCell(:,1);
 %     
-%     [m n] = size(finalCell);
+    %[m n] = size(finalCell);
     secondColumn = {};
     classifierColumns = {};
     for i = 1:length(dataStruct)
@@ -154,10 +154,25 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
         classifierData = dataStruct(i).classifierData;
         coordinateData = dataStruct(i).coordinateData;
         
+        [m n] = size(coordinateData);
+       
+        
         %create struct s that includes each classifier. i.e. s.start_frame
         %outputs start frame value.
         for j = 1:length(dataStruct(i).classifierData(1,:))
-            s.(dataStruct(i).classifierData{1,j}) = str2double(dataStruct(i).classifierData{2,j});  
+            s.(classifierData{1,j}) = str2double(classifierData{2,j});
+            if isnan(s.(classifierData{1,j}))
+                s.(classifierData{1,j}) = [];
+            end
+        end
+        
+        %if no start frame, pick first frame as start frame. if no end
+        %frame, pick last frame as end frame
+        if isempty(s.start_frame)
+            s.start_frame = 1;
+        end
+        if isempty(s.end_frame)
+            s.end_frame = m-1;
         end
         
         %calculate which frames are in each phase.
@@ -171,17 +186,15 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
             Frames_E = s.ues_closure:s.end_frame;
         end
         
-        %swallowPhaseData(:,i) = cell(m-1,1);
-        swallowPhaseData(Frames_preO,i)  = {'Pre-Oral Transport'};
-        swallowPhaseData(Frames_O,i)     = {'Oral Transport'};
-        swallowPhaseData(Frames_P,i)     = {'Pharyngeal Stage'};
-        swallowPhaseData(Frames_E,i)     = {'Esophageal Stage'};
-        swallowPhaseData(Frames_postE,i) = {'Post-Esophageal Stage'};
+        swallowPhaseData = cell(m-1,1);
+        swallowPhaseData(Frames_preO)  = {'Pre-Oral Transport'};
+        swallowPhaseData(Frames_O)     = {'Oral Transport'};
+        swallowPhaseData(Frames_P)     = {'Pharyngeal Stage'};
+        swallowPhaseData(Frames_E)     = {'Esophageal Stage'};
+        swallowPhaseData(Frames_postE) = {'Post-Esophageal Stage'};
         
-        %get rid of blank cells created when start frame > 1 or when one
-        %video's frames # is larger than others
-        keep = ~cellfun(@isempty,swallowPhaseData(:,i));
-        swallowPhaseData_no_blanks = swallowPhaseData(keep,i);
+        %select only frames within start-end frame
+        swallowPhaseData_no_blanks = swallowPhaseData(s.start_frame:s.end_frame);
         
         %create second column
         secondColumn = [secondColumn;swallowPhaseData_no_blanks];

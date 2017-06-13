@@ -116,8 +116,15 @@ function pushbutton1_Callback(hObject, eventdata, handles)
     %create new column's name
     %handles.uitable1.ColumnName = [handles.uitable1.ColumnName;handles.edit1.String{1}];
     %make new column editable
-    handles.uitable1.ColumnEditable = [handles.uitable1.ColumnEditable true];
-    handles.uitable1.ColumnFormat = [handles.uitable1.ColumnFormat {'char'}];
+    [m n] = size(data);
+    editable = false;
+    format = {'char'};
+    for i = 2:n
+        editable(i) = true;
+        format(i) = {'char'};
+    end
+    handles.uitable1.ColumnEditable = editable;
+    handles.uitable1.ColumnFormat = format;
     % Fit Columns
     columnWidth = fitColumns(handles.uitable1.Data);
     handles.uitable1.ColumnWidth = columnWidth;
@@ -142,6 +149,8 @@ function uitable1_CellEditCallback(hObject, eventdata, handles)
     % Fit Columns
     columnWidth = fitColumns(handles.uitable1.Data);
     handles.uitable1.ColumnWidth = columnWidth;
+    
+
 
 
 % --- Executes on button press in done.
@@ -196,6 +205,16 @@ if strcmp(eventdata.Key,'v') && ~isempty(eventdata.Modifier) && strcmp(eventdata
         handles.uitable1.Data(firstRow:finalRow,firstCol:finalCol) = clip_board;
         
     end
+    
+    [m n] = size(handles.uitable1.Data);
+    editable = false;
+    format = {'char'};
+    for i = 2:n
+        editable(i) = true;
+        format(i) = {'char'};
+    end
+    handles.uitable1.ColumnEditable = editable;
+    handles.uitable1.ColumnFormat = format;
 end
 
 
