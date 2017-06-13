@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 06-Jun-2017 13:29:00
+% Last Modified by GUIDE v2.5 13-Jun-2017 17:31:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -57,6 +57,13 @@ function VFTracker3_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for VFTracker3
 handles.output = hObject;
 
+%setting theme of application
+%  set(0,'defaultUicontrolBackgroundColor',[.212 .212 .212]);
+ set(0,'defaultUicontrolBackgroundColor',[.94 .94 .94]);
+ set(0,'defaultUicontrolForegroundColor',[0 0 0]);
+% set(hObject,'Color', [.212 .212 .212]);
+
+
 % Update handles structure
 guidata(hObject, handles);
 
@@ -65,11 +72,6 @@ guidata(hObject, handles);
 
 %Call the initialization function
 Initialize(handles);
-
-
-
-
-
 
 
 % --- Outputs from this function are returned to the command line.
@@ -100,8 +102,8 @@ function frameScrubber_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: slider controls usually have a light gray background.
-if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
+if ~isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
 
@@ -173,18 +175,13 @@ pointerShape = [ ...
                                         handles.appFigure,eventdata));
         
     
-
     
-    
-    %Initialize the frame scrubvber control
+    %Initialize the frame scrubber control
     set(handles.frameScrubber, 'Min', 1);
     set(handles.frameScrubber, 'Max', vfVideoStructure.numFrames);
     set(handles.frameScrubber, 'SliderStep', [inv(vfVideoStructure.numFrames - 1)  inv(vfVideoStructure.numFrames - 1)]);
     set(handles.frameScrubber, 'Value', 1);
     
-    
-                                
-
     
     %Set up the frame viewer control
     image(zeros(vfVideoStructure.resolution, 'double'), 'Parent', handles.frameViewer, 'HitTest', 'off');
@@ -220,7 +217,7 @@ pointerShape = [ ...
         inputDataArray = table2array(inputTable(:, 2:end));
         
         %loading frame information for push buttons.
-        morphoJTable = readtable([pathStr '\' name '_morphoj_.txt'],'Delimiter','\t', 'ReadVariableNames',false);
+        morphoJTable = readtable([pathStr '/' name '_morphoj_.txt'],'Delimiter','\t', 'ReadVariableNames',false);
         morphoJTable = table2cell(morphoJTable);
         
         if morphoJTable{1,1} == 'start_frame'
@@ -279,8 +276,6 @@ pointerShape = [ ...
     end
     
     
-    
-    
     %Update the GUI elements that display the parameters for the Harris
     %corner detector and the KLT tracker
     set(handles.harrisCornerDetectorMinQualityEditBox, 'String', num2str(globalStudyInfo.harrisFeatureDetectorParameters.minQuality));
@@ -288,25 +283,11 @@ pointerShape = [ ...
     set(handles.harrisCornerDetectorSearchRadiusEditBox, 'String', num2str(globalStudyInfo.harrisFeatureDetectorParameters.searchRadius));
     set(handles.numPyramidLevelsEditBox, 'String', num2str(globalStudyInfo.kltTrackerParameters.numPyramidLevels));
     set(handles.blockSizeEditBox, 'String', num2str(globalStudyInfo.kltTrackerParameters.blockSize));
-    
-    
-        
+   
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     
     %Render the first frame
     Render(handles);
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     
@@ -349,10 +330,6 @@ function Render(handles, varargin)
     
     %DIsplay the frame
     set(imageViewerHandle, 'CData', currentFrame);
-    
-    
-    
-
 
     
  %This function implements the callback that is called everytime the frame
@@ -369,8 +346,6 @@ function Render(handles, varargin)
     %Render(handles)
     frameNumberListener(handles.appFigure)
     
-    
-
 
 % --- Executes on selection change in landmarksListBox.
 function landmarksListBox_Callback(hObject, eventdata, handles)
@@ -401,8 +376,6 @@ function landmarksListBox_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
 
 
 %The function to do preprocessing of the image before it is rendered or
@@ -441,12 +414,6 @@ function result = preprocessImage(handles, img)
     else
         result = img;
     end
-    
-    
-    
-    
-    
-    
 
 
 % --------------------------------------------------------------------
@@ -476,8 +443,8 @@ function noiseFilterLevelSlider_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: slider controls usually have a light gray background.
-if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
+if ~isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
 
@@ -502,8 +469,8 @@ function gammaAdjustSlider_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: slider controls usually have a light gray background.
-if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
+if ~isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
 
@@ -1068,7 +1035,7 @@ function harrisCornerDetectorFilterSize_CreateFcn(hObject, eventdata, handles)
 % Hint: edit controls usually have a white background on Windows.
 %       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
+    set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
 
 
@@ -1292,3 +1259,140 @@ function endButton_Callback(hObject, eventdata, handles)
     globalStudyInfo.end_frame = floor(get(handles.frameScrubber, 'Value'));
     set(handles.text18, 'String', globalStudyInfo.end_frame);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+
+% --- Executes during object creation, after setting all properties.
+function numPyramidLevelsLabel_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to numPyramidLevelsLabel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+% set(hObject,'BackgroundColor',[.21 .21 .21]);
+% set(hObject,'Font',[1 1 1]);
+% set(hObject, 'Parent', handles.semiautoOptions);
+
+
+% --- Executes during object creation, after setting all properties.
+function feedbackLabel_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to feedbackLabel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+
+
+% --- Executes during object creation, after setting all properties.
+function text11_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to text11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
+% set(hObject,'ForegroundColor',[1 1 1]);
+
+
+% --- Executes on key press with focus on text21 and none of its controls.
+function text21_Callback(hObject, eventdata, handles)
+% hObject    handle to text21 (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+button_state = get(hObject,'Value');
+
+if button_state == get(hObject,'Max')
+    set(handles.semiautoOptions, 'visible', 'on');
+elseif button_state == get(hObject,'Min')
+    set(handles.semiautoOptions, 'visible', 'off');
+end
+
+drawnow();
+
+
+% --- Executes during object creation, after setting all properties.
+function semiautoOptions_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to semiautoOptions (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+set(hObject, 'visible', 'off');
+
+
+
+function estSize_Callback(hObject, eventdata, handles)
+% hObject    handle to estSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of estSize as text
+%        str2double(get(hObject,'String')) returns contents of estSize as a double
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    
+    if(isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2))
+        set(handles.feedbackLabel, 'String', 'Please Track Points');
+
+    else
+        if(isnan(str2double(get(hObject,'String'))))
+            set(handles.feedbackLabel, 'String', 'Please Enter Valid Number');
+        end
+        bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
+        bothPoints_dist = pdist(bothPoints,'euclidean');
+        
+        estSize = str2double(get(hObject,'String'));
+        globalStudyInfo.pixelspercm = bothPoints_dist / estSize;
+        set(handles.pixelspercm_text, 'String', num2str(globalStudyInfo.pixelspercm));
+    end
+    
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+
+% --- Executes during object creation, after setting all properties.
+function estSize_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to estSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in calibrateSIbutton.
+function calibrateSIbutton_Callback(hObject, eventdata, handles)
+% hObject    handle to calibrateSIbutton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    button_state = get(hObject,'Value');
+    
+    if (button_state == get(hObject,'Max'))
+        set(hObject,'String','Click one edge');
+
+        [x, y] = mygetpts();
+        globalStudyInfo.point1 = [x(1) y(1)];
+        set(handles.feedbackLabel, 'String', 'Point 1 Tracked');
+        set(handles.point1_text, 'String', sprintf('%.2d \t %.2d',x,y));
+        
+        set(hObject,'String','Click opposite edge');
+        [x, y] = mygetpts();
+        globalStudyInfo.point2 = [x(1) y(1)];
+        set(handles.feedbackLabel, 'String', 'Point 2 Tracked');
+        set(handles.point2_text, 'String', sprintf('%.d \t %.d',x,y));
+        set(hObject,'String','Calibrate SI Units');
+        set(hObject,'Value',0);
+    end
+        
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    
+
+    
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over estSize.
+function estSize_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to estSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(hObject, 'String', '');
+set(hObject, 'enable', 'on');
+uicontrol(hObject);

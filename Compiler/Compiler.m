@@ -54,7 +54,8 @@ function Compiler
         std = stageTransitionDuration(phasesCell);
         ptt = pharyngealTransitTime(phasesCell);
         optt = oropharyngealTransitTime(phasesCell);
-        %????? 1st jump larynx????%
+       
+        %????? 1st jump larynx - if hyoid then it would be the same as stageTransitionDuration????%
         pdt = pharyngealDelayTime(phasesCell);
         
         
@@ -522,7 +523,7 @@ function hla = hyolaryngealApproximation(doubleCell)
     hla = maxhla - minhla;
 end
 
-%'Laryngeal Elevation; Needs C2, Post. Cricoid
+%'Laryngeal Elevation; Needs C1, Post. Cricoid
 function le = laryngealElevation(doubleCell)
   
       doubleCellSize = size(doubleCell);    

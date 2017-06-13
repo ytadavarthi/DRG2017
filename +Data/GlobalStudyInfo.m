@@ -14,6 +14,11 @@ classdef GlobalStudyInfo < handle
       start_frame;
       end_frame;
       
+      %Calibration for SI units
+      point1;
+      point2;
+      pixelspercm;
+      
       %Global sessoin info
       currentlyTrackedLandmark = Data.JoveLandmarks.Mandible;
       
