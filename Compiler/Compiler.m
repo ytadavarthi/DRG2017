@@ -3,9 +3,9 @@ function Compiler
     
     %[pathName fileName ext] = fileparts([pathName fileNameMinusExt{1}]);
     
-    fileNames = { 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
-    % pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
-    pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
+    fileNames = {'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
+    pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
+%     pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
     
     file = [pathName fileNames{1} '.txt'];
     cell = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
@@ -24,33 +24,53 @@ function Compiler
     end
     dataStruct = struct('coordinateData',coordinateData,'classifierData',classifierData);
     
-    finalCell = compile_coordinateData(dataStruct,fileNames);
-    compile_classifierData(dataStruct,fileNames,finalCell);
+%     finalCell = compile_coordinateData(dataStruct,fileNames);
+%     compile_classifierData(dataStruct,fileNames,finalCell);
     
 
     %%%%start of kinematics functions%%%
-    doubleCell = cell2doubleSansLabels(dataStruct, 1);
+    sizeDataStruct = size(dataStruct);
+    
+    for i = 1:1
+    
+        doubleCell = points2doubleSansLabels(dataStruct, i);
+        phasesCell = frames2doubleSansLabels(dataStruct, i);
 
-    ahm = anteriorHyoidMovement(doubleCell);
-    shm = superiorHyoidMovement(doubleCell);
-    hyExMand = hyoidExcursionToMandible(doubleCell);
-    hyExVert = hyoidExcursionToVertebrae(doubleCell);
-    alm = antLargyngealMovement(doubleCell);
-    slm = supLargyngealMovement(doubleCell);
-    hla = hyolaryngealApproximation(doubleCell);
-    %??????does laryngeal elevation use c1 or c2??????
-    le = laryngealElevation(doubleCell);
-    ps = pharyngealShortening(doubleCell);
-
-%     disp(ahm);
-%     disp(shm);
-%     disp(hyExMand);
-%     disp(hyExVert);
-%     disp(alm);
-%     disp(slm);
-%     disp(hla);
-%     disp(le);
-%     disp(ps);
+        ahm = anteriorHyoidMovement(doubleCell);
+        shm = superiorHyoidMovement(doubleCell);
+        hyExMand = hyoidExcursionToMandible(doubleCell);
+        hyExVert = hyoidExcursionToVertebrae(doubleCell);
+        alm = antLargyngealMovement(doubleCell);
+        slm = supLargyngealMovement(doubleCell);
+        hla = hyolaryngealApproximation(doubleCell);
+        %??????does laryngeal elevation use c1 or c2??????
+        le = laryngealElevation(doubleCell);
+        ps = pharyngealShortening(doubleCell);
+        botrr = baseOfTongueRetractionRatio(doubleCell);
+        hybotex = hyoidbotexcursionratio(doubleCell);
+        
+        %transit times
+        ott = oralTransitTime(phasesCell);
+        std = stageTransitionDuration(phasesCell);
+        ptt = pharyngealTransitTime(phasesCell);
+        optt = oropharyngealTransitTime(phasesCell);
+        %????? 1st jump larynx????%
+        pdt = pharyngealDelayTime(phasesCell);
+        
+        
+%         disp(ahm);
+%         disp(shm);
+%         disp(hyExMand);
+%         disp(hyExVert);
+%         disp(alm);
+%         disp(slm);
+%         disp(hla);
+%         disp(le);
+%         disp(ps);
+%         disp(botrr);
+        
+    end
+    
 
 end
 
@@ -209,8 +229,12 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
         
 end
 
-function doubleCell = cell2doubleSansLabels(dataStruct, videoIndex)
+function doubleCell = points2doubleSansLabels(dataStruct, videoIndex)
     doubleCell = cellfun(@str2double,dataStruct(videoIndex).coordinateData(2:end,2:end));
+end
+
+function phaseFramesCell = frames2doubleSansLabels(dataStruct, videoIndex)
+    phaseFramesCell = cellfun(@str2double,dataStruct(videoIndex).classifierData(2:end,1:end));
 end
 
 function ahm = anteriorHyoidMovement(doubleCell)
@@ -489,7 +513,7 @@ function hla = hyolaryngealApproximation(doubleCell)
 
     end
     
-    %superior largyngeal movement is difference between max and min
+    %hyolaryngeal appx is difference between max and min
     %movements for all frames
     maxhla = max(allMovements);
     
@@ -498,6 +522,7 @@ function hla = hyolaryngealApproximation(doubleCell)
     hla = maxhla - minhla;
 end
 
+%'Laryngeal Elevation; Needs C2, Post. Cricoid
 function le = laryngealElevation(doubleCell)
   
       doubleCellSize = size(doubleCell);    
@@ -517,7 +542,7 @@ function le = laryngealElevation(doubleCell)
 
     end
     
-    %superior largyngeal movement is difference between max and min dist 
+    %laryngeal elevation is difference between max and min dist 
     maxle = max(allMovements);
     %finding nonzero min
     minle = min(allMovements(allMovements>0));
@@ -525,6 +550,7 @@ function le = laryngealElevation(doubleCell)
     le = maxle - minle;
 end
 
+%Pharyngeal Shortening; Needs Hard Palate, UES
 function ps = pharyngealShortening(doubleCell)
   
       doubleCellSize = size(doubleCell);    
@@ -544,13 +570,101 @@ function ps = pharyngealShortening(doubleCell)
 
     end
     
-    %superior largyngeal movement is difference between max and min dist 
+    %pharyngeal shortening is difference between max and min dist 
     maxps = max(allMovements);
     %finding nonzero min
     minps = min(allMovements(allMovements>0));
 
     ps = maxps - minps;
 end
+
+%Base of Tongue Retraction Ratio; Needs Val, C1, C4
+function botrr = baseOfTongueRetractionRatio(doubleCell)
+
+    doubleCellSize = size(doubleCell);    
+    allMovements = zeros(1,doubleCellSize(1));
+
+    for i = 1:doubleCellSize(1)
+        c1x = doubleCell(i,5);
+        c1y = doubleCell(i,6);
+        c4x = doubleCell(i,9);
+        c4y = doubleCell(i,10);
+        valx = doubleCell(i,19);
+        valy = doubleCell(i,20);
+
+        c1c4_points = [c1x, c1y; c4x, c4y];
+        c1val_points = [c1x, c1y; valx, valy];
+        c4val_points = [c4x, c4y; valx, valy];
+
+        %get lengths of each set of points to form edges of triangle
+
+        c1c4_dist = pdist(c1c4_points,'euclidean');
+        c1val_dist = pdist(c1val_points,'euclidean');
+        c4val_dist = pdist(c4val_points,'euclidean');
+   
+        %Using Law of Cosines to find angle at c1
+        valc1c4angle = acos(( c1val_dist ^ 2 + c1c4_dist ^ 2 - c4val_dist ^ 2) / (2 * c1val_dist * c1c4_dist));
+        
+        current_orthogonal_dist = sin(valc1c4angle) * c1val_dist;
+        allMovements(i) = current_orthogonal_dist;
+
+    end
+    
+    botrr = max(allMovements) - min(allMovements(allMovements>0));
+end
+
+%Hyoid to Base of Tongue Excursion Ratio; Needs Hyoid, Val
+function hybotex = hyoidbotexcursionratio(doubleCell)
+    doubleCellSize = size(doubleCell);    
+    allMovements = zeros(1,doubleCellSize(1));
+
+    for i = 1:doubleCellSize(1)
+        hyx = doubleCell(i,17);
+        hyy = doubleCell(i,18);
+        valX = doubleCell(i,19);
+        valY = doubleCell(i,20);
+
+        hyval_points = [hyx, hyy; valX, valY];
+
+        %get lengths of each set of points to form edge and add to array
+        hyval_dist = pdist(hyval_points,'euclidean');
+        allMovements(i) = hyval_dist;
+
+    end
+    
+    %hyoid to base of tongue excursion ratio is difference between max and min dist 
+    maxhybotex = max(allMovements);
+    %finding nonzero min
+    minhybotex = min(allMovements(allMovements>0));
+
+    hybotex = maxhybotex - minhybotex;
+end
+
+%Oral Transit Time; Needs T1 (Leaves Hold), T2 (Ramus Mand.)
+function ott = oralTransitTime (phasesCell)
+    ott = (phasesCell(3) - phasesCell(2)) / 30;
+end
+
+%Stage Transition Duration; Needs T2 (Ramus Mand.), T3 (1st Jump Hyoid)
+function std = stageTransitionDuration (phasesCell)
+    std = (phasesCell(4) - phasesCell(3)) / 30;
+end
+
+%'Pharyngeal Transit Time; Needs T2 (Ramus Mand.), T5 (UES Closes)
+function ptt = pharyngealTransitTime (phasesCell)
+    ptt = (phasesCell(5) - phasesCell(3)) / 30;
+end
+
+%'Oropharyngeal Transit Time; Needs T1 (Leaves Hold), T5 (UES Closes)
+function optt = oropharyngealTransitTime (phasesCell)
+    optt = (phasesCell(5) - phasesCell(2)) / 30;
+end
+
+%'Pharyngeal Delay Time; Needs T2 (Ramus Mand.), T4 (1st Jump Larynx)
+function pdt = pharyngealDelayTime (phasesCell)
+    pdt = (phasesCell(4) - phasesCell(3)) / 30;
+end
+
 
 
 
