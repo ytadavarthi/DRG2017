@@ -156,7 +156,7 @@ function finalCell = compile_coordinateData(dataStruct,fileNames)
     
     
     finalTable = cell2table(finalCell);
-    formatOut = 'dd-mm-yy HH-MM';
+    formatOut = 'dd-mm-yy HH-MM AM';
     date = datestr(now,formatOut);
     writetable(finalTable,['coordinates ' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
 end
@@ -234,12 +234,18 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
     secondColumn = [{'Swallow Stage'}; secondColumn];
     
     %add classifier titles to classifierColumns
+    for i = 2:length(outputData(1,:))
+        title = outputData{1,i};
+        if strcmp(title(1:9), '<html><b>')
+            outputData{1,i} = title(length('<html><b>')+1:end-length('</b><html>'));
+        end
+    end
     classifierColumns = [outputData(1,2:end);classifierColumns];
     
     finalTable = cell2table([firstColumn secondColumn classifierColumns]);
     
     %write table with correct filename
-    formatOut = 'dd-mm-yy HH-MM';
+    formatOut = 'dd-mm-yy HH-MM AM';
     date = datestr(now,formatOut);
     writetable(finalTable,['Classifiers ' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
         

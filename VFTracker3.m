@@ -730,7 +730,7 @@ Initialize(handles)
 
 
 % --- Executes on key press with focus on appFigure or any of its controls.
-function appFigure_WindowKeyPressFcn(hObject, eventdata, handles)
+function appFigure_WindowFcn(hObject, eventdata, handles)
 % hObject    handle to appFigure (see GCBO)
 % eventdata  structure with the following fields (see FIGURE)
 %	Key: name of the key that was pressed, in lower case
