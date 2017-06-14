@@ -4,8 +4,8 @@ function Compiler
     %[pathName fileName ext] = fileparts([pathName fileNameMinusExt{1}]);
     
 
-    fileNames = { 'Norm030_Tsp_Pud_morphoj_' 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
-    % pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
+    fileNames = { 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
+%     pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
     pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
 
     
