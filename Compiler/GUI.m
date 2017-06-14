@@ -176,7 +176,7 @@ function uitable1_KeyPressFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %if ctrl+v is pressed, paste clipboard into table at selected location
-if strcmp(eventdata.Key,'v') && ~isempty(eventdata.Modifier) && strcmp(eventdata.Modifier,'control')
+if strcmp(eventdata.Key,'v') && ~isempty(eventdata.Modifier) && (strcmp(eventdata.Modifier,'control') || strcmp(eventdata.Modifier,'command'))
     
     %use custom paste function to create clip_board
     clip_board = paste;
