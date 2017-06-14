@@ -5,14 +5,14 @@ function Compiler
     
 
     fileNames = {'Norm030_Tsp_Pud_morphoj_' 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
-%     pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
-    pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
+    pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
+%     pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
 
     
     file = [pathName fileNames{1} '.txt'];
     cell = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
     
-    %make coordinate compiled file and classifier compiled file
+    %make compiled files for coordinates, classifiers, and kinematics
     for i = 1:length(fileNames)
         file = [pathName fileNames{i} '.txt'];
         cell = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
@@ -26,14 +26,14 @@ function Compiler
     end
     dataStruct = struct('coordinateData',coordinateData,'classifierData',classifierData);
     
-%     finalCell = compile_coordinateData(dataStruct,fileNames);
-%     compile_classifierData(dataStruct,fileNames,finalCell);
+    finalCell = compile_coordinateData(dataStruct,fileNames);
+    disp('Done writing combined coordinates file');
 
-    %print out all kinematic values for all videos to a txt file
-    allKinematics = allKinematicsFunctions(dataStruct, fileNames);
-    total_kinematics_table = cell2table(allKinematics);
-    fullResultFileName = 'combined_kinematics_values.txt';
-    writetable(total_kinematics_table, fullResultFileName, 'Delimiter', '\t', 'WriteVariableNames', false);
+    compile_classifierData(dataStruct,fileNames,finalCell);
+    disp('Done writing combined classifier file');
+
+    compile_kinematicsData(dataStruct, fileNames);
+    disp('Done writing combined kinematics file');
 end
 
 function finalCell = compile_coordinateData(dataStruct,fileNames)
@@ -116,7 +116,7 @@ function finalCell = compile_coordinateData(dataStruct,fileNames)
     finalTable = cell2table(finalCell);
     formatOut = 'dd-mm-yy HH-MM AM';
     date = datestr(now,formatOut);
-    writetable(finalTable,['coordinates ' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
+    writetable(finalTable,['coordinates_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
 end
 
 function compile_classifierData(dataStruct, fileNames, finalCell)
@@ -205,12 +205,12 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
     %write table with correct filename
     formatOut = 'dd-mm-yy HH-MM AM';
     date = datestr(now,formatOut);
-    writetable(finalTable,['Classifiers ' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
+    writetable(finalTable,['classifiers_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
         
 end
 
 %Gets all kinematic values for all files and stores in a cell for output
-function allKinematics = allKinematicsFunctions(dataStruct, fileNames)
+function compile_kinematicsData(dataStruct, fileNames)
     lengthDataStruct = length(dataStruct);
     numKinematicsFunctions = 17;
     
@@ -282,7 +282,11 @@ function allKinematics = allKinematicsFunctions(dataStruct, fileNames)
         
     end
     
-    allKinematics = kinematicsArray;
+    %write to a file
+    total_kinematics_table = cell2table(kinematicsArray);
+    formatOut = 'dd-mm-yy HH-MM AM';
+    date = datestr(now,formatOut);
+    writetable(total_kinematics_table,['kinematics_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
 end
 
 %Gets Coordinates from DataStruct and converts into cell without labels
