@@ -232,7 +232,9 @@ pointerShape = [ ...
             set(handles.text16, 'String', num2str(morphoJTable{2,6}));
             set(handles.text17, 'String', num2str(morphoJTable{2,1}));
             set(handles.text18, 'String', num2str(morphoJTable{2,7}));
-            
+            set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',str2double(morphoJTable{2,8}),str2double(morphoJTable{2,9})));
+            set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',str2double(morphoJTable{2,10}),str2double(morphoJTable{2,11})));
+            set(handles.pixelspercm_text, 'String', sprintf('%-.2f',str2double(morphoJTable{2,12})));
             
             globalStudyInfo.hold_position  = num2str(morphoJTable{2,2});
             globalStudyInfo.ramus_mandible = num2str(morphoJTable{2,3});
@@ -241,7 +243,9 @@ pointerShape = [ ...
             globalStudyInfo.at_rest        = num2str(morphoJTable{2,6});
             globalStudyInfo.start_frame    = num2str(morphoJTable{2,1});
             globalStudyInfo.end_frame      = num2str(morphoJTable{2,7});
-            
+            globalStudyInfo.point1         = [num2str(morphoJTable{2,8}), num2str(morphoJTable{2,9})];
+            globalStudyInfo.point2         = [num2str(morphoJTable{2,10}), num2str(morphoJTable{2,11})];
+            globalStudyInfo.pixelspercm    = num2str(morphoJTable{2,12});
             %setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
         end
@@ -1370,13 +1374,13 @@ function calibrateSIbutton_Callback(hObject, eventdata, handles)
         [x, y] = mygetpts();
         globalStudyInfo.point1 = [x(1) y(1)];
         set(handles.feedbackLabel, 'String', 'Point 1 Tracked');
-        set(handles.point1_text, 'String', sprintf('%.2d \t %.2d',x,y));
+        set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',x,y));
         
         set(hObject,'String','Click opposite edge');
         [x, y] = mygetpts();
         globalStudyInfo.point2 = [x(1) y(1)];
         set(handles.feedbackLabel, 'String', 'Point 2 Tracked');
-        set(handles.point2_text, 'String', sprintf('%.d \t %.d',x,y));
+        set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',x,y));
         set(hObject,'String','Calibrate SI Units');
         set(hObject,'Value',0);
     end

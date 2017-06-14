@@ -3,15 +3,11 @@ function Compiler
     
     %[pathName fileName ext] = fileparts([pathName fileNameMinusExt{1}]);
     
-<<<<<<< HEAD
+
     fileNames = { 'Norm030_Tsp_Pud_morphoj_' 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
     % pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
     pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
-=======
-    fileNames = {'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
-    pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
-%     pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
->>>>>>> 5acccb7a1359ab430fbe79dc5ea78208b9541947
+
     
     file = [pathName fileNames{1} '.txt'];
     cell = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
@@ -30,14 +26,14 @@ function Compiler
     end
     dataStruct = struct('coordinateData',coordinateData,'classifierData',classifierData);
     
-%     finalCell = compile_coordinateData(dataStruct,fileNames);
-%     compile_classifierData(dataStruct,fileNames,finalCell);
+    finalCell = compile_coordinateData(dataStruct,fileNames);
+    compile_classifierData(dataStruct,fileNames,finalCell);
     
 
     %%%%start of kinematics functions%%%
     sizeDataStruct = size(dataStruct);
     
-    for i = 1:1
+    for i = 1:sizeDataStruct
     
         doubleCell = points2doubleSansLabels(dataStruct, i);
         phasesCell = frames2doubleSansLabels(dataStruct, i);

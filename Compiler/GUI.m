@@ -206,15 +206,22 @@ if strcmp(eventdata.Key,'v') && ~isempty(eventdata.Modifier) && strcmp(eventdata
         
     end
     
-    [m n] = size(handles.uitable1.Data);
+    %make new pasted columns editable, format = char, and bold the first
+    %line. then fit column size.
+    [m, n] = size(handles.uitable1.Data);
+   
     editable = false;
     format = {'char'};
     for i = 2:n
+        handles.uitable1.Data{1,i} = ['<html><b>' handles.uitable1.Data{1,i} '<html></b>'];
         editable(i) = true;
         format(i) = {'char'};
     end
     handles.uitable1.ColumnEditable = editable;
     handles.uitable1.ColumnFormat = format;
+    
+    columnWidth = fitColumns(handles.uitable1.Data);
+    handles.uitable1.ColumnWidth = columnWidth;
 end
 
 
