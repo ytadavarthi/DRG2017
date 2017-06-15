@@ -1,12 +1,23 @@
-function Compiler
-    %[fileNameMinusExt pathName] = uigetfile({'.txt'},'MultiSelect','on');
+function varargout = Compiler(varargin)
     
-    %[pathName fileName ext] = fileparts([pathName fileNameMinusExt{1}]);
-    
+    if isempty(varargin)
+        [fileNames pathName] = uigetfile({'.txt'},'MultiSelect','on');
+        kinematicsButton = false;
+    elseif length(varargin) == 1
+        fullFileName = varargin{1};
+        [pathName,fileNames,ext] = fileparts(fullFileName);
+        fileNames = {[fileNames '_morphoj_']};
+        pathName = [pathName '\'];
+        
+        kinematicsButton = true;
+    elseif length(varargin) > 1
+        error('too many inputs')
+    end
+       
 
-    fileNames = {'Norm030_Tsp_Pud_morphoj_' 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
-%     pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
-    pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
+%     fileNames = {'Norm030_Tsp_Pud_morphoj_' 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
+% %     pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
+%     pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
 
     
     file = [pathName fileNames{1} '.txt'];
@@ -26,14 +37,20 @@ function Compiler
     end
     dataStruct = struct('coordinateData',coordinateData,'classifierData',classifierData);
     
-    finalCell = compile_coordinateData(dataStruct,fileNames);
-    disp('Done writing combined coordinates file');
+    if kinematicsButton
+        output = compile_kinematicsButton(dataStruct, fileNames);
+        %disp('Done writing combined kinematics file');
+        varargout{1} = output;
+    else
+        finalCell = compile_coordinateData(dataStruct,fileNames);
+        disp('Done writing combined coordinates file');
 
-    compile_classifierData(dataStruct,fileNames,finalCell);
-    disp('Done writing combined classifier file');
+        compile_classifierData(dataStruct,fileNames,finalCell);
+        disp('Done writing combined classifier file');
 
-    compile_kinematicsData(dataStruct, fileNames);
-    disp('Done writing combined kinematics file');
+        compile_kinematicsData(dataStruct, fileNames);
+        disp('Done writing combined kinematics file');
+    end
 end
 
 function finalCell = compile_coordinateData(dataStruct,fileNames)
@@ -207,6 +224,82 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
     date = datestr(now,formatOut);
     writetable(finalTable,['classifiers_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
         
+end
+
+function output = compile_kinematicsButton(dataStruct, fileNames)
+    lengthDataStruct = length(dataStruct);
+    numKinematicsFunctions = 17;
+    
+    kinematicsArray = cell(lengthDataStruct+1, numKinematicsFunctions+1);
+    kinematicsArray(1, 1:numKinematicsFunctions+1) = ...
+        {'FileName',    ...
+        'ahm- AnteriorHyoidMovement',    ...
+        'shm- SuperiorHyoidMovement',    ...
+        'hyExMand- hyoidExcursionToMandible',   ...
+        'hyExC4- hyoidExcursionToC4',   ...
+        'hyExVert- hyoidExcursionToVertebrae',   ...
+        'alm- AnteriorLaryngealMovement',       ...
+        'slm- SuperiorLaryngealMovement',     ...
+        'hla- HyolaryngealAppx',     ...
+        'le- LaryngealElevation',     ...
+        'ps- PharyngealShortening',     ...
+        'botrr- BaseofTongueRetractionRatio',     ...
+        'hybotex- HyoidBaseofTongueExcursion',    ...
+        'ott- OralTransitTime',    ...
+        'std- StageTransitionDuration',    ...
+        'ptt- PharyngealTransitTime',    ...
+        'optt- OropharyngealTransitTime',    ...
+        'pdt- PharyngealDelayTime'};
+    
+    for i = 1:lengthDataStruct
+    
+        doubleCell = points2doubleSansLabels(dataStruct, i);
+        phasesCell = frames2doubleSansLabels(dataStruct, i);
+
+        ahm = anteriorHyoidMovement(doubleCell);
+        shm = superiorHyoidMovement(doubleCell);
+        hyExMand = hyoidExcursionToMandible(doubleCell);
+        hyExC4 = hyoidExcursionToC4(doubleCell);
+        hyExVert = hyoidExcursionToVertebrae(doubleCell);
+        alm = antLargyngealMovement(doubleCell);
+        slm = supLargyngealMovement(doubleCell);
+        hla = hyolaryngealApproximation(doubleCell);
+        le = laryngealElevation(doubleCell);
+        ps = pharyngealShortening(doubleCell);
+        botrr = baseOfTongueRetractionRatio(doubleCell);
+        hybotex = hyoidbotexcursionratio(doubleCell);
+        
+        %transit times
+        ott = oralTransitTime(phasesCell);
+        std = stageTransitionDuration(phasesCell);
+        ptt = pharyngealTransitTime(phasesCell);
+        optt = oropharyngealTransitTime(phasesCell);
+        %????? 1st jump larynx - if hyoid then it would be the same as stageTransitionDuration????%
+        pdt = pharyngealDelayTime(phasesCell);
+        
+        kinematicsArray(i+1, 1:numKinematicsFunctions+1) = {strcat(fileNames(i), '.txt'),...
+                                                ahm,    ...
+                                                shm,    ...
+                                                hyExMand,   ...
+                                                hyExC4,   ...
+                                                hyExVert,   ...
+                                                alm,       ...
+                                                slm,     ...
+                                                hla,     ...
+                                                le,     ...
+                                                ps,     ...
+                                                botrr,     ...
+                                                hybotex,    ...
+                                                ott,    ...
+                                                std,    ...
+                                                ptt,    ...
+                                                optt,    ...
+                                                pdt};
+        
+    end
+    
+    output = [kinematicsArray(1,2:end)' kinematicsArray(2,2:end)'];
+    
 end
 
 %Gets all kinematic values for all files and stores in a cell for output
@@ -463,7 +556,7 @@ end
 function hyExVert = hyoidExcursionToVertebrae(doubleCell)
     ahm = anteriorHyoidMovement(doubleCell);
     shm = superiorHyoidMovement(doubleCell);
-    
+    ahm = 0;
     if (ahm==0 || shm==0) 
         hyExVert = 0;
     else

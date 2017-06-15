@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 13-Jun-2017 17:31:07
+% Last Modified by GUIDE v2.5 15-Jun-2017 09:05:03
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -140,6 +140,9 @@ pointerShape = [ ...
     [fileName, pathName] = uigetfile({'*'});
     fullFileName = strcat(pathName, fileName);
     
+    %store file name and path for use in kinematicsbutton
+    setappdata(handles.kinematicsButton,'fullFileName',fullFileName)
+    
     %display file name
     handles.text11.String = fileName;
     
@@ -224,6 +227,16 @@ pointerShape = [ ...
             
             %set frame information to each textbox corresponding to push
             %buttons
+            globalStudyInfo.hold_position  = num2str(morphoJTable{2,2});
+            globalStudyInfo.ramus_mandible = num2str(morphoJTable{2,3});
+            globalStudyInfo.hyoid_burst    = num2str(morphoJTable{2,4});
+            globalStudyInfo.ues_closure    = num2str(morphoJTable{2,5});
+            globalStudyInfo.at_rest        = num2str(morphoJTable{2,6});
+            globalStudyInfo.start_frame    = num2str(morphoJTable{2,1});
+            globalStudyInfo.end_frame      = num2str(morphoJTable{2,7});
+            globalStudyInfo.point1         = [str2double(morphoJTable{2,8}), str2double(morphoJTable{2,9})];
+            globalStudyInfo.point2         = [str2double(morphoJTable{2,10}), str2double(morphoJTable{2,11})];
+            globalStudyInfo.pixelspercm    = str2double(morphoJTable{2,12});
             
             set(handles.text12, 'String', num2str(morphoJTable{2,2}));
             set(handles.text13, 'String', num2str(morphoJTable{2,3}));
@@ -232,20 +245,16 @@ pointerShape = [ ...
             set(handles.text16, 'String', num2str(morphoJTable{2,6}));
             set(handles.text17, 'String', num2str(morphoJTable{2,1}));
             set(handles.text18, 'String', num2str(morphoJTable{2,7}));
-            set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',str2double(morphoJTable{2,8}),num2str(morphoJTable{2,9})));
-            set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',num2str(morphoJTable{2,10}),num2str(morphoJTable{2,11})));
-            set(handles.pixelspercm_text, 'String', num2str(morphoJTable{2,12}));
+            set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',str2double(morphoJTable{2,8}),str2double(morphoJTable{2,9})));
+            set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',str2double(morphoJTable{2,10}),str2double(morphoJTable{2,11})));
+            set(handles.pixelspercm_text, 'String', sprintf('%-.2f',str2double(morphoJTable{2,12})));
             
-            globalStudyInfo.hold_position  = num2str(morphoJTable{2,2});
-            globalStudyInfo.ramus_mandible = num2str(morphoJTable{2,3});
-            globalStudyInfo.hyoid_burst    = num2str(morphoJTable{2,4});
-            globalStudyInfo.ues_closure    = num2str(morphoJTable{2,5});
-            globalStudyInfo.at_rest        = num2str(morphoJTable{2,6});
-            globalStudyInfo.start_frame    = num2str(morphoJTable{2,1});
-            globalStudyInfo.end_frame      = num2str(morphoJTable{2,7});
-            globalStudyInfo.point1         = [num2str(morphoJTable{2,8}), num2str(morphoJTable{2,9})];
-            globalStudyInfo.point2         = [num2str(morphoJTable{2,10}), num2str(morphoJTable{2,11})];
-            globalStudyInfo.pixelspercm    = num2str(morphoJTable{2,12});
+            bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
+            bothPoints_dist = pdist(bothPoints,'euclidean');
+        
+            estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
+            set(handles.estSize, 'String', num2str(estSize));
+            
             %setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
         end
@@ -724,7 +733,7 @@ Initialize(handles)
 
 
 % --- Executes on key press with focus on appFigure or any of its controls.
-function appFigure_WindowKeyPressFcn(hObject, eventdata, handles)
+function appFigure_WindowFcn(hObject, eventdata, handles)
 % hObject    handle to appFigure (see GCBO)
 % eventdata  structure with the following fields (see FIGURE)
 %	Key: name of the key that was pressed, in lower case
@@ -1304,8 +1313,10 @@ button_state = get(hObject,'Value');
 
 if button_state == get(hObject,'Max')
     set(handles.semiautoOptions, 'visible', 'on');
+    set(handles.kinematicsButton, 'visible', 'off');
 elseif button_state == get(hObject,'Min')
     set(handles.semiautoOptions, 'visible', 'off');
+    set(handles.kinematicsButton, 'visible', 'on');
 end
 
 drawnow();
@@ -1400,3 +1411,54 @@ function estSize_ButtonDownFcn(hObject, eventdata, handles)
 set(hObject, 'String', '');
 set(hObject, 'enable', 'on');
 uicontrol(hObject);
+
+
+% --- Executes on button press in kinematicsButton.
+function kinematicsButton_Callback(hObject, eventdata, handles)
+% hObject    handle to kinematicsButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%retreive file path information stored in initialize
+fullFileName = getappdata(handles.kinematicsButton,'fullFileName');
+[pathstr name ext] = fileparts(fullFileName);
+%change directory
+cd([pathstr\
+%run compiler
+kinematicValues = Compiler(fullFileName);
+
+%create table and format
+h = figure;
+u = uitable(h,'Data',kinematicValues);
+columnWidth = fitColumns(u.Data);
+u.ColumnWidth = columnWidth;
+table_extent = get(u,'Extent');
+figure_size = get(h,'outerposition');
+desired_fig_size = [figure_size(1) figure_size(2) table_extent(3)+36 table_extent(4)+65];
+set(u,'Position',[1 20 table_extent(3)+35 table_extent(4)])
+set(h,'outerposition', desired_fig_size);
+set(h,'MenuBar','none')
+set(h,'ToolBar','none')
+
+
+function columnWidth = fitColumns(data)
+    dataSize = size(data);
+    maxLen = zeros(1,dataSize(2));
+    for i = 1:dataSize(2)
+        for j = 1:dataSize(1)
+            len = length(data{j,i});
+            if j == 1
+                len = length(data{j,i}) - length('<html><b></b><html>');
+            end
+            
+            if(len>maxLen(1,i))
+                maxLen(1,i) = len;
+            end
+           
+        end
+        if maxLen(1,i) < 5
+            maxLen(1,i) = 7;
+        end
+    end
+    
+    columnWidth = num2cell(maxLen*6);

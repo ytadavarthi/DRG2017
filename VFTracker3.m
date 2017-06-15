@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 13-Jun-2017 17:31:07
+% Last Modified by GUIDE v2.5 15-Jun-2017 09:05:03
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -139,6 +139,9 @@ pointerShape = [ ...
 
     [fileName, pathName] = uigetfile({'*'});
     fullFileName = strcat(pathName, fileName);
+    
+    %store file name and path for use in kinematicsbutton
+    setappdata(handles.kinematicsButton,'fullFileName',fullFileName)
     
     %display file name
     handles.text11.String = fileName;
@@ -1310,8 +1313,10 @@ button_state = get(hObject,'Value');
 
 if button_state == get(hObject,'Max')
     set(handles.semiautoOptions, 'visible', 'on');
+    set(handles.kinematicsButton, 'visible', 'off');
 elseif button_state == get(hObject,'Min')
     set(handles.semiautoOptions, 'visible', 'off');
+    set(handles.kinematicsButton, 'visible', 'on');
 end
 
 drawnow();
@@ -1406,3 +1411,62 @@ function estSize_ButtonDownFcn(hObject, eventdata, handles)
 set(hObject, 'String', '');
 set(hObject, 'enable', 'on');
 uicontrol(hObject);
+
+
+% --- Executes on button press in kinematicsButton.
+function kinematicsButton_Callback(hObject, eventdata, handles)
+% hObject    handle to kinematicsButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+%close previous window if it exists
+close(findobj('type','figure','name','Kinematic Variables'))
+
+%retreive file path information stored in initialize
+fullFileName = getappdata(handles.kinematicsButton,'fullFileName');
+[pathstr name ext] = fileparts(fullFileName);
+
+%change directory
+cd([pathstr '\Compiler'])
+
+%run compiler
+kinematicValues = Compiler(fullFileName);
+
+%return directory
+cd(pathstr);
+
+%create table and format
+h = figure('Name','Kinematic Variables','NumberTitle','off');
+u = uitable(h,'Data',kinematicValues);
+columnWidth = fitColumns(u.Data);
+u.ColumnWidth = columnWidth;
+table_extent = get(u,'Extent');
+figure_size = get(h,'outerposition');
+desired_fig_size = [figure_size(1) figure_size(2) table_extent(3)+36 table_extent(4)+65];
+set(u,'Position',[1 20 table_extent(3)+35 table_extent(4)])
+set(h,'outerposition', desired_fig_size);
+set(h,'MenuBar','none')
+set(h,'ToolBar','none')
+
+
+function columnWidth = fitColumns(data)
+    dataSize = size(data);
+    maxLen = zeros(1,dataSize(2));
+    for i = 1:dataSize(2)
+        for j = 1:dataSize(1)
+            len = length(data{j,i});
+            if j == 1
+                len = length(data{j,i}) - length('<html><b></b><html>');
+            end
+            
+            if(len>maxLen(1,i))
+                maxLen(1,i) = len;
+            end
+           
+        end
+        if maxLen(1,i) < 5
+            maxLen(1,i) = 7;
+        end
+    end
+    
+    columnWidth = num2cell(maxLen*6);
