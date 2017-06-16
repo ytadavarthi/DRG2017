@@ -7,7 +7,7 @@ function varargout = Compiler(varargin)
         fullFileName = varargin{1};
         [pathName,fileNames,ext] = fileparts(fullFileName);
         fileNames = {[fileNames '_morphoj_']};
-        pathName = [pathName '\'];
+        pathName = [pathName '/'];
         
         kinematicsButton = true;
     elseif length(varargin) > 1
@@ -20,12 +20,12 @@ function varargout = Compiler(varargin)
 %     pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
 
     
-    file = [pathName fileNames{1} '.txt'];
+    file = [pathName fileNames{1}];
     cell = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
     
     %make compiled files for coordinates, classifiers, and kinematics
     for i = 1:length(fileNames)
-        file = [pathName fileNames{i} '.txt'];
+        file = [pathName fileNames{i}];
         cell = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
                       
         coordinateData{i} = cell(3:end,:);

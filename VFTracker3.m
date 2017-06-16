@@ -1427,7 +1427,7 @@ fullFileName = getappdata(handles.kinematicsButton,'fullFileName');
 [pathstr name ext] = fileparts(fullFileName);
 
 %change directory
-cd([pathstr '\Compiler'])
+cd([pathstr '/Compiler'])
 
 %run compiler
 kinematicValues = Compiler(fullFileName);
