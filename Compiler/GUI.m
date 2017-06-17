@@ -59,7 +59,12 @@ function GUI_OpeningFcn(hObject, eventdata, handles, varargin)
 %     t.ColumnName = data(1,:);
 %     t.ColumnEditable = true;
     
+    
     fileNames = ['Swallow ID'; varargin{1}'];
+    
+    for i = 2:length(fileNames)
+        fileNames{i} = fileNames{i}(1:end-4);
+    end
     
     fileNames{1} = ['<html><b>' fileNames{1} '</b><html>'];
   

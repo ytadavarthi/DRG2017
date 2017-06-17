@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 15-Jun-2017 09:05:03
+% Last Modified by GUIDE v2.5 16-Jun-2017 12:24:01
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -145,6 +145,7 @@ pointerShape = [ ...
     
     %display file name
     handles.text11.String = fileName;
+    uicontrol(handles.text11);
     
     %%% Uncomment to load a file direclty without the file chooser:
     %fullFileName = 'C:\Users\johndoe\Desktop\ThirdRevision\testvideo.avi';
@@ -368,13 +369,16 @@ function landmarksListBox_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns landmarksListBox contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from landmarksListBox
+   
+    uicontrol(handles.text11); %prevents click off problem
+    
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
     listBoxSelection = get(handles.landmarksListBox, 'Value');
     listBoxSelection = listBoxSelection(1);
     globalStudyInfo.currentlyTrackedLandmark = Data.JoveLandmarks(listBoxSelection);
     Utilities.CustomPrinters.printInfo(sprintf('Current landmark is %s', char(globalStudyInfo.currentlyTrackedLandmark)));
-    figure(gcf);%This is supposed to bring the focus back to the app figure's gray area but it does not work as expected.
-    uicontrol(handles.text9);
+    %figure(gcf);%This is supposed to bring the focus back to the app figure's gray area but it does not work as expected.
+    
     Render(handles);
 
 
@@ -506,7 +510,7 @@ function noiseFilterLevelIndicator_CreateFcn(hObject, eventdata, handles)
 
 % --- Executes on key press with focus on appFigure and none of its controls.
 %This is not being used.
-function appFigure_KeyPressFcn(hObject, eventdata, handles)
+%function appFigure_KeyPressFcn(hObject, eventdata, handles)
 % hObject    handle to appFigure (see GCBO)
 % eventdata  structure with the following fields (see FIGURE)
 %	Key: name of the key that was pressed, in lower case
@@ -733,7 +737,7 @@ Initialize(handles)
 
 
 % --- Executes on key press with focus on appFigure or any of its controls.
-function appFigure_WindowFcn(hObject, eventdata, handles)
+function appFigure_WindowKeyPressFcn(hObject, eventdata, handles)
 % hObject    handle to appFigure (see GCBO)
 % eventdata  structure with the following fields (see FIGURE)
 %	Key: name of the key that was pressed, in lower case
@@ -799,6 +803,7 @@ function saveButton_ClickedCallback(hObject, eventdata, handles)
 globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
 oldFeedbackLabelMessage = get(handles.feedbackLabel, 'String');
 set(handles.feedbackLabel, 'String', 'Saving...');
+drawnow()
 Utilities.ResultFileWriter(globalStudyInfo);
 set(handles.feedbackLabel, 'String', '');
 
@@ -808,7 +813,14 @@ function WriteHighResVideo_ClickedCallback(hObject, eventdata, handles)
 % hObject    handle to WriteHighResVideo (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+%display "saving video" in top left corner
+set(handles.feedbackLabel,'String', 'Saving...')
+drawnow()
+    
 VideoWriterCallback(handles, 'high');   
+
+set(handles.feedbackLabel,'String', '')
     
 
 
@@ -867,7 +879,14 @@ function WriteLowResVideo_ClickedCallback(hObject, eventdata, handles)
 % hObject    handle to WriteLowResVideo (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+%display "saving video" in top left corner
+set(handles.feedbackLabel,'String', 'Saving...')
+drawnow()
+    
 VideoWriterCallback(handles, 'low');
+
+set(handles.feedbackLabel,'String','');
 % disp('debug pitstop called');
 % globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
 % fullFileName = globalStudyInfo.vfVideoStructure.fileName;
@@ -1079,6 +1098,8 @@ end
 
 
 function VideoWriterCallback(handles, resolution)
+    
+  
 globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
 numFrames = globalStudyInfo.vfVideoStructure.numFrames;
 
@@ -1385,13 +1406,13 @@ function calibrateSIbutton_Callback(hObject, eventdata, handles)
         [x, y] = mygetpts();
         globalStudyInfo.point1 = [x(1) y(1)];
         set(handles.feedbackLabel, 'String', 'Point 1 Tracked');
-        set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',x,y));
+        set(handles.point1_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
         
         set(hObject,'String','Click opposite edge');
         [x, y] = mygetpts();
         globalStudyInfo.point2 = [x(1) y(1)];
         set(handles.feedbackLabel, 'String', 'Point 2 Tracked');
-        set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',x,y));
+        set(handles.point2_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
         set(hObject,'String','Calibrate SI Units');
         set(hObject,'Value',0);
     end
@@ -1422,31 +1443,37 @@ function kinematicsButton_Callback(hObject, eventdata, handles)
 %close previous window if it exists
 close(findobj('type','figure','name','Kinematic Variables'))
 
-%retreive file path information stored in initialize
+% %retreive file path information stored in initialize
 fullFileName = getappdata(handles.kinematicsButton,'fullFileName');
 [pathstr name ext] = fileparts(fullFileName);
 
-%change directory
-cd([pathstr '/Compiler'])
+if exist([fullFileName(1:end-length(ext)) '_morphoj_.txt'],'file')
 
-%run compiler
-kinematicValues = Compiler(fullFileName);
+    %change directory
+    cd Compiler
 
-%return directory
-cd(pathstr);
+    %run compiler
+    kinematicValues = Compiler(fullFileName);
 
-%create table and format
-h = figure('Name','Kinematic Variables','NumberTitle','off');
-u = uitable(h,'Data',kinematicValues);
-columnWidth = fitColumns(u.Data);
-u.ColumnWidth = columnWidth;
-table_extent = get(u,'Extent');
-figure_size = get(h,'outerposition');
-desired_fig_size = [figure_size(1) figure_size(2) table_extent(3)+36 table_extent(4)+65];
-set(u,'Position',[1 20 table_extent(3)+35 table_extent(4)])
-set(h,'outerposition', desired_fig_size);
-set(h,'MenuBar','none')
-set(h,'ToolBar','none')
+    %return directory
+    cd ../
+
+    %create table and format
+    h = figure('Visible','off','Name','Kinematic Variables','NumberTitle','off', 'MenuBar', 'none', 'ToolBar' , 'none');
+    u = uitable(h,'Data',kinematicValues);
+    columnWidth = fitColumns(u.Data);
+    u.ColumnWidth = columnWidth;
+    table_extent = get(u,'Extent');
+    figure_size = get(h,'outerposition');
+    desired_fig_size = [figure_size(1) figure_size(2) table_extent(3)+36 table_extent(4)+65];
+    set(u,'Position',[1 20 table_extent(3)+35 table_extent(4)])
+    set(h,'outerposition', desired_fig_size);
+    set(h,'Visible','on');
+    
+else
+    warningMessage = sprintf('Warning: Cannot display kinematics because file does not exist. Click "save" first!');
+    uiwait(msgbox(warningMessage));
+end
 
 
 function columnWidth = fitColumns(data)
@@ -1470,3 +1497,19 @@ function columnWidth = fitColumns(data)
     end
     
     columnWidth = num2cell(maxLen*6);
+
+
+% --- Executes on button press in pushbutton11.
+function pushbutton11_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+close('VFTracker3')
+VFTracker3
+
+
+% % --- Executes on button press in pushbutton12.
+% function pushbutton12_Callback(hObject, eventdata, handles)
+% % hObject    handle to pushbutton12 (see GCBO)
+% % eventdata  reserved - to be defined in a future version of MATLAB
+% % handles    structure with handles and user data (see GUIDATA)

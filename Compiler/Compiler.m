@@ -1,13 +1,14 @@
 function varargout = Compiler(varargin)
     
     if isempty(varargin)
-        [fileNames pathName] = uigetfile({'.txt'},'MultiSelect','on');
+        [fileNames, pathName] = uigetfile({'.txt'},'MultiSelect','on');
         kinematicsButton = false;
     elseif length(varargin) == 1
         fullFileName = varargin{1};
-        [pathName,fileNames,ext] = fileparts(fullFileName);
+        [~,fileNames,ext] = fileparts(fullFileName);
+        pathName = fullFileName(1:end-length([fileNames ext]));
         fileNames = {[fileNames '_morphoj_']};
-        pathName = [pathName '/'];
+        
         
         kinematicsButton = true;
     elseif length(varargin) > 1
@@ -42,18 +43,18 @@ function varargout = Compiler(varargin)
         %disp('Done writing combined kinematics file');
         varargout{1} = output;
     else
-        finalCell = compile_coordinateData(dataStruct,fileNames);
+        finalCell = compile_coordinateData(dataStruct,fileNames,pathName);
         disp('Done writing combined coordinates file');
 
-        compile_classifierData(dataStruct,fileNames,finalCell);
+        compile_classifierData(dataStruct,fileNames,finalCell,pathName);
         disp('Done writing combined classifier file');
 
-        compile_kinematicsData(dataStruct, fileNames);
+        compile_kinematicsData(dataStruct, fileNames,pathName);
         disp('Done writing combined kinematics file');
     end
 end
 
-function finalCell = compile_coordinateData(dataStruct,fileNames)
+function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
     %initialize finalCell
     finalCell = dataStruct(1).coordinateData(1,:);
     finalCell{1,1} = 'Swallow ID';
@@ -95,7 +96,7 @@ function finalCell = compile_coordinateData(dataStruct,fileNames)
                     
         %Rename ID Column
         for j = 1:m-1
-            coordinateData{j+1,1} = [fileNames{i} num2str(j)];
+            coordinateData{j+1,1} = [fileNames{i}(1:end-4) num2str(j)];
         end
         
         %Find all unAnnotated Columns
@@ -133,10 +134,10 @@ function finalCell = compile_coordinateData(dataStruct,fileNames)
     finalTable = cell2table(finalCell);
     formatOut = 'dd-mm-yy HH-MM AM';
     date = datestr(now,formatOut);
-    writetable(finalTable,['coordinates_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
+    writetable(finalTable,[pathName 'coordinates_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
 end
 
-function compile_classifierData(dataStruct, fileNames, finalCell)
+function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
     
     %Create GUI for use-input independent variables
     [~, outputData] = GUI(fileNames);
@@ -222,7 +223,7 @@ function compile_classifierData(dataStruct, fileNames, finalCell)
     %write table with correct filename
     formatOut = 'dd-mm-yy HH-MM AM';
     date = datestr(now,formatOut);
-    writetable(finalTable,['classifiers_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
+    writetable(finalTable,[pathName 'classifiers_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
         
 end
 
@@ -303,7 +304,7 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
 end
 
 %Gets all kinematic values for all files and stores in a cell for output
-function compile_kinematicsData(dataStruct, fileNames)
+function compile_kinematicsData(dataStruct, fileNames, pathName)
     lengthDataStruct = length(dataStruct);
     numKinematicsFunctions = 17;
     
@@ -354,7 +355,7 @@ function compile_kinematicsData(dataStruct, fileNames)
         %????? 1st jump larynx - if hyoid then it would be the same as stageTransitionDuration????%
         pdt = pharyngealDelayTime(phasesCell);
         
-        kinematicsArray(i+1, 1:numKinematicsFunctions+1) = {strcat(fileNames(i), '.txt'),...
+        kinematicsArray(i+1, 1:numKinematicsFunctions+1) = {{fileNames{i}(1:end-4)},...
                                                 ahm,    ...
                                                 shm,    ...
                                                 hyExMand,   ...
@@ -379,7 +380,7 @@ function compile_kinematicsData(dataStruct, fileNames)
     total_kinematics_table = cell2table(kinematicsArray);
     formatOut = 'dd-mm-yy HH-MM AM';
     date = datestr(now,formatOut);
-    writetable(total_kinematics_table,['kinematics_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
+    writetable(total_kinematics_table,[pathName 'kinematics_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
 end
 
 %Gets Coordinates from DataStruct and converts into cell without labels
