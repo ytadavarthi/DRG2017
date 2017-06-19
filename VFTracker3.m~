@@ -228,24 +228,24 @@ pointerShape = [ ...
             
             %set frame information to each textbox corresponding to push
             %buttons
+            globalStudyInfo.start_frame    = num2str(morphoJTable{2,1});
             globalStudyInfo.hold_position  = num2str(morphoJTable{2,2});
             globalStudyInfo.ramus_mandible = num2str(morphoJTable{2,3});
             globalStudyInfo.hyoid_burst    = num2str(morphoJTable{2,4});
             globalStudyInfo.ues_closure    = num2str(morphoJTable{2,5});
             globalStudyInfo.at_rest        = num2str(morphoJTable{2,6});
-            globalStudyInfo.start_frame    = num2str(morphoJTable{2,1});
             globalStudyInfo.end_frame      = num2str(morphoJTable{2,7});
             globalStudyInfo.point1         = [str2double(morphoJTable{2,8}), str2double(morphoJTable{2,9})];
             globalStudyInfo.point2         = [str2double(morphoJTable{2,10}), str2double(morphoJTable{2,11})];
             globalStudyInfo.pixelspercm    = str2double(morphoJTable{2,12});
             
-            set(handles.text12, 'String', globalStudyInfo.hold_position);
-            set(handles.text13, 'String', globalStudyInfo.ramus_mandible);
-            set(handles.text14, 'String', globalStudyInfo.hyoid_burst);
-            set(handles.text15, 'String', globalStudyInfo.ues_closure);
-            set(handles.text16, 'String', globalStudyInfo.at_rest);
-            set(handles.text17, 'String', globalStudyInfo.start_frame);
-            set(handles.text18, 'String', globalStudyInfo.end_frame);
+            set(handles.text12, 'String', num2str(morphoJTable{2,2}));
+            set(handles.text13, 'String', num2str(morphoJTable{2,3}));
+            set(handles.text14, 'String', num2str(morphoJTable{2,4}));
+            set(handles.text15, 'String', num2str(morphoJTable{2,5}));
+            set(handles.text16, 'String', num2str(morphoJTable{2,6}));
+            set(handles.text17, 'String', num2str(morphoJTable{2,1}));
+            set(handles.text18, 'String', num2str(morphoJTable{2,7}));
             set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',str2double(morphoJTable{2,8}),str2double(morphoJTable{2,9})));
             set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',str2double(morphoJTable{2,10}),str2double(morphoJTable{2,11})));
             set(handles.pixelspercm_text, 'String', sprintf('%-.2f',str2double(morphoJTable{2,12})));
