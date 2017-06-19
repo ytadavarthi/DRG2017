@@ -235,9 +235,9 @@ pointerShape = [ ...
             globalStudyInfo.at_rest        = num2str(morphoJTable{2,6});
             globalStudyInfo.start_frame    = num2str(morphoJTable{2,1});
             globalStudyInfo.end_frame      = num2str(morphoJTable{2,7});
-            globalStudyInfo.point1         = [str2double(morphoJTable{2,8}), str2double(morphoJTable{2,9})];
-            globalStudyInfo.point2         = [str2double(morphoJTable{2,10}), str2double(morphoJTable{2,11})];
-            globalStudyInfo.pixelspercm    = str2double(morphoJTable{2,12});
+            globalStudyInfo.point1         = [str2num(morphoJTable{2,8}), str2num(morphoJTable{2,9})];
+            globalStudyInfo.point2         = [str2num(morphoJTable{2,10}), str2num(morphoJTable{2,11})];
+            globalStudyInfo.pixelspercm    = str2num(morphoJTable{2,12});
             
             set(handles.text12, 'String', globalStudyInfo.hold_position);
             set(handles.text13, 'String', globalStudyInfo.ramus_mandible);
@@ -246,15 +246,21 @@ pointerShape = [ ...
             set(handles.text16, 'String', globalStudyInfo.at_rest);
             set(handles.text17, 'String', globalStudyInfo.start_frame);
             set(handles.text18, 'String', globalStudyInfo.end_frame);
-            set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',str2double(morphoJTable{2,8}),str2double(morphoJTable{2,9})));
-            set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',str2double(morphoJTable{2,10}),str2double(morphoJTable{2,11})));
-            set(handles.pixelspercm_text, 'String', sprintf('%-.2f',str2double(morphoJTable{2,12})));
+
+            set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',globalStudyInfo.point1(1),globalStudyInfo.point1(2)));
+            set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',globalStudyInfo.point2(1),globalStudyInfo.point2(2)));
+            set(handles.pixelspercm_text, 'String', sprintf('%-.2f',globalStudyInfo.pixelspercm));
             
-            bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
-            bothPoints_dist = pdist(bothPoints,'euclidean');
+            if isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2)
+                estSize = '';
+                set(handles.estSize, 'String', num2str(estSize));
+            else
+                bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
+                bothPoints_dist = pdist(bothPoints,'euclidean');
         
-            estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
-            set(handles.estSize, 'String', num2str(estSize));
+                estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
+                set(handles.estSize, 'String', num2str(estSize));
+            end
             
             %setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
