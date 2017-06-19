@@ -3,9 +3,6 @@ function varargout = Compiler(varargin)
     if isempty(varargin)
         [fileNames, pathName] = uigetfile({'.txt'},'MultiSelect','on');
         kinematicsButton = false;
-        if ~iscellstr(fileNames)
-            fileNames = {fileNames};
-        end
     elseif length(varargin) == 1
         fullFileName = varargin{1};
         [~,fileNames,ext] = fileparts(fullFileName);
