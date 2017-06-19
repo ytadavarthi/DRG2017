@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 16-Jun-2017 12:24:01
+% Last Modified by GUIDE v2.5 19-Jun-2017 14:10:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -247,8 +247,8 @@ pointerShape = [ ...
             set(handles.text17, 'String', globalStudyInfo.start_frame);
             set(handles.text18, 'String', globalStudyInfo.end_frame);
 
-            set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',globalStudyInfo.point1(1),globalStudyInfo.point1(2)));
-            set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',globalStudyInfo.point2(1),globalStudyInfo.point2(2)));
+            set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,8}),str2num(morphoJTable{2,9})));
+            set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,10}),str2num(morphoJTable{2,11})));
             set(handles.pixelspercm_text, 'String', sprintf('%-.2f',globalStudyInfo.pixelspercm));
             
             if isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2)
@@ -610,7 +610,7 @@ function performTracking(handles)
             cornersFound = false;
             Utilities.CustomPrinters.printWarning('No Harris corners detected. Increase search window or try a different spot');
 %            disp('no corners detected');
-            set(handles.feedbackLabel, 'String', 'No corners detected');
+            showFeedbackPopup(handles,'No corners detected');
         else
 %            disp('corners detected');
             Utilities.CustomPrinters.printInfo('Harris corner detected');
@@ -620,7 +620,7 @@ function performTracking(handles)
     end
     
     
-    set(handles.feedbackLabel, 'String', 'Tracking...');
+    showFeedbackPopup(handles,'Tracking...');
     
     %By how much does the corner that is about to be tracked exceed the
     %point chosen by the user?
@@ -808,12 +808,22 @@ function saveButton_ClickedCallback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
 oldFeedbackLabelMessage = get(handles.feedbackLabel, 'String');
-set(handles.feedbackLabel, 'String', 'Saving...');
+% set(handles.feedbackLabel, 'String', 'Saving...');
+showFeedbackPopup(handles, 'Saving...');
+
 drawnow()
 Utilities.ResultFileWriter(globalStudyInfo);
-set(handles.feedbackLabel, 'String', '');
+
+function showFeedbackPopup(handles, string)
+    set(handles.feedbackPanel, 'visible', 'on');
+    set(handles.feedbackLabel, 'String', string);
+    pause(1);
+    set(handles.feedbackLabel, 'String', '');
+    set(handles.feedbackPanel, 'visible', 'off');
 
 
+    
+    
 % --------------------------------------------------------------------
 function WriteHighResVideo_ClickedCallback(hObject, eventdata, handles)
 % hObject    handle to WriteHighResVideo (see GCBO)
@@ -1341,9 +1351,12 @@ button_state = get(hObject,'Value');
 if button_state == get(hObject,'Max')
     set(handles.semiautoOptions, 'visible', 'on');
     set(handles.kinematicsButton, 'visible', 'off');
+    set(handles.unitCalibrationButton, 'visible', 'off');
+
 elseif button_state == get(hObject,'Min')
     set(handles.semiautoOptions, 'visible', 'off');
     set(handles.kinematicsButton, 'visible', 'on');
+    set(handles.unitCalibrationButton, 'visible', 'on');
 end
 
 drawnow();
@@ -1356,8 +1369,6 @@ function semiautoOptions_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 set(hObject, 'visible', 'off');
 
-
-
 function estSize_Callback(hObject, eventdata, handles)
 % hObject    handle to estSize (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -1368,11 +1379,11 @@ function estSize_Callback(hObject, eventdata, handles)
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
     
     if(isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2))
-        set(handles.feedbackLabel, 'String', 'Please Track Points');
+        showFeedbackPopup(handles,'Please Track Points');
 
     else
         if(isnan(str2double(get(hObject,'String'))))
-            set(handles.feedbackLabel, 'String', 'Please Enter Valid Number');
+            showFeedbackPopup(handles,'Please Enter Valid Number');
         end
         bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
         bothPoints_dist = pdist(bothPoints,'euclidean');
@@ -1411,23 +1422,19 @@ function calibrateSIbutton_Callback(hObject, eventdata, handles)
 
         [x, y] = mygetpts();
         globalStudyInfo.point1 = [x(1) y(1)];
-        set(handles.feedbackLabel, 'String', 'Point 1 Tracked');
+        showFeedbackPopup(handles,'Point 1 Tracked');
         set(handles.point1_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
         
         set(hObject,'String','Click opposite edge');
         [x, y] = mygetpts();
         globalStudyInfo.point2 = [x(1) y(1)];
-        set(handles.feedbackLabel, 'String', 'Point 2 Tracked');
+        showFeedbackPopup(handles,'Point 2 Tracked');
         set(handles.point2_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
         set(hObject,'String','Calibrate SI Units');
         set(hObject,'Value',0);
     end
         
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-    
-
-    
-
 
 % --- If Enable == 'on', executes on mouse press in 5 pixel border.
 % --- Otherwise, executes on mouse press in 5 pixel border or over estSize.
@@ -1440,11 +1447,15 @@ set(hObject, 'enable', 'on');
 uicontrol(hObject);
 
 
+
 % --- Executes on button press in kinematicsButton.
 function kinematicsButton_Callback(hObject, eventdata, handles)
 % hObject    handle to kinematicsButton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+%automatically saving the file
+saveButton_ClickedCallback(hObject, eventdata, handles);
 
 %close previous window if it exists
 close(findobj('type','figure','name','Kinematic Variables'))
@@ -1510,6 +1521,7 @@ function pushbutton11_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton11 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+saveButton_ClickedCallback(hObject, eventdata, handles);
 close('VFTracker3')
 VFTracker3
 
@@ -1519,3 +1531,30 @@ VFTracker3
 % % hObject    handle to pushbutton12 (see GCBO)
 % % eventdata  reserved - to be defined in a future version of MATLAB
 % % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in unitCalibrationButton.
+function unitCalibrationButton_Callback(hObject, eventdata, handles)
+% hObject    handle to unitCalibrationButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of unitCalibrationButton
+
+button_state = get(hObject,'Value');
+
+if button_state == get(hObject,'Max')
+    set(handles.unitCalibrationPanel, 'visible', 'on');
+elseif button_state == get(hObject,'Min')
+    set(handles.unitCalibrationPanel, 'visible', 'off');
+end
+
+drawnow();
+
+
+% --- Executes during object creation, after setting all properties.
+function unitCalibrationPanel_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to unitCalibrationPanel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+set(hObject, 'visible', 'off');

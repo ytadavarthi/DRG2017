@@ -231,6 +231,10 @@ function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
 end
 
 function output = compile_kinematicsButton(dataStruct, fileNames)
+    
+
+
+
     lengthDataStruct = length(dataStruct);
     numKinematicsFunctions = 17;
     
@@ -344,13 +348,13 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         
         %checks for both c2-c4 points and si calibration
         if(~c2c4bool)
-            disp('Not all C2-C4 points are plotted. Normalization to Vertebrae may not be accurate');
+            disp('WARNING: Not all C2-C4 points are plotted. Normalization to Vertebrae may not be accurate');
         end
         
         if(~siScalar)
-            disp('SI normalization not calculated. You will not have kinematics values in cm');
+            disp('WARNING: SI normalization not calculated. You will not have kinematics values in cm');
         else
-            disp('SI calibration detected');
+            fprintf('SI calibration detected. %-.2fpx/cm\n',siScalar);
         end
 
         ahm = anteriorHyoidMovement(doubleCell, siScalar);
@@ -474,12 +478,12 @@ function c2c4bool = checkForC2C4(doubleCell)
         
         %finished all of the points
         if(c2x == 0 && c2y == 481 && c4x == 0 && c4y == 481)
-            fprintf('For %d points, C2-C4 points have been tracked',i-1);
+            fprintf('For %d frames, all C2-C4 points have been tracked\n', i-1);
             break;
         end
         
         if(c2x == 0 || c2y == 0 || c4x == 0 || c4y == 0)
-            fprintf('For %d points, C2-C4 points have been tracked',i-1);
+            fprintf('WARNING: C2-C4 points for Frame %d have NOT been tracked\n', i);
             c2c4bool = false;
         end
         
