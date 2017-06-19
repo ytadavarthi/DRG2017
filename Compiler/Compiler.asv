@@ -655,13 +655,13 @@ end
 function hyExVert = hyoidExcursionToVertebrae(doubleCell, siScalar)
     ahm = anteriorHyoidMovement(doubleCell, siScalar);
     shm = superiorHyoidMovement(doubleCell, siScalar);
-    hyExVert = {[],[]};
+    hyExVert = {0,0};
     
-    if (~isempty(ahm{1}) && ~isempty(shm{1})) 
+    if (~isempty(ahm{1}) && ~isemshm{1}) 
         hyExVert{1} = sqrt(ahm{1}^2 + shm{1}^2);
     end
     
-    if (~isempty(ahm{2}) && ~isempty(shm{2})) 
+    if (ahm{2} && shm{2})
         hyExVert{2} = sqrt(ahm{2}^2 + shm{2}^2);
     end
     
