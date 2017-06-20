@@ -232,7 +232,7 @@ end
 
 function output = compile_kinematicsButton(dataStruct, fileNames)
     lengthDataStruct = length(dataStruct);
-    numKinematicsFunctions = 12;
+    numKinematicsFunctions = 11;
     % numKinematicsFunctions + 5 for the timing variables + 1 for filename
     numColumns = numKinematicsFunctions*2 + 5 + 1;
     kinematicsArray = cell(lengthDataStruct+1, numColumns);    
@@ -250,7 +250,6 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         'le_vert',  'le_si',   ...
         'ps_vert', 'ps_si',    ...
         'botrr_vert', 'botrr_si',    ...
-        'hybotex_vert', 'hybotex_si',   ...
         'ott',    ...
         'std',    ...
         'ptt',    ...
@@ -262,12 +261,9 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         doubleCell = points2doubleSansLabels(dataStruct, i);
         phaseFramesCell = frames2doubleSansLabels(dataStruct, i);
         siScalar = getSIscalar(phaseFramesCell);
-        c2c4bool = checkForC2C4(doubleCell);
+        vertScalar = getVertScalar(doubleCell);
         
-        %checks for both c2-c4 points and SI calibration
-        if(~c2c4bool)
-            disp('WARNING: Not all C2-C4 points are plotted. Normalization to Vertebrae may not be accurate');
-        end
+        %checks for SI calibration
         
         if(~siScalar)
             disp('WARNING: SI normalization not calculated. You will not have kinematics values in cm');
@@ -276,18 +272,17 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         end
         
         
-        ahm = anteriorHyoidMovement(doubleCell, siScalar);
-        shm = superiorHyoidMovement(doubleCell, siScalar);
-        hyExMand = hyoidExcursionToMandible(doubleCell, siScalar);
-        hyExC4 = hyoidExcursionToC4(doubleCell, siScalar);
-        hyExVert = hyoidExcursionToVertebrae(doubleCell, siScalar);
-        alm = antLargyngealMovement(doubleCell, siScalar);
-        slm = supLargyngealMovement(doubleCell, siScalar);
-        hla = hyolaryngealApproximation(doubleCell, siScalar);
-        le = laryngealElevation(doubleCell, siScalar);
-        ps = pharyngealShortening(doubleCell, siScalar);
-        botrr = baseOfTongueRetractionRatio(doubleCell, siScalar);
-        hybotex = hyoidbotexcursionratio(doubleCell, siScalar);
+        ahm = anteriorHyoidMovement(doubleCell, vertScalar, siScalar);
+        shm = superiorHyoidMovement(doubleCell, vertScalar, siScalar);
+        hyExMand = hyoidExcursionToMandible(doubleCell, vertScalar, siScalar);
+        hyExC4 = hyoidExcursionToC4(doubleCell, vertScalar, siScalar);
+        hyExVert = hyoidExcursionToVertebrae(doubleCell, vertScalar,  siScalar);
+        alm = antLargyngealMovement(doubleCell, vertScalar,  siScalar);
+        slm = supLargyngealMovement(doubleCell, vertScalar, siScalar);
+        hla = hyolaryngealApproximation(doubleCell, vertScalar, siScalar);
+        le = laryngealElevation(doubleCell, vertScalar, siScalar);
+        ps = pharyngealShortening(doubleCell, vertScalar, siScalar);
+        botrr = baseOfTongueRetractionRatio(doubleCell, vertScalar, siScalar);
         
         %transit times
         ott = oralTransitTime(phaseFramesCell);
@@ -309,7 +304,6 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
                                                 le{1}, le{2},    ...
                                                 ps{1}, ps{2},    ...
                                                 botrr{1},  botrr{2},    ...
-                                                hybotex{1}, hybotex{2},   ...
                                                 ott,    ...
                                                 std,    ...
                                                 ptt,    ...
@@ -325,7 +319,7 @@ end
 %Gets all kinematic values for all files and stores in a cell for output
 function compile_kinematicsData(dataStruct, fileNames, pathName)
     lengthDataStruct = length(dataStruct);
-    numKinematicsFunctions = 12;
+    numKinematicsFunctions = 11;
     % numKinematicsFunctions + 5 for the timing variables + 1 for filename
     numColumns = numKinematicsFunctions*2 + 5 + 1;
     
@@ -344,7 +338,6 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         'le_vert',  'le_si',   ...
         'ps_vert', 'ps_si',    ...
         'botrr_vert', 'botrr_si',    ...
-        'hybotex_vert', 'hybotex_si',   ...
         'ott',    ...
         'std',    ...
         'ptt',    ...
@@ -356,12 +349,7 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         doubleCell = points2doubleSansLabels(dataStruct, i);
         phaseFramesCell = frames2doubleSansLabels(dataStruct, i);
         siScalar = getSIscalar(phaseFramesCell);
-        c2c4bool = checkForC2C4(doubleCell);
-        
-        %checks for both c2-c4 points and si calibration
-        if(~c2c4bool)
-            disp('WARNING: Not all C2-C4 points are plotted. Normalization to Vertebrae may not be accurate');
-        end
+        vertScalar = getVertScalar(doubleCell);
         
         if(~siScalar)
             disp('WARNING: SI normalization not calculated. You will not have kinematics values in cm');
@@ -369,18 +357,18 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
             fprintf('SI calibration detected. %-.2fpx/cm\n',siScalar);
         end
 
-        ahm = anteriorHyoidMovement(doubleCell, siScalar);
-        shm = superiorHyoidMovement(doubleCell, siScalar);
-        hyExMand = hyoidExcursionToMandible(doubleCell, siScalar);
-        hyExC4 = hyoidExcursionToC4(doubleCell, siScalar);
-        hyExVert = hyoidExcursionToVertebrae(doubleCell, siScalar);
-        alm = antLargyngealMovement(doubleCell, siScalar);
-        slm = supLargyngealMovement(doubleCell, siScalar);
-        hla = hyolaryngealApproximation(doubleCell, siScalar);
-        le = laryngealElevation(doubleCell, siScalar);
-        ps = pharyngealShortening(doubleCell, siScalar);
-        botrr = baseOfTongueRetractionRatio(doubleCell, siScalar);
-        hybotex = hyoidbotexcursionratio(doubleCell, siScalar);
+        %all kinematics functions
+        ahm = anteriorHyoidMovement(doubleCell, vertScalar, siScalar);
+        shm = superiorHyoidMovement(doubleCell, vertScalar, siScalar);
+        hyExMand = hyoidExcursionToMandible(doubleCell, vertScalar, siScalar);
+        hyExC4 = hyoidExcursionToC4(doubleCell, vertScalar, siScalar);
+        hyExVert = hyoidExcursionToVertebrae(doubleCell, vertScalar,  siScalar);
+        alm = antLargyngealMovement(doubleCell, vertScalar,  siScalar);
+        slm = supLargyngealMovement(doubleCell, vertScalar, siScalar);
+        hla = hyolaryngealApproximation(doubleCell, vertScalar, siScalar);
+        le = laryngealElevation(doubleCell, vertScalar, siScalar);
+        ps = pharyngealShortening(doubleCell, vertScalar, siScalar);
+        botrr = baseOfTongueRetractionRatio(doubleCell, vertScalar, siScalar);
         
         %transit times
         ott = oralTransitTime(phaseFramesCell);
@@ -402,7 +390,6 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
                                                 le{1}, le{2},    ...
                                                 ps{1}, ps{2},    ...
                                                 botrr{1},  botrr{2},    ...
-                                                hybotex{1}, hybotex{2},   ...
                                                 ott,    ...
                                                 std,    ...
                                                 ptt,    ...
@@ -429,7 +416,7 @@ function phaseFramesCell = frames2doubleSansLabels(dataStruct, videoIndex)
 end
 
 %Anterior Hyoid Movement; Needs C1, C4, Hyoid
-function ahm = anteriorHyoidMovement(doubleCell, siScalar)
+function ahm = anteriorHyoidMovement(doubleCell, vertScalar, siScalar)
     
     doubleCellSize = size(doubleCell);    
     
@@ -451,19 +438,15 @@ function ahm = anteriorHyoidMovement(doubleCell, siScalar)
         c1c4_dist = pdist(c1c4_points,'euclidean');
         c1hy_dist = pdist(c1hy_points,'euclidean');
         c4hy_dist = pdist(c4hy_points,'euclidean');
-                
-        %for correction factor of c2-c4
-        c2x = doubleCell(i,7);
-        c2y = doubleCell(i,8);
-        c2c4_points = [c2x, c2y; c4x, c4y];
-        vertScalar = pdist(c2c4_points,'euclidean');
          
         %Using Farres' method of Law of Cosines
         
         hyc1c4angle = acos(( c1hy_dist ^ 2 + c1c4_dist ^ 2 - c4hy_dist ^ 2) / (2 * c1hy_dist * c1c4_dist));
         current_orthogonal_dist = sin(hyc1c4angle) * c1hy_dist;
-                
-        allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        
+        if(~isnan(vertScalar))        
+            allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        end
         
         if(siScalar)
             allSIMovements(i) = current_orthogonal_dist / siScalar;
@@ -476,13 +459,13 @@ function ahm = anteriorHyoidMovement(doubleCell, siScalar)
     ahm = {vertAHM siAHM};
 end
 
-function c2c4bool = checkForC2C4(doubleCell)
+function vertScalar = getVertScalar(doubleCell)
     doubleCellSize = size(doubleCell);
     
-    c2c4bool = true;
+    allVertLengths = 0;
+    totalTrackedPoints = 0;
     
-    i=1;
-    while (i <= doubleCellSize(1) && c2c4bool == true)
+    for i= 1:doubleCellSize(1)
         c2x = doubleCell(i,7);
         c2y = doubleCell(i,8);
         c4x = doubleCell(i,9);
@@ -496,11 +479,14 @@ function c2c4bool = checkForC2C4(doubleCell)
         
         if(c2x == 0 || c2y == 0 || c4x == 0 || c4y == 0)
             fprintf('WARNING: C2-C4 points for Frame %d have NOT been tracked\n', i);
-            c2c4bool = false;
-        end
-        
-        i = i+1;
-    end            
+        else
+            c2c4_points = [c2x, c2y; c4x, c4y];
+            dist = pdist(c2c4_points,'euclidean');
+            allVertLengths = allVertLengths + dist;
+            totalTrackedPoints = totalTrackedPoints + 1;
+        end     
+    end
+    vertScalar = allVertLengths / totalTrackedPoints;
 end
 
 function siScalar = getSIscalar(phaseFramesCell)
@@ -515,7 +501,7 @@ function siScalar = getSIscalar(phaseFramesCell)
 end
 
 %Superior Hyoid Movement; Needs C1, C4, Hyoid
-function shm = superiorHyoidMovement(doubleCell, siScalar)
+function shm = superiorHyoidMovement(doubleCell, vertScalar, siScalar)
     
     doubleCellSize = size(doubleCell);
 
@@ -537,19 +523,15 @@ function shm = superiorHyoidMovement(doubleCell, siScalar)
         c1c4_dist = pdist(c1c4_points,'euclidean');
         c1hy_dist = pdist(c1hy_points,'euclidean');
         c4hy_dist = pdist(c4hy_points,'euclidean');
-        
-        %for correction factor of c2-c4
-        c2x = doubleCell(i,7);
-        c2y = doubleCell(i,8);
-        c2c4_points = [c2x, c2y; c4x, c4y];
-        vertScalar = pdist(c2c4_points,'euclidean');
-
+    
         %Using Law of Cosines
         
         hyc1c4angle = acos(( c1hy_dist ^ 2 + c1c4_dist ^ 2 - c4hy_dist ^ 2) / (2 * c1hy_dist * c1c4_dist));
         current_orthogonal_dist = cos(hyc1c4angle) * c1hy_dist;
         
-        allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        if(~isnan(vertScalar))        
+            allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        end
         
         if(siScalar)
             allSIMovements(i) = current_orthogonal_dist / siScalar;
@@ -563,7 +545,7 @@ function shm = superiorHyoidMovement(doubleCell, siScalar)
 end
 
 %Hyoid Excursion to Mandible; Needs Mandible, C1, Hyoid
-function hyExMand = hyoidExcursionToMandible(doubleCell, siScalar)
+function hyExMand = hyoidExcursionToMandible(doubleCell, vertScalar, siScalar)
     
     doubleCellSize = size(doubleCell);
     allVertMovements = zeros(1, doubleCellSize(1));
@@ -586,14 +568,6 @@ function hyExMand = hyoidExcursionToMandible(doubleCell, siScalar)
         c1mand_dist = pdist(c1mand_points,'euclidean');
         c1hy_dist = pdist(c1hy_points,'euclidean');
         mandhy_dist = pdist(mandhy_points,'euclidean');
-        
-        %for correction factor of c2-c4
-        c2x = doubleCell(i,7);
-        c2y = doubleCell(i,8);
-        c4x = doubleCell(i,9);
-        c4y = doubleCell(i,10);
-        c2c4_points = [c2x, c2y; c4x, c4y];
-        vertScalar = pdist(c2c4_points,'euclidean');
      
         %Using Law of Cosines to find angle at mandible
         mhlinemandhyangle = acos(( mandhy_dist ^ 2 + c1mand_dist ^ 2 - c1hy_dist ^ 2) / (2 * mandhy_dist * c1mand_dist));
@@ -601,7 +575,9 @@ function hyExMand = hyoidExcursionToMandible(doubleCell, siScalar)
         %distance between hyoid and vector between mandible and c1
         current_orthogonal_dist = sin(mhlinemandhyangle) * mandhy_dist; 
         
-        allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        if(~isnan(vertScalar))        
+            allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        end
         
         if(siScalar)
             allSIMovements(i) = current_orthogonal_dist / siScalar;
@@ -616,7 +592,7 @@ function hyExMand = hyoidExcursionToMandible(doubleCell, siScalar)
 end
 
 %Hyoid Excursion to C4; Needs C4, Hyoid
-function hyExC4 = hyoidExcursionToC4(doubleCell, siScalar)
+function hyExC4 = hyoidExcursionToC4(doubleCell, vertScalar, siScalar)
     doubleCellSize = size(doubleCell);    
     allVertMovements = zeros(1,doubleCellSize(1));
     allSIMovements = zeros(1, doubleCellSize(1));
@@ -628,17 +604,13 @@ function hyExC4 = hyoidExcursionToC4(doubleCell, siScalar)
         hyy = doubleCell(i,18);
 
         c4hy_points = [c4x, c4y; hyx, hyy];
-        
-        %for correction factor of c2-c4
-        c2x = doubleCell(i,7);
-        c2y = doubleCell(i,8);
-        c2c4_points = [c2x, c2y; c4x, c4y];
-        vertScalar = pdist(c2c4_points,'euclidean');
-     
+             
         %get lengths of each set of points to form edge and add to array
         c4hy_dist = pdist(c4hy_points,'euclidean');
-        allVertMovements(i) = c4hy_dist / vertScalar;
-
+        
+        if(~isnan(vertScalar))        
+            allVertMovements(i) = c4hy_dist / vertScalar;
+        end
         if(siScalar)
             allSIMovements(i) = c4hy_dist / siScalar;
         end
@@ -652,9 +624,9 @@ function hyExC4 = hyoidExcursionToC4(doubleCell, siScalar)
 end
 
 %Hyoid Excursion to Vertebrae; Needs Anterior and Superior Hyoid Movements
-function hyExVert = hyoidExcursionToVertebrae(doubleCell, siScalar)
-    ahm = anteriorHyoidMovement(doubleCell, siScalar);
-    shm = superiorHyoidMovement(doubleCell, siScalar);
+function hyExVert = hyoidExcursionToVertebrae(doubleCell, vertScalar, siScalar)
+    ahm = anteriorHyoidMovement(doubleCell, vertScalar, siScalar);
+    shm = superiorHyoidMovement(doubleCell, vertScalar, siScalar);
     hyExVert = {[],[]};
     
     if (~isempty(ahm{1}) && ~isempty(shm{1})) 
@@ -668,7 +640,7 @@ function hyExVert = hyoidExcursionToVertebrae(doubleCell, siScalar)
 end
 
 %Anterior Laryngeal Movements; Needs C1, C4, Hyoid, Ant.Cricoid
-function alm = antLargyngealMovement(doubleCell, siScalar)
+function alm = antLargyngealMovement(doubleCell, vertScalar, siScalar)
   
     doubleCellSize = size(doubleCell);    
     allVertMovements = zeros(1,doubleCellSize(1));
@@ -694,19 +666,15 @@ function alm = antLargyngealMovement(doubleCell, siScalar)
         c1hy_dist = pdist(c1hy_points,'euclidean');
         c4hy_dist = pdist(c4hy_points,'euclidean');
         c1antCric_dist = pdist(c1antCric_points,'euclidean');
-        
-        %for correction factor of c2-c4
-        c2x = doubleCell(i,7);
-        c2y = doubleCell(i,8);
-        c2c4_points = [c2x, c2y; c4x, c4y];
-        vertScalar = pdist(c2c4_points,'euclidean');
    
         %Using Law of Cosines to find angle at mandible
         hyc1c4angle = acos(( c1hy_dist ^ 2 + c1c4_dist ^ 2 - c4hy_dist ^ 2) / (2 * c1hy_dist * c1c4_dist));
         
         current_orthogonal_dist = sin(hyc1c4angle) * c1antCric_dist;
         
-        allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        if(~isnan(vertScalar))
+            allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        end
         
         if(siScalar)
             allSIMovements(i) = current_orthogonal_dist / siScalar;
@@ -720,7 +688,7 @@ function alm = antLargyngealMovement(doubleCell, siScalar)
 end
 
 %Superior Laryngeal Movements; Needs C1, C4, Hyoid, Ant.Cricoid
-function slm = supLargyngealMovement(doubleCell, siScalar)
+function slm = supLargyngealMovement(doubleCell,vertScalar, siScalar)
   
     doubleCellSize = size(doubleCell);    
     allVertMovements = zeros(1,doubleCellSize(1));
@@ -748,21 +716,16 @@ function slm = supLargyngealMovement(doubleCell, siScalar)
         c1hy_dist = pdist(c1hy_points,'euclidean');
         c4hy_dist = pdist(c4hy_points,'euclidean');
         c1antCric_dist = pdist(c1antCric_points,'euclidean');
-        
-        %for correction factor of c2-c4
-        c2x = doubleCell(i,7);
-        c2y = doubleCell(i,8);
-        c2c4_points = [c2x, c2y; c4x, c4y];
-        vertScalar = pdist(c2c4_points,'euclidean');
-   
+           
         %Using Law of Cosines to find angle at mandible
         hyc1c4angle = acos(( c1hy_dist ^ 2 + c1c4_dist ^ 2 - c4hy_dist ^ 2) / (2 * c1hy_dist * c1c4_dist));
         
         %approximating vertical movement of larynx
         current_orthogonal_dist = cos(hyc1c4angle) * c1antCric_dist;
         
-        
-        allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        if(~isnan(vertScalar))
+            allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        end 
         
         if(siScalar)
             allSIMovements(i) = current_orthogonal_dist / siScalar;
@@ -777,7 +740,7 @@ function slm = supLargyngealMovement(doubleCell, siScalar)
 end
 
 %Hyolaryngeal Approximation; Needs Hyoid, Ant. Cricoid
-function hla = hyolaryngealApproximation(doubleCell, siScalar)
+function hla = hyolaryngealApproximation(doubleCell, vertScalar, siScalar)
   
     doubleCellSize = size(doubleCell);    
     allVertMovements = zeros(1,doubleCellSize(1));
@@ -790,19 +753,14 @@ function hla = hyolaryngealApproximation(doubleCell, siScalar)
         antCricY = doubleCell(i,16);
 
         hyAntCric_points = [hyx, hyy; antCricX, antCricY];
-        
-        %for correction factor of c2-c4
-        c2x = doubleCell(i,7);
-        c2y = doubleCell(i,8);
-        c4x = doubleCell(i,9);
-        c4y = doubleCell(i,10);
-        c2c4_points = [c2x, c2y; c4x, c4y];
-        vertScalar = pdist(c2c4_points,'euclidean');
+       
 
         %get lengths of each set of points to form edge and add to array
         hyAntCric_dist = pdist(hyAntCric_points, 'euclidean');
-        allVertMovements(i) = hyAntCric_dist / vertScalar;
-        
+
+        if(~isnan(vertScalar))
+            allVertMovements(i) = hyAntCric_dist / vertScalar;
+        end
         if(siScalar)
             allSIMovements(i) = hyAntCric_dist / siScalar;
         end
@@ -817,7 +775,7 @@ function hla = hyolaryngealApproximation(doubleCell, siScalar)
 end
 
 %Laryngeal Elevation; Needs C1, Post. Cricoid
-function le = laryngealElevation(doubleCell, siScalar)
+function le = laryngealElevation(doubleCell,vertScalar, siScalar)
   
     doubleCellSize = size(doubleCell);    
     allVertMovements = zeros(1,doubleCellSize(1));
@@ -834,16 +792,10 @@ function le = laryngealElevation(doubleCell, siScalar)
         %get lengths of each set of points to form edge and add to array
         c1PostCric_dist = pdist(c1PostCric_points,'euclidean');
         
-        %for correction factor of c2-c4
-        c2x = doubleCell(i,7);
-        c2y = doubleCell(i,8);
-        c4x = doubleCell(i,9);
-        c4y = doubleCell(i,10);
-        c2c4_points = [c2x, c2y; c4x, c4y];
-        vertScalar = pdist(c2c4_points,'euclidean');
         
-        
-        allVertMovements(i) = c1PostCric_dist / vertScalar;
+        if(~isnan(vertScalar))
+            allVertMovements(i) = c1PostCric_dist / vertScalar;
+        end
         
         if(siScalar)
             allSIMovements(i) = c1PostCric_dist / siScalar;
@@ -858,7 +810,7 @@ function le = laryngealElevation(doubleCell, siScalar)
 end
 
 %Pharyngeal Shortening; Needs Hard Palate, UES
-function ps = pharyngealShortening(doubleCell, siScalar)
+function ps = pharyngealShortening(doubleCell, vertScalar, siScalar)
   
     doubleCellSize = size(doubleCell);    
     allVertMovements = zeros(1,doubleCellSize(1));
@@ -874,17 +826,11 @@ function ps = pharyngealShortening(doubleCell, siScalar)
 
         %get lengths of each set of points to form edge and add to array
         hpUES_dist = pdist(hpUES_points,'euclidean');
+       
         
-        %for correction factor of c2-c4
-        c2x = doubleCell(i,7);
-        c2y = doubleCell(i,8);
-        c4x = doubleCell(i,9);
-        c4y = doubleCell(i,10);
-        c2c4_points = [c2x, c2y; c4x, c4y];
-        vertScalar = pdist(c2c4_points,'euclidean');
-        
-        
-        allVertMovements(i) = hpUES_dist / vertScalar;
+        if(~isnan(vertScalar))
+            allVertMovements(i) = hpUES_dist / vertScalar;
+        end
         
         if(siScalar)
             allSIMovements(i) = hpUES_dist / siScalar;
@@ -899,7 +845,7 @@ function ps = pharyngealShortening(doubleCell, siScalar)
 end
 
 %Base of Tongue Retraction Ratio; Needs Val, C1, C4
-function botrr = baseOfTongueRetractionRatio(doubleCell, siScalar)
+function botrr = baseOfTongueRetractionRatio(doubleCell, vertScalar, siScalar)
 
     doubleCellSize = size(doubleCell);    
     allVertMovements = zeros(1,doubleCellSize(1));
@@ -923,17 +869,14 @@ function botrr = baseOfTongueRetractionRatio(doubleCell, siScalar)
         c1val_dist = pdist(c1val_points,'euclidean');
         c4val_dist = pdist(c4val_points,'euclidean');
    
-        %for correction factor of c2-c4
-        c2x = doubleCell(i,7);
-        c2y = doubleCell(i,8);
-        c2c4_points = [c2x, c2y; c4x, c4y];
-        vertScalar = pdist(c2c4_points,'euclidean');
-        
         %Using Law of Cosines to find angle at c1
         valc1c4angle = acos(( c1val_dist ^ 2 + c1c4_dist ^ 2 - c4val_dist ^ 2) / (2 * c1val_dist * c1c4_dist));
         
         current_orthogonal_dist = sin(valc1c4angle) * c1val_dist;
-        allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        
+        if(~isnan(vertScalar))
+            allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        end
         
         if(siScalar)
             allSIMovements(i) = current_orthogonal_dist / siScalar;
@@ -944,44 +887,6 @@ function botrr = baseOfTongueRetractionRatio(doubleCell, siScalar)
     siBotrr = max(allSIMovements) - min(allSIMovements(allSIMovements>0));
 
     botrr = {vertBotrr siBotrr};
-end
-
-%Hyoid to Base of Tongue Excursion Ratio; Needs Hyoid, Val
-function hybotex = hyoidbotexcursionratio(doubleCell, siScalar)
-    doubleCellSize = size(doubleCell);    
-    allVertMovements = zeros(1,doubleCellSize(1));
-    allSIMovements = zeros(1,doubleCellSize(1));
-
-    for i = 1:doubleCellSize(1)
-        hyx = doubleCell(i,17);
-        hyy = doubleCell(i,18);
-        valX = doubleCell(i,19);
-        valY = doubleCell(i,20);
-
-        hyval_points = [hyx, hyy; valX, valY];
-        
-        %for correction factor of c2-c4
-        c2x = doubleCell(i,7);
-        c2y = doubleCell(i,8);
-        c4x = doubleCell(i,9);
-        c4y = doubleCell(i,10);
-        c2c4_points = [c2x, c2y; c4x, c4y];
-        vertScalar = pdist(c2c4_points,'euclidean');
-
-        %get lengths of each set of points to form edge and add to array
-        hyval_dist = pdist(hyval_points,'euclidean');
-        allVertMovements(i) = hyval_dist / vertScalar;
-        
-        if(siScalar)
-            allSIMovements(i) = hyval_dist / siScalar;
-        end
-
-
-    end
-    vertHybotex = max(allVertMovements) - min(allVertMovements(allVertMovements>0));
-    siHybotex = max(allSIMovements) - min(allSIMovements(allSIMovements>0));
-
-    hybotex = {vertHybotex siHybotex};
 end
 
 %Oral Transit Time; Needs T1 (Leaves Hold), T2 (Ramus Mand.)
@@ -1072,3 +977,37 @@ function oldahm = oldanteriorHyoidMovement(doubleCell, phaseFramesCell)
     ahm = max(allFarresMovements) - min(allFarresMovements(allFarresMovements>0));
     
 end
+
+%OLD Hyoid to Base of Tongue Excursion Ratio; Needs Hyoid, Val
+function hybotex = hyoidbotexcursionratio(doubleCell, siScalar)
+    doubleCellSize = size(doubleCell);    
+    allVertMovements = zeros(1,doubleCellSize(1));
+    allSIMovements = zeros(1,doubleCellSize(1));
+
+    for i = 1:doubleCellSize(1)
+        hyx = doubleCell(i,17);
+        hyy = doubleCell(i,18);
+        valX = doubleCell(i,19);
+        valY = doubleCell(i,20);
+
+        hyval_points = [hyx, hyy; valX, valY];
+       
+        %get lengths of each set of points to form edge and add to array
+        hyval_dist = pdist(hyval_points,'euclidean');
+        
+        if(~isnan(vertScalar))
+            allVertMovements(i) = hyval_dist / vertScalar;
+        end
+        
+        if(siScalar)
+            allSIMovements(i) = hyval_dist / siScalar;
+        end
+
+
+    end
+    vertHybotex = max(allVertMovements) - min(allVertMovements(allVertMovements>0));
+    siHybotex = max(allSIMovements) - min(allSIMovements(allSIMovements>0));
+
+    hybotex = {vertHybotex siHybotex};
+end
+
