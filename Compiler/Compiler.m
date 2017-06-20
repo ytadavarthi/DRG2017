@@ -472,7 +472,7 @@ function vertScalar = getVertScalar(doubleCell)
         c4y = doubleCell(i,10);
         
         %finished all of the points
-        if(c2x == 0 && c2y == 481 && c4x == 0 && c4y == 481)
+        if(c2x == 0 && c2y > 100 && c4x == 0 && c4y > 100)
             fprintf('For %d frames, all C2-C4 points have been tracked\n', i-1);
             break;
         end
