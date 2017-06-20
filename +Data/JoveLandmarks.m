@@ -13,8 +13,8 @@ classdef JoveLandmarks < uint8
       AntCric (8);
       Hyoid (9);
       Valleculae (10);
-      Landmark_11 (11);
-      Landmark_12 (12);
+      SPC (11);
+      MPC (12);
       Landmark_13 (13);
       Landmark_14 (14);
       Landmark_15 (15);

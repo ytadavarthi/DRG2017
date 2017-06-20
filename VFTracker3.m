@@ -1326,8 +1326,6 @@ function feedbackLabel_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to feedbackLabel (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
-set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
-
 
 % --- Executes during object creation, after setting all properties.
 function text11_CreateFcn(hObject, eventdata, handles)

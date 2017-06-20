@@ -444,7 +444,7 @@ function ahm = anteriorHyoidMovement(doubleCell, vertScalar, siScalar)
         hyc1c4angle = acos(( c1hy_dist ^ 2 + c1c4_dist ^ 2 - c4hy_dist ^ 2) / (2 * c1hy_dist * c1c4_dist));
         current_orthogonal_dist = sin(hyc1c4angle) * c1hy_dist;
         
-        if(vertScalar)        
+        if(~isnan(vertScalar))        
             allVertMovements(i) = current_orthogonal_dist / vertScalar;
         end
         
@@ -529,7 +529,7 @@ function shm = superiorHyoidMovement(doubleCell, vertScalar, siScalar)
         hyc1c4angle = acos(( c1hy_dist ^ 2 + c1c4_dist ^ 2 - c4hy_dist ^ 2) / (2 * c1hy_dist * c1c4_dist));
         current_orthogonal_dist = cos(hyc1c4angle) * c1hy_dist;
         
-        if(vertScalar)        
+        if(~isnan(vertScalar))        
             allVertMovements(i) = current_orthogonal_dist / vertScalar;
         end
         
@@ -575,7 +575,7 @@ function hyExMand = hyoidExcursionToMandible(doubleCell, vertScalar, siScalar)
         %distance between hyoid and vector between mandible and c1
         current_orthogonal_dist = sin(mhlinemandhyangle) * mandhy_dist; 
         
-        if(vertScalar)        
+        if(~isnan(vertScalar))        
             allVertMovements(i) = current_orthogonal_dist / vertScalar;
         end
         
@@ -608,7 +608,7 @@ function hyExC4 = hyoidExcursionToC4(doubleCell, vertScalar, siScalar)
         %get lengths of each set of points to form edge and add to array
         c4hy_dist = pdist(c4hy_points,'euclidean');
         
-        if(vertScalar)        
+        if(~isnan(vertScalar))        
             allVertMovements(i) = c4hy_dist / vertScalar;
         end
         if(siScalar)
@@ -672,7 +672,7 @@ function alm = antLargyngealMovement(doubleCell, vertScalar, siScalar)
         
         current_orthogonal_dist = sin(hyc1c4angle) * c1antCric_dist;
         
-        if(vertScalar)
+        if(~isnan(vertScalar))
             allVertMovements(i) = current_orthogonal_dist / vertScalar;
         end
         
@@ -723,7 +723,7 @@ function slm = supLargyngealMovement(doubleCell,vertScalar, siScalar)
         %approximating vertical movement of larynx
         current_orthogonal_dist = cos(hyc1c4angle) * c1antCric_dist;
         
-        if(vertScalar)
+        if(~isnan(vertScalar))
             allVertMovements(i) = current_orthogonal_dist / vertScalar;
         end 
         
@@ -758,7 +758,7 @@ function hla = hyolaryngealApproximation(doubleCell, vertScalar, siScalar)
         %get lengths of each set of points to form edge and add to array
         hyAntCric_dist = pdist(hyAntCric_points, 'euclidean');
 
-        if(vertScalar)
+        if(~isnan(vertScalar))
             allVertMovements(i) = hyAntCric_dist / vertScalar;
         end
         if(siScalar)
@@ -793,7 +793,7 @@ function le = laryngealElevation(doubleCell,vertScalar, siScalar)
         c1PostCric_dist = pdist(c1PostCric_points,'euclidean');
         
         
-        if(vertScalar)
+        if(~isnan(vertScalar))
             allVertMovements(i) = c1PostCric_dist / vertScalar;
         end
         
@@ -828,7 +828,7 @@ function ps = pharyngealShortening(doubleCell, vertScalar, siScalar)
         hpUES_dist = pdist(hpUES_points,'euclidean');
        
         
-        if(vertScalar)
+        if(~isnan(vertScalar))
             allVertMovements(i) = hpUES_dist / vertScalar;
         end
         
@@ -874,7 +874,7 @@ function botrr = baseOfTongueRetractionRatio(doubleCell, vertScalar, siScalar)
         
         current_orthogonal_dist = sin(valc1c4angle) * c1val_dist;
         
-        if(vertScalar)
+        if(~isnan(vertScalar))
             allVertMovements(i) = current_orthogonal_dist / vertScalar;
         end
         
@@ -995,7 +995,7 @@ function hybotex = hyoidbotexcursionratio(doubleCell, siScalar)
         %get lengths of each set of points to form edge and add to array
         hyval_dist = pdist(hyval_points,'euclidean');
         
-        if(vertScalar)
+        if(~isnan(vertScalar))
             allVertMovements(i) = hyval_dist / vertScalar;
         end
         
