@@ -46,11 +46,11 @@ function varargout = Compiler(varargin)
         %disp('Done writing combined kinematics file');
         varargout{1} = output;
     else
-%         finalCell = compile_coordinateData(dataStruct,fileNames,pathName);
-%         disp('Done writing combined coordinates file');
-% 
-%         compile_classifierData(dataStruct,fileNames,finalCell,pathName);
-%         disp('Done writing combined classifier file');
+        finalCell = compile_coordinateData(dataStruct,fileNames,pathName);
+        disp('Done writing combined coordinates file');
+
+        compile_classifierData(dataStruct,fileNames,finalCell,pathName);
+        disp('Done writing combined classifier file');
 
         compile_kinematicsData(dataStruct, fileNames,pathName);
         disp('Done writing combined kinematics file');
