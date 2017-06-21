@@ -602,7 +602,7 @@ function performTracking(handles)
             cornersFound = false;
             Utilities.CustomPrinters.printWarning('No Harris corners detected. Increase search window or try a different spot');
 %            disp('no corners detected');
-            showFeedbackPopup(handles,'No corners detected');
+            showFeedbackPopup(handles,'No corners detected',2);
         else
 %            disp('corners detected');
             Utilities.CustomPrinters.printInfo('Harris corner detected');
@@ -612,7 +612,7 @@ function performTracking(handles)
     end
     
     
-    showFeedbackPopup(handles,'Tracking...');
+    showFeedbackPopup(handles,'Tracking...',1);
     
     %By how much does the corner that is about to be tracked exceed the
     %point chosen by the user?
@@ -645,7 +645,7 @@ function performTracking(handles)
          end
      end
      Utilities.CustomPrinters.printInfo('Tracking is done');
-     set(handles.feedbackLabel, 'String', '');
+     showFeedbackPopup(handles,'',0);
      Render(handles);
     
 
@@ -795,18 +795,28 @@ function saveButton_ClickedCallback(hObject, eventdata, handles)
 globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
 oldFeedbackLabelMessage = get(handles.feedbackLabel, 'String');
 % set(handles.feedbackLabel, 'String', 'Saving...');
-showFeedbackPopup(handles, 'Saving...');
+showFeedbackPopup(handles, 'Saving...',1);
 
 drawnow()
 Utilities.ResultFileWriter(globalStudyInfo);
+showFeedbackPopup(handles, 'Saved',2);
+
 
 %allows you to display text to the screen
-function showFeedbackPopup(handles, string)
-    set(handles.feedbackPanel, 'visible', 'on');
-    set(handles.feedbackLabel, 'String', string);
-    pause(1);
-    set(handles.feedbackLabel, 'String', '');
-    set(handles.feedbackPanel, 'visible', 'off');
+function showFeedbackPopup(handles, string, visibility)
+    if (visibility == 1)
+        set(handles.feedbackPanel, 'visible', 'on');
+        set(handles.feedbackLabel, 'String', string);
+    elseif (visibility == 0)
+        set(handles.feedbackLabel, 'String', '');
+        set(handles.feedbackPanel, 'visible', 'off');
+    elseif (visibility == 2)
+        set(handles.feedbackPanel, 'visible', 'on');
+        set(handles.feedbackLabel, 'String', string);
+        pause(.5)
+        set(handles.feedbackLabel, 'String', '');
+        set(handles.feedbackPanel, 'visible', 'off');
+    end
     
     
 % --------------------------------------------------------------------
@@ -1363,11 +1373,11 @@ function estSize_Callback(hObject, eventdata, handles)
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
     
     if(isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2))
-        showFeedbackPopup(handles,'Please Track Points');
+        showFeedbackPopup(handles,'Please Track Points',1);
 
     else
         if(isnan(str2double(get(hObject,'String'))))
-            showFeedbackPopup(handles,'Please Enter Valid Number');
+            showFeedbackPopup(handles,'Please Enter Valid Number',1);
         end
         bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
         bothPoints_dist = pdist(bothPoints,'euclidean');
@@ -1406,16 +1416,16 @@ function calibrateSIbutton_Callback(hObject, eventdata, handles)
 
         [x, y] = mygetpts();
         globalStudyInfo.point1 = [x(1) y(1)];
-        showFeedbackPopup(handles,'Point 1 Tracked');
         set(handles.point1_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
-        
         set(hObject,'String','Click opposite edge');
+        showFeedbackPopup(handles,'Point 1 Tracked',1);
+
         [x, y] = mygetpts();
         globalStudyInfo.point2 = [x(1) y(1)];
-        showFeedbackPopup(handles,'Point 2 Tracked');
         set(handles.point2_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
         set(hObject,'String','Calibrate SI Units');
         set(hObject,'Value',0);
+        showFeedbackPopup(handles,'Point 2 Tracked',2);
     end
         
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);

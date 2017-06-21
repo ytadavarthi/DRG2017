@@ -49,7 +49,7 @@ function varargout = Compiler(varargin)
         finalCell = compile_coordinateData(dataStruct,fileNames,pathName);
         disp('Done writing combined coordinates file');
 
-%         compile_classifierData(dataStruct,fileNames,finalCell,pathName);
+        compile_classifierData(dataStruct,fileNames,finalCell,pathName);
         disp('Done writing combined classifier file');
 
         compile_kinematicsData(dataStruct, fileNames,pathName);
