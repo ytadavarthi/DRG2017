@@ -1,10 +1,29 @@
 function varargout = Compiler(varargin)
     
     if isempty(varargin)
-        [fileNames, pathName] = uigetfile({'.txt'},'MultiSelect','on');
+        choice = menu('Select an option','Compile selected files','Compile all _morphoj files in a selected folder');
         kinematicsButton = false;
-        if ~iscellstr(fileNames)
-            fileNames = {fileNames};
+        if choice == 1
+            [fileNames, folder_name] = uigetfile({'.txt'},'MultiSelect','on');
+            if ~iscellstr(fileNames)
+                fileNames = {fileNames};
+            end
+            pathName = {};
+            pathName(1:length(fileNames)) = {folder_name};
+        elseif choice == 2
+            folder_name = uigetdir();
+            [pathName, F] = subdir(folder_name); %gathers all folder paths and file names in the chosen directory.
+            
+            %un-nests the nested F cell matrix
+            fileNames = {};
+            for i = 1:length(F)
+                for j = 1:length(F{i})
+                    fileNames{end+1} = F{i}{j};
+                end
+            end
+            
+        else
+            error('Something went wrong, try again')
         end
     elseif length(varargin) == 1
         fullFileName = varargin{1};
@@ -12,31 +31,29 @@ function varargout = Compiler(varargin)
         pathName = fullFileName(1:end-length([fileNames ext]));
         fileNames = {[fileNames '_morphoj_']};
         
-        
         kinematicsButton = true;
     elseif length(varargin) > 1
         error('too many inputs')
     end
        
-
-%     fileNames = {'Norm030_Tsp_Pud_morphoj_' 'Norm072_Tsp_Pud_morphoj_' 'Norm072_Tsp_Thn_morphoj_'};
-% %     pathName = '/Users/yasasvi/Documents/DRG_2017_git/Compiler/';
-%     pathName = 'C:\Users\pouri\OneDrive\Documents\MCG\research\MATLAB\Tracker\DRG2017\Compiler\';
-
     
-    file = [pathName fileNames{1}];
-    cell = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
-    
-    %make compiled files for coordinates, classifiers, and kinematics
+    %make compiled structure for coordinates, classifiers, and kinematics
     for i = 1:length(fileNames)
-        file = [pathName fileNames{i}];
-        cell = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
-                      
-        coordinateData{i} = cell(3:end,:);
-                
-        %remove all extraneous cells in classifierData
-        keep = ~cellfun(@isempty,cell(1,:));
-        classifierData{i} = cell([1,2],keep);
+        file = fullfile(pathName{i},fileNames{i});
+        cell1 = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
+            
+        if cell1{1,1} == 'start_frame'
+            coordinateData{i} = cell1(3:end,:);
+
+            %remove all extraneous cells in classifierData
+            keep = ~cellfun(@isempty,cell1(1,:));
+            classifierData{i} = cell1([1,2],keep);
+        else
+            coordinateData{i} = cell1;
+            [m, n] = size(cell1);
+            classifierData{i} = cell(2,n);
+            
+        end
         
     end
     dataStruct = struct('coordinateData',coordinateData,'classifierData',classifierData);
@@ -46,13 +63,19 @@ function varargout = Compiler(varargin)
         %disp('Done writing combined kinematics file');
         varargout{1} = output;
     else
-        finalCell = compile_coordinateData(dataStruct,fileNames,pathName);
+        finalCell = compile_coordinateData(dataStruct,fileNames,folder_name);
         disp('Done writing combined coordinates file');
+        
+        %if morphoJ file is old and doesn't include the frame number
+        %information, the classifier data text file will not be written.
+        if cell1{1,1} == 'start_frame'
+            compile_classifierData(dataStruct,fileNames,finalCell,folder_name);
+            disp('Done writing combined classifier file');
+        else
+            disp('Warning: classifier data not found in _morphoj_ file');
+        end
 
-%         compile_classifierData(dataStruct,fileNames,finalCell,pathName);
-        disp('Done writing combined classifier file');
-
-        compile_kinematicsData(dataStruct, fileNames,pathName);
+        compile_kinematicsData(dataStruct, fileNames,folder_name);
         disp('Done writing combined kinematics file');
     end
 end
@@ -137,7 +160,7 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
     finalTable = cell2table(finalCell);
     formatOut = 'dd-mm-yy HH-MM AM';
     date = datestr(now,formatOut);
-    writetable(finalTable,[pathName 'coordinates_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
+    writetable(finalTable,fullfile(pathName, ['coordinates_' date '.txt']), 'Delimiter', '\t', 'WriteVariableNames', false);
 end
 
 function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
@@ -226,7 +249,7 @@ function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
     %write table with correct filename
     formatOut = 'dd-mm-yy HH-MM AM';
     date = datestr(now,formatOut);
-    writetable(finalTable,[pathName 'classifiers_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
+    writetable(finalTable,fullfile(pathName, ['classifiers_' date '.txt']), 'Delimiter', '\t', 'WriteVariableNames', false);
         
 end
 
@@ -402,7 +425,7 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
     total_kinematics_table = cell2table(kinematicsArray);
     formatOut = 'dd-mm-yy HH-MM AM';
     date = datestr(now,formatOut);
-    writetable(total_kinematics_table,[pathName 'kinematics_' date '.txt'], 'Delimiter', '\t', 'WriteVariableNames', false);
+    writetable(total_kinematics_table,fullfile(pathName, ['kinematics_' date '.txt']), 'Delimiter', '\t', 'WriteVariableNames', false);
 end
 
 %Gets Coordinates from DataStruct and converts into cell without labels
@@ -1062,3 +1085,65 @@ function hybotex = hyoidbotexcursionratio(doubleCell, siScalar)
     hybotex = {vertHybotex siHybotex};
 end
 
+function [sub,fls] = subdir(CurrPath)
+%   SUBDIR  lists (recursive) all subfolders and files under given folder
+%    
+%   SUBDIR
+%        returns all subfolder under current path.
+%
+%   P = SUBDIR('directory_name') 
+%       stores all subfolders under given directory into a variable 'P'
+%
+%   [P F] = SUBDIR('directory_name')
+%       stores all subfolders under given directory into a
+%       variable 'P' and all filenames into a variable 'F'.
+%       use sort([F{:}]) to get sorted list of all filenames.
+%
+%   See also DIR, CD
+
+%   author:  Elmar Tarajan [Elmar.Tarajan@Mathworks.de]
+%   version: 2.0 
+%   date:    07-Dez-2004
+%
+    if nargin == 0
+       CurrPath = cd;
+    end% if
+    if nargout == 1
+       sub = subfolder(CurrPath,'');
+    else
+       [sub, fls] = subfolder(CurrPath,'','');
+       tmp = dir(CurrPath);
+       tmp = tmp(~ismember({tmp.name},{'.' '..'}));
+       names = {tmp(~[tmp.isdir]).name};
+       hasMorphoj = strfind(names,'_morphoj_','ForceCellOutput',true);
+       keep = ~cellfun(@isempty,hasMorphoj);
+       names = names(keep);
+       
+       for i = 1:length(names)
+            sub{end+1} = CurrPath;
+      
+            fls{end+1} = names(i);  
+       end
+       
+    end% if
+      %
+end
+
+function [sub,fls] = subfolder(CurrPath,sub,fls)
+    %------------------------------------------------
+    tmp = dir(CurrPath);
+    tmp = tmp(~ismember({tmp.name},{'.' '..'}));
+    for i = {tmp([tmp.isdir]).name}
+       sub{end+1} = fullfile(CurrPath,i{:});
+       if nargin==2
+          sub = subfolder(sub{end},sub);
+       else
+          tmp = dir(sub{end});
+          names = {tmp(~[tmp.isdir]).name};
+          hasMorphoj = strfind(names,'_morphoj_','ForceCellOutput',true);
+          keep = ~cellfun(@isempty,hasMorphoj);
+          fls{end+1} = names(keep);
+          [sub fls] = subfolder(sub{end},sub,fls);
+       end% if
+    end% if
+end

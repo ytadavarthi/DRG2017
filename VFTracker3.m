@@ -137,7 +137,10 @@ pointerShape = [ ...
         set(handles.appFigure, 'PointerShapeCData', pointerShape);
         set(handles.appFigure, 'PointerShapeHotSpot', pointerHotSpot);
 
-    [fileName, pathName] = uigetfile({'*'});
+    [fileName, pathName] = uigetfile({'*.mp4;*.mov;*.avi;*.flv;*.wmv',...
+                                      'Video Files (*.mp4,*.mov,*.avi,*.flv,*.wmv)';...
+                                      '*.*', 'All Files (*.*)'});
+    
     fullFileName = strcat(pathName, fileName);
     
     %store file name and path for use in kinematicsbutton
@@ -220,9 +223,9 @@ pointerShape = [ ...
         inputTable = readtable(expectedFullExcelFileName, 'Delimiter', '\t');
         inputDataArray = table2array(inputTable(:, 2:end));
         
-        if exist([pathStr '\' name '_morphoj_.txt'],'file')
+        if exist(fullfile(pathStr,name, '_morphoj_.txt'),'file')
             %loading frame information for push buttons.
-            morphoJTable = readtable([pathStr '\' name '_morphoj_.txt'],'Delimiter','\t', 'ReadVariableNames',false);
+            morphoJTable = readtable(fullfile(pathStr,name, '_morphoj_.txt'),'Delimiter','\t', 'ReadVariableNames',false);
             morphoJTable = table2cell(morphoJTable);
 
             if morphoJTable{1,1} == 'start_frame'
@@ -828,12 +831,13 @@ function WriteHighResVideo_ClickedCallback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %display "saving video" in top left corner
-set(handles.feedbackLabel,'String', 'Saving...')
+showFeedbackPopup(handles, 'Saving...',1);
+
 drawnow()
     
 VideoWriterCallback(handles, 'high');   
 
-set(handles.feedbackLabel,'String', '')
+showFeedbackPopup(handles, 'Saved',2);
     
     
 % --------------------------------------------------------------------
@@ -884,12 +888,12 @@ function WriteLowResVideo_ClickedCallback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %display "saving video" in top left corner
-set(handles.feedbackLabel,'String', 'Saving...')
+showFeedbackPopup(handles, 'Saving...',1);
 drawnow()
     
 VideoWriterCallback(handles, 'low');
 
-set(handles.feedbackLabel,'String','');
+showFeedbackPopup(handles, 'Saved',2);
 % disp('debug pitstop called');
 % globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
 % fullFileName = globalStudyInfo.vfVideoStructure.fileName;
