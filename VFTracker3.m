@@ -220,52 +220,54 @@ pointerShape = [ ...
         inputTable = readtable(expectedFullExcelFileName, 'Delimiter', '\t');
         inputDataArray = table2array(inputTable(:, 2:end));
         
-        %loading frame information for push buttons.
-        morphoJTable = readtable([pathStr '/' name '_morphoj_.txt'],'Delimiter','\t', 'ReadVariableNames',false);
-        morphoJTable = table2cell(morphoJTable);
-        
-        if morphoJTable{1,1} == 'start_frame'
-            
-            %set frame information to each textbox corresponding to push
-            %buttons
-            globalStudyInfo.hold_position  = num2str(morphoJTable{2,2});
-            globalStudyInfo.ramus_mandible = num2str(morphoJTable{2,3});
-            globalStudyInfo.hyoid_burst    = num2str(morphoJTable{2,4});
-            globalStudyInfo.ues_closure    = num2str(morphoJTable{2,5});
-            globalStudyInfo.at_rest        = num2str(morphoJTable{2,6});
-            globalStudyInfo.start_frame    = num2str(morphoJTable{2,1});
-            globalStudyInfo.end_frame      = num2str(morphoJTable{2,7});
-            globalStudyInfo.point1         = [str2num(morphoJTable{2,8}), str2num(morphoJTable{2,9})];
-            globalStudyInfo.point2         = [str2num(morphoJTable{2,10}), str2num(morphoJTable{2,11})];
-            globalStudyInfo.pixelspercm    = str2num(morphoJTable{2,12});
-            
-            set(handles.text12, 'String', globalStudyInfo.hold_position);
-            set(handles.text13, 'String', globalStudyInfo.ramus_mandible);
-            set(handles.text14, 'String', globalStudyInfo.hyoid_burst);
-            set(handles.text15, 'String', globalStudyInfo.ues_closure);
-            set(handles.text16, 'String', globalStudyInfo.at_rest);
-            set(handles.text17, 'String', globalStudyInfo.start_frame);
-            set(handles.text18, 'String', globalStudyInfo.end_frame);
+        if exist([pathStr '\' name '_morphoj_.txt'],'file')
+            %loading frame information for push buttons.
+            morphoJTable = readtable([pathStr '\' name '_morphoj_.txt'],'Delimiter','\t', 'ReadVariableNames',false);
+            morphoJTable = table2cell(morphoJTable);
 
-            set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,8}),str2num(morphoJTable{2,9})));
-            set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,10}),str2num(morphoJTable{2,11})));
-            set(handles.pixelspercm_text, 'String', sprintf('%-.2f',globalStudyInfo.pixelspercm));
-            
-            if isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2)
-                estSize = '';
-                set(handles.estSize, 'String', num2str(estSize));
-            else
-                bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
-                bothPoints_dist = pdist(bothPoints,'euclidean');
-        
-                estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
-                set(handles.estSize, 'String', num2str(estSize));
+            if morphoJTable{1,1} == 'start_frame'
+
+                %set frame information to each textbox corresponding to push
+                %buttons
+                globalStudyInfo.hold_position  = num2str(morphoJTable{2,2});
+                globalStudyInfo.ramus_mandible = num2str(morphoJTable{2,3});
+                globalStudyInfo.hyoid_burst    = num2str(morphoJTable{2,4});
+                globalStudyInfo.ues_closure    = num2str(morphoJTable{2,5});
+                globalStudyInfo.at_rest        = num2str(morphoJTable{2,6});
+                globalStudyInfo.start_frame    = num2str(morphoJTable{2,1});
+                globalStudyInfo.end_frame      = num2str(morphoJTable{2,7});
+                globalStudyInfo.point1         = [str2num(morphoJTable{2,8}), str2num(morphoJTable{2,9})];
+                globalStudyInfo.point2         = [str2num(morphoJTable{2,10}), str2num(morphoJTable{2,11})];
+                globalStudyInfo.pixelspercm    = str2num(morphoJTable{2,12});
+
+                set(handles.text12, 'String', globalStudyInfo.hold_position);
+                set(handles.text13, 'String', globalStudyInfo.ramus_mandible);
+                set(handles.text14, 'String', globalStudyInfo.hyoid_burst);
+                set(handles.text15, 'String', globalStudyInfo.ues_closure);
+                set(handles.text16, 'String', globalStudyInfo.at_rest);
+                set(handles.text17, 'String', globalStudyInfo.start_frame);
+                set(handles.text18, 'String', globalStudyInfo.end_frame);
+
+                set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,8}),str2num(morphoJTable{2,9})));
+                set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,10}),str2num(morphoJTable{2,11})));
+                set(handles.pixelspercm_text, 'String', sprintf('%-.2f',globalStudyInfo.pixelspercm));
+
+                if isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2)
+                    estSize = '';
+                    set(handles.estSize, 'String', num2str(estSize));
+                else
+                    bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
+                    bothPoints_dist = pdist(bothPoints,'euclidean');
+
+                    estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
+                    set(handles.estSize, 'String', num2str(estSize));
+                end
+
+                %setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
             end
-            
-            %setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-
         end
-        
+
         
         [a, b] = enumeration('Data.JoveLandmarks');
         numLandmarks = numel(b);

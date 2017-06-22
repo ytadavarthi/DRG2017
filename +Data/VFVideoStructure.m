@@ -24,8 +24,19 @@ classdef VFVideoStructure < handle
             obj.videoFrames = {};
             while (~isDone(videoFileReader))
                obj.numFrames = obj.numFrames + 1;
-               obj.videoFrames{end + 1} = step(videoFileReader);
+               [obj.videoFrames{end + 1}] = step(videoFileReader);
             end
+            
+%             repeatFrames = [];
+%             for i = 1:length(obj.videoFrames)-1
+%                 frame = obj.videoFrames{i+1};
+%                 lastFrame = obj.videoFrames{i};
+%                 figure
+%                 imshowpair(frame,lastFrame,'diff');
+%                 if(isequal(frame,lastFrame))
+%                     repeatFrames = [repeatFrames obj.numFrames];
+%                 end
+%             end
             
             release(videoFileReader);
             
