@@ -378,15 +378,12 @@ function landmarksListBox_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns landmarksListBox contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from landmarksListBox
    
-    uicontrol(handles.text11); %prevents click off problem
-    
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
     listBoxSelection = get(handles.landmarksListBox, 'Value');
     listBoxSelection = listBoxSelection(1);
     globalStudyInfo.currentlyTrackedLandmark = Data.JoveLandmarks(listBoxSelection);
     Utilities.CustomPrinters.printInfo(sprintf('Current landmark is %s', char(globalStudyInfo.currentlyTrackedLandmark)));
-    %figure(gcf);%This is supposed to bring the focus back to the app figure's gray area but it does not work as expected.
-    
+    uicontrol(handles.frameScrubber); %prevents click off problem
     Render(handles);
 
 
@@ -483,8 +480,6 @@ function gammaAdjustSlider_Callback(hObject, eventdata, handles)
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
     updateGammaAdjustLevelIndicator(handles);
     Render(handles);
-    
-    
     
     
 % --- Executes during object creation, after setting all properties.
@@ -590,7 +585,6 @@ function performTracking(handles)
     currentFrame = rgb2gray(currentFrame);     
     
     
-    
     cornersFound = false;
     while(cornersFound == false)
         
@@ -599,8 +593,6 @@ function performTracking(handles)
         chosenPointX = floor(x(1));
         chosenPointY = floor(y(1));
 
-    
-       
         
         cornerSearchRadius = globalStudyInfo.harrisFeatureDetectorParameters.searchRadius;
         harrisFeatureDetectorMinQuality = globalStudyInfo.harrisFeatureDetectorParameters.minQuality;
@@ -612,7 +604,7 @@ function performTracking(handles)
             cornersFound = false;
             Utilities.CustomPrinters.printWarning('No Harris corners detected. Increase search window or try a different spot');
 %            disp('no corners detected');
-            showFeedbackPopup(handles,'No corners detected');
+            showFeedbackPopup(handles,'No corners detected',2);
         else
 %            disp('corners detected');
             Utilities.CustomPrinters.printInfo('Harris corner detected');
@@ -622,7 +614,7 @@ function performTracking(handles)
     end
     
     
-    showFeedbackPopup(handles,'Tracking...');
+    showFeedbackPopup(handles,'Tracking...',1);
     
     %By how much does the corner that is about to be tracked exceed the
     %point chosen by the user?
@@ -630,11 +622,9 @@ function performTracking(handles)
     cornerMinusChosenPointY = cornersDetected.Location(1, 2) - chosenPointY;
     
     
-    
     %Store the detected corner into the coordinate structure
     globalStudyInfo.studyCoordinates.setCoordinate(currentFrameIndex, currentlyTrackedLandmark, [(cornersDetected.Location(1, 1) - cornerMinusChosenPointX) (cornersDetected.Location(1, 2) - cornerMinusChosenPointY)]);
     globalStudyInfo.studyCoordinates.setTrackedStatus(currentFrameIndex, currentlyTrackedLandmark, Data.TrackingType.Automatic);
-    
     
     
     %Utilities.CustomPrinters.printInfo(sprintf('About to initiate KLT tracker with Block size = [%s], Number Pyramid Levels = %s, Max Iterations = %s', num2str(globalStudyInfo.kltTrackerParameters.blockSize), num2str(globalStudyInfo.kltTrackerParameters.numPyramidLevels), num2str(globalStudyInfo.kltTrackerParameters.maxIterations)));    
@@ -657,7 +647,7 @@ function performTracking(handles)
          end
      end
      Utilities.CustomPrinters.printInfo('Tracking is done');
-     set(handles.feedbackLabel, 'String', '');
+     showFeedbackPopup(handles,'',0);
      Render(handles);
     
 
@@ -669,7 +659,6 @@ function performManualAnnotation(handles)
     currentFrameIndex = floor(get(handles.frameScrubber, 'Value'));
     
     numFrames = globalStudyInfo.vfVideoStructure.numFrames;
-    
     
     currentlyTrackedLandmark = globalStudyInfo.currentlyTrackedLandmark;
     
@@ -684,8 +673,6 @@ function performManualAnnotation(handles)
        set(handles.frameScrubber, 'Value', currentFrameIndex + 1); 
        slider1ContValCallback(handles.appFigure, [] );
     end
-    
-    
     
 
 % --------------------------------------------------------------------
@@ -762,7 +749,6 @@ switch(lower(eventdata.Character))
     case 'q'
         close(handles.appFigure);
     case 'm'
-        %disp('called')
         %performManualAnnotation(handles);
         x = [];
         y = [];
@@ -811,19 +797,28 @@ function saveButton_ClickedCallback(hObject, eventdata, handles)
 globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
 oldFeedbackLabelMessage = get(handles.feedbackLabel, 'String');
 % set(handles.feedbackLabel, 'String', 'Saving...');
-showFeedbackPopup(handles, 'Saving...');
+showFeedbackPopup(handles, 'Saving...',1);
 
 drawnow()
 Utilities.ResultFileWriter(globalStudyInfo);
-
-function showFeedbackPopup(handles, string)
-    set(handles.feedbackPanel, 'visible', 'on');
-    set(handles.feedbackLabel, 'String', string);
-    pause(1);
-    set(handles.feedbackLabel, 'String', '');
-    set(handles.feedbackPanel, 'visible', 'off');
+showFeedbackPopup(handles, 'Saved',2);
 
 
+%allows you to display text to the screen
+function showFeedbackPopup(handles, string, visibility)
+    if (visibility == 1)
+        set(handles.feedbackPanel, 'visible', 'on');
+        set(handles.feedbackLabel, 'String', string);
+    elseif (visibility == 0)
+        set(handles.feedbackLabel, 'String', '');
+        set(handles.feedbackPanel, 'visible', 'off');
+    elseif (visibility == 2)
+        set(handles.feedbackPanel, 'visible', 'on');
+        set(handles.feedbackLabel, 'String', string);
+        pause(.5)
+        set(handles.feedbackLabel, 'String', '');
+        set(handles.feedbackPanel, 'visible', 'off');
+    end
     
     
 % --------------------------------------------------------------------
@@ -839,9 +834,6 @@ drawnow()
 VideoWriterCallback(handles, 'high');   
 
 set(handles.feedbackLabel,'String', '')
-    
-
-
     
     
 % --------------------------------------------------------------------
@@ -864,7 +856,6 @@ function CreateSlitImageMenuButton_Callback(hObject, eventdata, handles)
     SEPERATOR_COLOUR = 'green';
     ABSENT_COLOUR = 'black';
     
-    
     %Set up the matrix that will hold the frames
     slit_image = zeros(2 * SLIT_HEIGHT_HW + 1, 0, 3);
     
@@ -884,12 +875,6 @@ function CreateSlitImageMenuButton_Callback(hObject, eventdata, handles)
     end
     
     figure, imshow(slit_image)
-    
-    
-    
-    
-    
-    
 
 
 % --------------------------------------------------------------------
@@ -1049,6 +1034,7 @@ value = str2double(get(hObject, 'String'));
 globalStudyInfo.harrisFeatureDetectorParameters.minQuality = value;
 setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
+
 % --- Executes during object creation, after setting all properties.
 function harrisCornerDetectorMinQualityEditBox_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to harrisCornerDetectorMinQualityEditBox (see GCBO)
@@ -1087,7 +1073,6 @@ function harrisCornerDetectorFilterSize_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',get(0,'defaultUicontrolBackgroundColor'));
 end
-
 
 
 function harrisCornerDetectorSearchRadiusEditBox_Callback(hObject, eventdata, handles)
@@ -1221,7 +1206,7 @@ function landmarksListBox_KeyPressFcn(hObject, eventdata, handles)
 %	Character: character interpretation of the key(s) that was pressed
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
-uicontrol(handles.text9);
+uicontrol(handles.frameScrubber);
 
 
 % --- Executes on button press in pushbutton1.
@@ -1233,6 +1218,9 @@ function pushbutton1_Callback(hObject, eventdata, handles)
     globalStudyInfo.hold_position = floor(get(handles.frameScrubber, 'Value'));
     set(handles.text12, 'String', globalStudyInfo.hold_position);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    uicontrol(handles.frameScrubber);
+
+    
 
     
 % --- Executes on button press in pushbutton2.
@@ -1244,6 +1232,7 @@ function pushbutton2_Callback(hObject, eventdata, handles)
     globalStudyInfo.ramus_mandible = floor(get(handles.frameScrubber, 'Value'));
     set(handles.text13, 'String', globalStudyInfo.ramus_mandible);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    uicontrol(handles.frameScrubber);
 
     
 % --- Executes on button press in pushbutton3.
@@ -1255,6 +1244,7 @@ function pushbutton3_Callback(hObject, eventdata, handles)
     globalStudyInfo.hyoid_burst = floor(get(handles.frameScrubber, 'Value'));
     set(handles.text14, 'String', globalStudyInfo.hyoid_burst);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    uicontrol(handles.frameScrubber);
 
     
 % --- Executes on button press in pushbutton4.
@@ -1266,6 +1256,7 @@ function pushbutton4_Callback(hObject, eventdata, handles)
     globalStudyInfo.ues_closure = floor(get(handles.frameScrubber, 'Value'));
     set(handles.text15, 'String', globalStudyInfo.ues_closure);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    uicontrol(handles.frameScrubber);
 
 % --- Executes on button press in pushbutton5.
 function pushbutton5_Callback(hObject, eventdata, handles)
@@ -1276,7 +1267,7 @@ function pushbutton5_Callback(hObject, eventdata, handles)
     globalStudyInfo.at_rest = floor(get(handles.frameScrubber, 'Value'));
     set(handles.text16, 'String', globalStudyInfo.at_rest);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-
+    uicontrol(handles.frameScrubber);
 
 % --- Executes on button press in deletebutton.
 function deletebutton_Callback(hObject, eventdata, handles)
@@ -1290,7 +1281,7 @@ function deletebutton_Callback(hObject, eventdata, handles)
     globalStudyInfo.studyCoordinates.deleteLaterCoordinates(currentFrameIndex, numFramesTotal, currentLandmark);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     Render(handles);
-
+    uicontrol(handles.frameScrubber);
 
 % --- Executes on button press in startButton.
 function startButton_Callback(hObject, eventdata, handles)
@@ -1301,6 +1292,7 @@ function startButton_Callback(hObject, eventdata, handles)
     globalStudyInfo.start_frame = floor(get(handles.frameScrubber, 'Value'));
     set(handles.text17, 'String', globalStudyInfo.start_frame);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    uicontrol(handles.frameScrubber);
 
 % --- Executes on button press in endButton.
 function endButton_Callback(hObject, eventdata, handles)
@@ -1311,6 +1303,7 @@ function endButton_Callback(hObject, eventdata, handles)
     globalStudyInfo.end_frame = floor(get(handles.frameScrubber, 'Value'));
     set(handles.text18, 'String', globalStudyInfo.end_frame);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    uicontrol(handles.frameScrubber);
 
 
 % --- Executes during object creation, after setting all properties.
@@ -1352,11 +1345,14 @@ if button_state == get(hObject,'Max')
     set(handles.semiautoOptions, 'visible', 'on');
     set(handles.kinematicsButton, 'visible', 'off');
     set(handles.unitCalibrationButton, 'visible', 'off');
+    set(handles.unitCalibrationPanel, 'visible', 'off');
 
 elseif button_state == get(hObject,'Min')
     set(handles.semiautoOptions, 'visible', 'off');
     set(handles.kinematicsButton, 'visible', 'on');
-    set(handles.unitCalibrationButton, 'visible', 'on');
+    set(handles.unitCalibrationButton, 'visible', 'on');    
+    set(handles.unitCalibrationButton, 'Value', '0');
+    set(handles.unitCalibrationPanel, 'visible', 'off');
 end
 
 drawnow();
@@ -1379,11 +1375,11 @@ function estSize_Callback(hObject, eventdata, handles)
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
     
     if(isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2))
-        showFeedbackPopup(handles,'Please Track Points');
+        showFeedbackPopup(handles,'Please Track Points',1);
 
     else
         if(isnan(str2double(get(hObject,'String'))))
-            showFeedbackPopup(handles,'Please Enter Valid Number');
+            showFeedbackPopup(handles,'Please Enter Valid Number',1);
         end
         bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
         bothPoints_dist = pdist(bothPoints,'euclidean');
@@ -1422,16 +1418,16 @@ function calibrateSIbutton_Callback(hObject, eventdata, handles)
 
         [x, y] = mygetpts();
         globalStudyInfo.point1 = [x(1) y(1)];
-        showFeedbackPopup(handles,'Point 1 Tracked');
         set(handles.point1_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
-        
         set(hObject,'String','Click opposite edge');
+        showFeedbackPopup(handles,'Point 1 Tracked',1);
+
         [x, y] = mygetpts();
         globalStudyInfo.point2 = [x(1) y(1)];
-        showFeedbackPopup(handles,'Point 2 Tracked');
         set(handles.point2_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
         set(hObject,'String','Calibrate SI Units');
         set(hObject,'Value',0);
+        showFeedbackPopup(handles,'Point 2 Tracked',2);
     end
         
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
@@ -1445,7 +1441,6 @@ function estSize_ButtonDownFcn(hObject, eventdata, handles)
 set(hObject, 'String', '');
 set(hObject, 'enable', 'on');
 uicontrol(hObject);
-
 
 
 % --- Executes on button press in kinematicsButton.
@@ -1492,7 +1487,6 @@ else
     uiwait(msgbox(warningMessage));
 end
 
-
 function columnWidth = fitColumns(data)
     dataSize = size(data);
     maxLen = zeros(1,dataSize(2));
@@ -1521,16 +1515,8 @@ function pushbutton11_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton11 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-saveButton_ClickedCallback(hObject, eventdata, handles);
 close('VFTracker3')
 VFTracker3
-
-
-% % --- Executes on button press in pushbutton12.
-% function pushbutton12_Callback(hObject, eventdata, handles)
-% % hObject    handle to pushbutton12 (see GCBO)
-% % eventdata  reserved - to be defined in a future version of MATLAB
-% % handles    structure with handles and user data (see GUIDATA)
 
 
 % --- Executes on button press in unitCalibrationButton.

@@ -49,7 +49,7 @@ function varargout = Compiler(varargin)
         finalCell = compile_coordinateData(dataStruct,fileNames,pathName);
         disp('Done writing combined coordinates file');
 
-        compile_classifierData(dataStruct,fileNames,finalCell,pathName);
+%         compile_classifierData(dataStruct,fileNames,finalCell,pathName);
         disp('Done writing combined classifier file');
 
         compile_kinematicsData(dataStruct, fileNames,pathName);
@@ -415,6 +415,49 @@ function phaseFramesCell = frames2doubleSansLabels(dataStruct, videoIndex)
     phaseFramesCell = cellfun(@str2double,dataStruct(videoIndex).classifierData(2:end,1:end));
 end
 
+%Gets Average C2-C4 Lengths to normalize the distances across patients
+function vertScalar = getVertScalar(doubleCell)
+    doubleCellSize = size(doubleCell);
+    
+    allVertLengths = 0;
+    totalTrackedPoints = 0;
+    
+    for i= 1:doubleCellSize(1)
+        c2x = doubleCell(i,7);
+        c2y = doubleCell(i,8);
+        c4x = doubleCell(i,9);
+        c4y = doubleCell(i,10);
+        
+        %finished all of the points
+        if(c2x == 0 && c2y > 100 && c4x == 0 && c4y > 100)
+            fprintf('For %d frames, all C2-C4 points have been tracked\n', i-1);
+            break;
+        end
+        
+        if(c2x == 0 || c2y == 0 || c4x == 0 || c4y == 0)
+            fprintf('WARNING: C2-C4 points for Frame %d have NOT been tracked\n', i);
+        else
+            c2c4_points = [c2x, c2y; c4x, c4y];
+            dist = pdist(c2c4_points,'euclidean');
+            allVertLengths = allVertLengths + dist;
+            totalTrackedPoints = totalTrackedPoints + 1;
+        end     
+    end
+    vertScalar = allVertLengths / totalTrackedPoints;
+end
+
+%Finds pixels/cm based on the size of a reference object
+function siScalar = getSIscalar(phaseFramesCell)
+    %normalized to penny
+    temp = phaseFramesCell(1,12);
+    
+    if(~isnan(temp))
+        siScalar = temp;
+    else
+        siScalar = 0;
+    end
+end
+
 %Anterior Hyoid Movement; Needs C1, C4, Hyoid
 function ahm = anteriorHyoidMovement(doubleCell, vertScalar, siScalar)
     
@@ -430,6 +473,11 @@ function ahm = anteriorHyoidMovement(doubleCell, vertScalar, siScalar)
         c4y = doubleCell(i,10);
         hyx = doubleCell(i,17);
         hyy = doubleCell(i,18);
+        
+        if(find([c1x c1y c4x c4y hyx hyy]==0))
+            ahm = {0,0};
+            return;
+        end
 
         c1c4_points = [c1x, c1y; c4x, c4y];
         c1hy_points = [c1x, c1y; hyx, hyy];
@@ -459,47 +507,6 @@ function ahm = anteriorHyoidMovement(doubleCell, vertScalar, siScalar)
     ahm = {vertAHM siAHM};
 end
 
-function vertScalar = getVertScalar(doubleCell)
-    doubleCellSize = size(doubleCell);
-    
-    allVertLengths = 0;
-    totalTrackedPoints = 0;
-    
-    for i= 1:doubleCellSize(1)
-        c2x = doubleCell(i,7);
-        c2y = doubleCell(i,8);
-        c4x = doubleCell(i,9);
-        c4y = doubleCell(i,10);
-        
-        %finished all of the points
-        if(c2x == 0 && c2y == 481 && c4x == 0 && c4y == 481)
-            fprintf('For %d frames, all C2-C4 points have been tracked\n', i-1);
-            break;
-        end
-        
-        if(c2x == 0 || c2y == 0 || c4x == 0 || c4y == 0)
-            fprintf('WARNING: C2-C4 points for Frame %d have NOT been tracked\n', i);
-        else
-            c2c4_points = [c2x, c2y; c4x, c4y];
-            dist = pdist(c2c4_points,'euclidean');
-            allVertLengths = allVertLengths + dist;
-            totalTrackedPoints = totalTrackedPoints + 1;
-        end     
-    end
-    vertScalar = allVertLengths / totalTrackedPoints;
-end
-
-function siScalar = getSIscalar(phaseFramesCell)
-    %normalized to penny
-    temp = phaseFramesCell(1,12);
-    
-    if(~isnan(temp))
-        siScalar = temp;
-    else
-        siScalar = 0;
-    end
-end
-
 %Superior Hyoid Movement; Needs C1, C4, Hyoid
 function shm = superiorHyoidMovement(doubleCell, vertScalar, siScalar)
     
@@ -515,7 +522,12 @@ function shm = superiorHyoidMovement(doubleCell, vertScalar, siScalar)
         c4y = doubleCell(i,10);
         hyx = doubleCell(i,17);
         hyy = doubleCell(i,18);
-
+        
+        if(find([c1x c1y c4x c4y hyx hyy]==0))
+            shm = {0,0};
+            return;
+        end
+        
         c1c4_points = [c1x, c1y; c4x, c4y];
         c1hy_points = [c1x, c1y; hyx, hyy];
         c4hy_points = [c4x, c4y; hyx, hyy];
@@ -559,7 +571,12 @@ function hyExMand = hyoidExcursionToMandible(doubleCell, vertScalar, siScalar)
         c1y = doubleCell(i,6);
         hyx = doubleCell(i,17);
         hyy = doubleCell(i,18);
-
+        
+        if(find([mandx mandy c1x c1y hyx hyy]==0))
+            hyExMand = {0,0};
+            return;
+        end
+        
         c1mand_points = [c1x, c1y; mandx, mandy];
         c1hy_points = [c1x, c1y; hyx, hyy];
         mandhy_points = [mandx, mandy; hyx, hyy];
@@ -602,7 +619,12 @@ function hyExC4 = hyoidExcursionToC4(doubleCell, vertScalar, siScalar)
         c4y = doubleCell(i,10);
         hyx = doubleCell(i,17);
         hyy = doubleCell(i,18);
-
+        
+        if(find([c4x c4y hyx hyy]==0))
+            hyExC4 = {0,0};
+            return;
+        end
+        
         c4hy_points = [c4x, c4y; hyx, hyy];
              
         %get lengths of each set of points to form edge and add to array
@@ -654,7 +676,12 @@ function alm = antLargyngealMovement(doubleCell, vertScalar, siScalar)
         hyy = doubleCell(i,18);
         antCricX = doubleCell(i,15);
         antCricY = doubleCell(i,16);
-
+        
+        if(find([c1x c1y c4x c4y hyx hyy antCricX antCricY]==0))
+            alm = {0,0};
+            return;
+        end
+        
         c1c4_points = [c1x, c1y; c4x, c4y];
         c1hy_points = [c1x, c1y; hyx, hyy];
         c4hy_points = [c4x, c4y; hyx, hyy];
@@ -704,7 +731,11 @@ function slm = supLargyngealMovement(doubleCell,vertScalar, siScalar)
         antCricX = doubleCell(i,15);
         antCricY = doubleCell(i,16);
 
-
+        if(find([c1x c1y c4x c4y hyx hyy antCricX antCricY]==0))
+            slm = {0,0};
+            return;
+        end
+        
         c1c4_points = [c1x, c1y; c4x, c4y];
         c1hy_points = [c1x, c1y; hyx, hyy];
         c4hy_points = [c4x, c4y; hyx, hyy];
@@ -751,7 +782,12 @@ function hla = hyolaryngealApproximation(doubleCell, vertScalar, siScalar)
         hyy = doubleCell(i,18);
         antCricX = doubleCell(i,15);
         antCricY = doubleCell(i,16);
-
+        
+        if(find([hyx hyy antCricX antCricY]==0))
+            hla = {0,0};
+            return;
+        end
+        
         hyAntCric_points = [hyx, hyy; antCricX, antCricY];
        
 
@@ -786,7 +822,12 @@ function le = laryngealElevation(doubleCell,vertScalar, siScalar)
         c1y = doubleCell(i,6);
         postCricX = doubleCell(i,13);
         postCricY = doubleCell(i,14);
-
+        
+        if(find([c1x c1y postCricX postCricY]==0))
+            le = {0,0};
+            return;
+        end
+        
         c1PostCric_points = [c1x, c1y; postCricX, postCricY];
 
         %get lengths of each set of points to form edge and add to array
@@ -821,7 +862,12 @@ function ps = pharyngealShortening(doubleCell, vertScalar, siScalar)
         hpy = doubleCell(i,4);
         uesX = doubleCell(i,11);
         uesY = doubleCell(i,12);
-
+        
+        if(find([hpx hpy uesX uesY]==0))
+            ps = {0,0};
+            return;
+        end
+        
         hpUES_points = [hpx, hpy; uesX, uesY];
 
         %get lengths of each set of points to form edge and add to array
@@ -858,7 +904,12 @@ function botrr = baseOfTongueRetractionRatio(doubleCell, vertScalar, siScalar)
         c4y = doubleCell(i,10);
         valx = doubleCell(i,19);
         valy = doubleCell(i,20);
-
+        
+        if(find([c1x c1y c4x c4y valx valy]==0))
+            botrr = {0,0};
+            return;
+        end
+        
         c1c4_points = [c1x, c1y; c4x, c4y];
         c1val_points = [c1x, c1y; valx, valy];
         c4val_points = [c4x, c4y; valx, valy];
