@@ -232,13 +232,13 @@ pointerShape = [ ...
 
                 %set frame information to each textbox corresponding to push
                 %buttons
-                globalStudyInfo.hold_position  = num2str(morphoJTable{2,2});
-                globalStudyInfo.ramus_mandible = num2str(morphoJTable{2,3});
-                globalStudyInfo.hyoid_burst    = num2str(morphoJTable{2,4});
-                globalStudyInfo.ues_closure    = num2str(morphoJTable{2,5});
-                globalStudyInfo.at_rest        = num2str(morphoJTable{2,6});
-                globalStudyInfo.start_frame    = num2str(morphoJTable{2,1});
-                globalStudyInfo.end_frame      = num2str(morphoJTable{2,7});
+                globalStudyInfo.hold_position  = str2num(morphoJTable{2,2});
+                globalStudyInfo.ramus_mandible = str2num(morphoJTable{2,3});
+                globalStudyInfo.hyoid_burst    = str2num(morphoJTable{2,4});
+                globalStudyInfo.ues_closure    = str2num(morphoJTable{2,5});
+                globalStudyInfo.at_rest        = str2num(morphoJTable{2,6});
+                globalStudyInfo.start_frame    = str2num(morphoJTable{2,1});
+                globalStudyInfo.end_frame      = str2num(morphoJTable{2,7});
                 globalStudyInfo.point1         = [str2num(morphoJTable{2,8}), str2num(morphoJTable{2,9})];
                 globalStudyInfo.point2         = [str2num(morphoJTable{2,10}), str2num(morphoJTable{2,11})];
                 globalStudyInfo.pixelspercm    = str2num(morphoJTable{2,12});
@@ -1150,44 +1150,44 @@ for i = 1:numFrames
    currentFrame = insertText(currentFrame, [1 1], sprintf('%d / %d', i, numFrames));
    
    %Insert push button frames
-   if i == str2double(globalStudyInfo.start_frame)
+   if i == globalStudyInfo.start_frame
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)/4);
        position_y = 1;
        currentFrame = insertText(currentFrame,[position_x position_y], 'Start Frame');
        
-   elseif i == str2double(globalStudyInfo.end_frame)
+   elseif i == globalStudyInfo.end_frame
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)/4);
        position_y = 1;
        currentFrame = insertText(currentFrame,[position_x position_y], 'End Frame');
    end
    
-   if i == str2double(globalStudyInfo.hold_position)
+   if i == globalStudyInfo.hold_position
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
        currentFrame = insertText(currentFrame,[position_x position_y], 'Hold Position');
        
-   elseif i == str2double(globalStudyInfo.ramus_mandible)
+   elseif i == globalStudyInfo.ramus_mandible
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
        currentFrame = insertText(currentFrame,[position_x position_y], 'Ramus Mandible');
        
-   elseif i == str2double(globalStudyInfo.hyoid_burst)
+   elseif i == globalStudyInfo.hyoid_burst
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
        currentFrame = insertText(currentFrame,[position_x position_y], 'Hyoid Burst');
        
-   elseif i == str2double(globalStudyInfo.ues_closure)
+   elseif i == globalStudyInfo.ues_closure
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
        currentFrame = insertText(currentFrame,[position_x position_y], 'UES Closure');
    
-   elseif i == str2double(globalStudyInfo.at_rest)
+   elseif i == globalStudyInfo.at_rest
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
