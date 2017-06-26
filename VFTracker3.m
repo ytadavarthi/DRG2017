@@ -223,9 +223,9 @@ pointerShape = [ ...
         inputTable = readtable(expectedFullExcelFileName, 'Delimiter', '\t');
         inputDataArray = table2array(inputTable(:, 2:end));
         
-        if exist(fullfile(pathStr,name, '_morphoj_.txt'),'file')
+        if exist(fullfile(pathStr,[name, '_morphoj_.txt']),'file')
             %loading frame information for push buttons.
-            morphoJTable = readtable(fullfile(pathStr,name, '_morphoj_.txt'),'Delimiter','\t', 'ReadVariableNames',false);
+            morphoJTable = readtable(fullfile(pathStr,[name, '_morphoj_.txt']),'Delimiter','\t', 'ReadVariableNames',false);
             morphoJTable = table2cell(morphoJTable);
 
             if morphoJTable{1,1} == 'start_frame'

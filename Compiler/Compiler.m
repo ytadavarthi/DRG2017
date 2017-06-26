@@ -28,7 +28,7 @@ function varargout = Compiler(varargin)
     elseif length(varargin) == 1
         fullFileName = varargin{1};
         [~,fileNames,ext] = fileparts(fullFileName);
-        pathName = fullFileName(1:end-length([fileNames ext]));
+        pathName = {fullFileName(1:end-length([fileNames ext]))};
         fileNames = {[fileNames '_morphoj_']};
         
         kinematicsButton = true;
