@@ -137,7 +137,10 @@ pointerShape = [ ...
         set(handles.appFigure, 'PointerShapeCData', pointerShape);
         set(handles.appFigure, 'PointerShapeHotSpot', pointerHotSpot);
 
-    [fileName, pathName] = uigetfile({'*'});
+    [fileName, pathName] = uigetfile({'*.mp4;*.mov;*.avi;*.flv;*.wmv',...
+                                      'Video Files (*.mp4,*.mov,*.avi,*.flv,*.wmv)';...
+                                      '*.*', 'All Files (*.*)'});
+    
     fullFileName = strcat(pathName, fileName);
     
     %store file name and path for use in kinematicsbutton
@@ -220,52 +223,54 @@ pointerShape = [ ...
         inputTable = readtable(expectedFullExcelFileName, 'Delimiter', '\t');
         inputDataArray = table2array(inputTable(:, 2:end));
         
-        %loading frame information for push buttons.
-        morphoJTable = readtable([pathStr '/' name '_morphoj_.txt'],'Delimiter','\t', 'ReadVariableNames',false);
-        morphoJTable = table2cell(morphoJTable);
-        
-        if morphoJTable{1,1} == 'start_frame'
-            
-            %set frame information to each textbox corresponding to push
-            %buttons
-            globalStudyInfo.hold_position  = num2str(morphoJTable{2,2});
-            globalStudyInfo.ramus_mandible = num2str(morphoJTable{2,3});
-            globalStudyInfo.hyoid_burst    = num2str(morphoJTable{2,4});
-            globalStudyInfo.ues_closure    = num2str(morphoJTable{2,5});
-            globalStudyInfo.at_rest        = num2str(morphoJTable{2,6});
-            globalStudyInfo.start_frame    = num2str(morphoJTable{2,1});
-            globalStudyInfo.end_frame      = num2str(morphoJTable{2,7});
-            globalStudyInfo.point1         = [str2num(morphoJTable{2,8}), str2num(morphoJTable{2,9})];
-            globalStudyInfo.point2         = [str2num(morphoJTable{2,10}), str2num(morphoJTable{2,11})];
-            globalStudyInfo.pixelspercm    = str2num(morphoJTable{2,12});
-            
-            set(handles.text12, 'String', globalStudyInfo.hold_position);
-            set(handles.text13, 'String', globalStudyInfo.ramus_mandible);
-            set(handles.text14, 'String', globalStudyInfo.hyoid_burst);
-            set(handles.text15, 'String', globalStudyInfo.ues_closure);
-            set(handles.text16, 'String', globalStudyInfo.at_rest);
-            set(handles.text17, 'String', globalStudyInfo.start_frame);
-            set(handles.text18, 'String', globalStudyInfo.end_frame);
+        if exist(fullfile(pathStr,[name, '_morphoj_.txt']),'file')
+            %loading frame information for push buttons.
+            morphoJTable = readtable(fullfile(pathStr,[name, '_morphoj_.txt']),'Delimiter','\t', 'ReadVariableNames',false);
+            morphoJTable = table2cell(morphoJTable);
 
-            set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,8}),str2num(morphoJTable{2,9})));
-            set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,10}),str2num(morphoJTable{2,11})));
-            set(handles.pixelspercm_text, 'String', sprintf('%-.2f',globalStudyInfo.pixelspercm));
-            
-            if isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2)
-                estSize = '';
-                set(handles.estSize, 'String', num2str(estSize));
-            else
-                bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
-                bothPoints_dist = pdist(bothPoints,'euclidean');
-        
-                estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
-                set(handles.estSize, 'String', num2str(estSize));
+            if morphoJTable{1,1} == 'start_frame'
+
+                %set frame information to each textbox corresponding to push
+                %buttons
+                globalStudyInfo.hold_position  = str2num(morphoJTable{2,2});
+                globalStudyInfo.ramus_mandible = str2num(morphoJTable{2,3});
+                globalStudyInfo.hyoid_burst    = str2num(morphoJTable{2,4});
+                globalStudyInfo.ues_closure    = str2num(morphoJTable{2,5});
+                globalStudyInfo.at_rest        = str2num(morphoJTable{2,6});
+                globalStudyInfo.start_frame    = str2num(morphoJTable{2,1});
+                globalStudyInfo.end_frame      = str2num(morphoJTable{2,7});
+                globalStudyInfo.point1         = [str2num(morphoJTable{2,8}), str2num(morphoJTable{2,9})];
+                globalStudyInfo.point2         = [str2num(morphoJTable{2,10}), str2num(morphoJTable{2,11})];
+                globalStudyInfo.pixelspercm    = str2num(morphoJTable{2,12});
+
+                set(handles.text12, 'String', globalStudyInfo.hold_position);
+                set(handles.text13, 'String', globalStudyInfo.ramus_mandible);
+                set(handles.text14, 'String', globalStudyInfo.hyoid_burst);
+                set(handles.text15, 'String', globalStudyInfo.ues_closure);
+                set(handles.text16, 'String', globalStudyInfo.at_rest);
+                set(handles.text17, 'String', globalStudyInfo.start_frame);
+                set(handles.text18, 'String', globalStudyInfo.end_frame);
+
+                set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,8}),str2num(morphoJTable{2,9})));
+                set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,10}),str2num(morphoJTable{2,11})));
+                set(handles.pixelspercm_text, 'String', sprintf('%-.2f',globalStudyInfo.pixelspercm));
+
+                if isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2)
+                    estSize = '';
+                    set(handles.estSize, 'String', num2str(estSize));
+                else
+                    bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
+                    bothPoints_dist = coordinates_dist(bothPoints);
+
+                    estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
+                    set(handles.estSize, 'String', num2str(estSize));
+                end
+
+                %setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
             end
-            
-            %setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-
         end
-        
+
         
         [a, b] = enumeration('Data.JoveLandmarks');
         numLandmarks = numel(b);
@@ -365,7 +370,7 @@ function Render(handles, varargin)
         
     %Render(handles)
     frameNumberListener(handles.appFigure)
-    
+  
 
 % --- Executes on selection change in landmarksListBox.
 function landmarksListBox_Callback(hObject, eventdata, handles)
@@ -397,6 +402,8 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+function dist = coordinates_dist(points)
+    dist = sqrt((points(1,1) - points(2,1))^2 + (points(1,2) - points(2,2))^2);
 
 %The function to do preprocessing of the image before it is rendered or
 %passed onto the point tracker
@@ -602,7 +609,7 @@ function performTracking(handles)
             cornersFound = false;
             Utilities.CustomPrinters.printWarning('No Harris corners detected. Increase search window or try a different spot');
 %            disp('no corners detected');
-            showFeedbackPopup(handles,'No corners detected');
+            showFeedbackPopup(handles,'No corners detected',2);
         else
 %            disp('corners detected');
             Utilities.CustomPrinters.printInfo('Harris corner detected');
@@ -612,7 +619,7 @@ function performTracking(handles)
     end
     
     
-    showFeedbackPopup(handles,'Tracking...');
+    showFeedbackPopup(handles,'Tracking...',1);
     
     %By how much does the corner that is about to be tracked exceed the
     %point chosen by the user?
@@ -645,7 +652,7 @@ function performTracking(handles)
          end
      end
      Utilities.CustomPrinters.printInfo('Tracking is done');
-     set(handles.feedbackLabel, 'String', '');
+     showFeedbackPopup(handles,'',0);
      Render(handles);
     
 
@@ -795,17 +802,28 @@ function saveButton_ClickedCallback(hObject, eventdata, handles)
 globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
 oldFeedbackLabelMessage = get(handles.feedbackLabel, 'String');
 % set(handles.feedbackLabel, 'String', 'Saving...');
-showFeedbackPopup(handles, 'Saving...');
+showFeedbackPopup(handles, 'Saving...',1);
 
 drawnow()
 Utilities.ResultFileWriter(globalStudyInfo);
+showFeedbackPopup(handles, 'Saved',2);
+
 
 %allows you to display text to the screen
-function showFeedbackPopup(handles, string, )
-    set(handles.feedbackPanel, 'visible', 'on');
-    set(handles.feedbackLabel, 'String', string);
-    set(handles.feedbackLabel, 'String', '');
-    set(handles.feedbackPanel, 'visible', 'off');
+function showFeedbackPopup(handles, string, visibility)
+    if (visibility == 1)
+        set(handles.feedbackPanel, 'visible', 'on');
+        set(handles.feedbackLabel, 'String', string);
+    elseif (visibility == 0)
+        set(handles.feedbackLabel, 'String', '');
+        set(handles.feedbackPanel, 'visible', 'off');
+    elseif (visibility == 2)
+        set(handles.feedbackPanel, 'visible', 'on');
+        set(handles.feedbackLabel, 'String', string);
+        pause(.5)
+        set(handles.feedbackLabel, 'String', '');
+        set(handles.feedbackPanel, 'visible', 'off');
+    end
     
     
 % --------------------------------------------------------------------
@@ -815,12 +833,13 @@ function WriteHighResVideo_ClickedCallback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %display "saving video" in top left corner
-set(handles.feedbackLabel,'String', 'Saving...')
+showFeedbackPopup(handles, 'Saving...',1);
+
 drawnow()
     
 VideoWriterCallback(handles, 'high');   
 
-set(handles.feedbackLabel,'String', '')
+showFeedbackPopup(handles, 'Saved',2);
     
     
 % --------------------------------------------------------------------
@@ -871,12 +890,12 @@ function WriteLowResVideo_ClickedCallback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %display "saving video" in top left corner
-set(handles.feedbackLabel,'String', 'Saving...')
+showFeedbackPopup(handles, 'Saving...',1);
 drawnow()
     
 VideoWriterCallback(handles, 'low');
 
-set(handles.feedbackLabel,'String','');
+showFeedbackPopup(handles, 'Saved',2);
 % disp('debug pitstop called');
 % globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
 % fullFileName = globalStudyInfo.vfVideoStructure.fileName;
@@ -1133,44 +1152,44 @@ for i = 1:numFrames
    currentFrame = insertText(currentFrame, [1 1], sprintf('%d / %d', i, numFrames));
    
    %Insert push button frames
-   if i == str2double(globalStudyInfo.start_frame)
+   if i == globalStudyInfo.start_frame
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)/4);
        position_y = 1;
        currentFrame = insertText(currentFrame,[position_x position_y], 'Start Frame');
        
-   elseif i == str2double(globalStudyInfo.end_frame)
+   elseif i == globalStudyInfo.end_frame
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)/4);
        position_y = 1;
        currentFrame = insertText(currentFrame,[position_x position_y], 'End Frame');
    end
    
-   if i == str2double(globalStudyInfo.hold_position)
+   if i == globalStudyInfo.hold_position
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
        currentFrame = insertText(currentFrame,[position_x position_y], 'Hold Position');
        
-   elseif i == str2double(globalStudyInfo.ramus_mandible)
+   elseif i == globalStudyInfo.ramus_mandible
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
        currentFrame = insertText(currentFrame,[position_x position_y], 'Ramus Mandible');
        
-   elseif i == str2double(globalStudyInfo.hyoid_burst)
+   elseif i == globalStudyInfo.hyoid_burst
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
        currentFrame = insertText(currentFrame,[position_x position_y], 'Hyoid Burst');
        
-   elseif i == str2double(globalStudyInfo.ues_closure)
+   elseif i == globalStudyInfo.ues_closure
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
        currentFrame = insertText(currentFrame,[position_x position_y], 'UES Closure');
    
-   elseif i == str2double(globalStudyInfo.at_rest)
+   elseif i == globalStudyInfo.at_rest
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
@@ -1362,15 +1381,16 @@ function estSize_Callback(hObject, eventdata, handles)
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
     
     if(isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2))
-        showFeedbackPopup(handles,'Please Track Points');
+        showFeedbackPopup(handles,'Please Track Points',1);
 
     else
         if(isnan(str2double(get(hObject,'String'))))
-            showFeedbackPopup(handles,'Please Enter Valid Number');
+            showFeedbackPopup(handles,'Please Enter Valid Number',1);
         end
         bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
-        bothPoints_dist = pdist(bothPoints,'euclidean');
-        
+        bothPoints_dist = coordinates_dist(bothPoints);
+        bothPoints_dist2 = pdist(bothPoints,);
+
         estSize = str2double(get(hObject,'String'));
         globalStudyInfo.pixelspercm = bothPoints_dist / estSize;
         set(handles.pixelspercm_text, 'String', num2str(globalStudyInfo.pixelspercm));
@@ -1405,16 +1425,16 @@ function calibrateSIbutton_Callback(hObject, eventdata, handles)
 
         [x, y] = mygetpts();
         globalStudyInfo.point1 = [x(1) y(1)];
-        showFeedbackPopup(handles,'Point 1 Tracked');
         set(handles.point1_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
-        
         set(hObject,'String','Click opposite edge');
+        showFeedbackPopup(handles,'Point 1 Tracked',1);
+
         [x, y] = mygetpts();
         globalStudyInfo.point2 = [x(1) y(1)];
-        showFeedbackPopup(handles,'Point 2 Tracked');
         set(handles.point2_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
         set(hObject,'String','Calibrate SI Units');
         set(hObject,'Value',0);
+        showFeedbackPopup(handles,'Point 2 Tracked',2);
     end
         
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);

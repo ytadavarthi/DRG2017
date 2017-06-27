@@ -260,7 +260,7 @@ pointerShape = [ ...
                     set(handles.estSize, 'String', num2str(estSize));
                 else
                     bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
-                    bothPoints_dist = pdist(bothPoints,'euclidean');
+                    bothPoints_dist = coordinates_dist(bothPoints);
 
                     estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
                     set(handles.estSize, 'String', num2str(estSize));
@@ -370,7 +370,7 @@ function Render(handles, varargin)
         
     %Render(handles)
     frameNumberListener(handles.appFigure)
-    
+  
 
 % --- Executes on selection change in landmarksListBox.
 function landmarksListBox_Callback(hObject, eventdata, handles)
@@ -402,6 +402,8 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+function dist = coordinates_dist(points)
+    dist = sqrt((points(1,1) - points(2,1))^2 + (points(1,2) - points(2,2))^2);
 
 %The function to do preprocessing of the image before it is rendered or
 %passed onto the point tracker
@@ -1432,8 +1434,9 @@ function estSize_Callback(hObject, eventdata, handles)
             showFeedbackPopup(handles,'Please Enter Valid Number',1);
         end
         bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
-        bothPoints_dist = pdist(bothPoints,'euclidean');
-        
+        bothPoints_dist = coordinates_dist(bothPoints);
+        bothPoints_dist2 = pdist(bothPoints, 'euclidean');
+
         estSize = str2double(get(hObject,'String'));
         globalStudyInfo.pixelspercm = bothPoints_dist / estSize;
         set(handles.pixelspercm_text, 'String', num2str(globalStudyInfo.pixelspercm));

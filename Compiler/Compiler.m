@@ -428,6 +428,11 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
     writetable(total_kinematics_table,fullfile(pathName, ['kinematics_' date '.txt']), 'Delimiter', '\t', 'WriteVariableNames', false);
 end
 
+function dist = coordinates_dist(points)
+    dist = sqrt((points(1,1) - points(2,1))^2 + (points(1,2) - points(2,2))^2);
+end
+
+
 %Gets Coordinates from DataStruct and converts into cell without labels
 function doubleCell = points2doubleSansLabels(dataStruct, videoIndex)
     doubleCell = cellfun(@str2double,dataStruct(videoIndex).coordinateData(2:end,2:end));
@@ -461,7 +466,7 @@ function vertScalar = getVertScalar(doubleCell)
             fprintf('WARNING: C2-C4 points for Frame %d have NOT been tracked\n', i);
         else
             c2c4_points = [c2x, c2y; c4x, c4y];
-            dist = pdist(c2c4_points,'euclidean');
+            dist = coordinates_dist(c2c4_points);
             allVertLengths = allVertLengths + dist;
             totalTrackedPoints = totalTrackedPoints + 1;
         end     
@@ -506,9 +511,9 @@ function ahm = anteriorHyoidMovement(doubleCell, vertScalar, siScalar)
         c1hy_points = [c1x, c1y; hyx, hyy];
         c4hy_points = [c4x, c4y; hyx, hyy];
 
-        c1c4_dist = pdist(c1c4_points,'euclidean');
-        c1hy_dist = pdist(c1hy_points,'euclidean');
-        c4hy_dist = pdist(c4hy_points,'euclidean');
+        c1c4_dist = coordinates_dist(c1c4_points);
+        c1hy_dist = coordinates_dist(c1hy_points);
+        c4hy_dist = coordinates_dist(c4hy_points);
          
         %Using Farres' method of Law of Cosines
         
@@ -555,9 +560,9 @@ function shm = superiorHyoidMovement(doubleCell, vertScalar, siScalar)
         c1hy_points = [c1x, c1y; hyx, hyy];
         c4hy_points = [c4x, c4y; hyx, hyy];
 
-        c1c4_dist = pdist(c1c4_points,'euclidean');
-        c1hy_dist = pdist(c1hy_points,'euclidean');
-        c4hy_dist = pdist(c4hy_points,'euclidean');
+        c1c4_dist = coordinates_dist(c1c4_points);
+        c1hy_dist = coordinates_dist(c1hy_points);
+        c4hy_dist = coordinates_dist(c4hy_points);
     
         %Using Law of Cosines
         
@@ -605,9 +610,9 @@ function hyExMand = hyoidExcursionToMandible(doubleCell, vertScalar, siScalar)
         mandhy_points = [mandx, mandy; hyx, hyy];
 
         %get lengths of each set of points to form edges of triangle
-        c1mand_dist = pdist(c1mand_points,'euclidean');
-        c1hy_dist = pdist(c1hy_points,'euclidean');
-        mandhy_dist = pdist(mandhy_points,'euclidean');
+        c1mand_dist = coordinates_dist(c1mand_points);
+        c1hy_dist = coordinates_dist(c1hy_points);
+        mandhy_dist = coordinates_dist(mandhy_points);
      
         %Using Law of Cosines to find angle at mandible
         mhlinemandhyangle = acos(( mandhy_dist ^ 2 + c1mand_dist ^ 2 - c1hy_dist ^ 2) / (2 * mandhy_dist * c1mand_dist));
@@ -651,7 +656,7 @@ function hyExC4 = hyoidExcursionToC4(doubleCell, vertScalar, siScalar)
         c4hy_points = [c4x, c4y; hyx, hyy];
              
         %get lengths of each set of points to form edge and add to array
-        c4hy_dist = pdist(c4hy_points,'euclidean');
+        c4hy_dist = coordinates_dist(c4hy_points);
         
         if(~isnan(vertScalar))        
             allVertMovements(i) = c4hy_dist / vertScalar;
@@ -712,10 +717,10 @@ function alm = antLargyngealMovement(doubleCell, vertScalar, siScalar)
 
         %get lengths of each set of points to form edges of triangle
 
-        c1c4_dist = pdist(c1c4_points,'euclidean');
-        c1hy_dist = pdist(c1hy_points,'euclidean');
-        c4hy_dist = pdist(c4hy_points,'euclidean');
-        c1antCric_dist = pdist(c1antCric_points,'euclidean');
+        c1c4_dist = coordinates_dist(c1c4_points);
+        c1hy_dist = coordinates_dist(c1hy_points);
+        c4hy_dist = coordinates_dist(c4hy_points);
+        c1antCric_dist = coordinates_dist(c1antCric_points);
    
         %Using Law of Cosines to find angle at mandible
         hyc1c4angle = acos(( c1hy_dist ^ 2 + c1c4_dist ^ 2 - c4hy_dist ^ 2) / (2 * c1hy_dist * c1c4_dist));
@@ -766,10 +771,10 @@ function slm = supLargyngealMovement(doubleCell,vertScalar, siScalar)
 
         %get lengths of each set of points to form edges of triangle
 
-        c1c4_dist = pdist(c1c4_points,'euclidean');
-        c1hy_dist = pdist(c1hy_points,'euclidean');
-        c4hy_dist = pdist(c4hy_points,'euclidean');
-        c1antCric_dist = pdist(c1antCric_points,'euclidean');
+        c1c4_dist = coordinates_dist(c1c4_points);
+        c1hy_dist = coordinates_dist(c1hy_points);
+        c4hy_dist = coordinates_dist(c4hy_points);
+        c1antCric_dist = coordinates_dist(c1antCric_points);
            
         %Using Law of Cosines to find angle at mandible
         hyc1c4angle = acos(( c1hy_dist ^ 2 + c1c4_dist ^ 2 - c4hy_dist ^ 2) / (2 * c1hy_dist * c1c4_dist));
@@ -815,7 +820,7 @@ function hla = hyolaryngealApproximation(doubleCell, vertScalar, siScalar)
        
 
         %get lengths of each set of points to form edge and add to array
-        hyAntCric_dist = pdist(hyAntCric_points, 'euclidean');
+        hyAntCric_dist = coordinates_dist(hyAntCric_points, 'euclidean');
 
         if(~isnan(vertScalar))
             allVertMovements(i) = hyAntCric_dist / vertScalar;
@@ -854,7 +859,7 @@ function le = laryngealElevation(doubleCell,vertScalar, siScalar)
         c1PostCric_points = [c1x, c1y; postCricX, postCricY];
 
         %get lengths of each set of points to form edge and add to array
-        c1PostCric_dist = pdist(c1PostCric_points,'euclidean');
+        c1PostCric_dist = coordinates_dist(c1PostCric_points);
         
         
         if(~isnan(vertScalar))
@@ -894,7 +899,7 @@ function ps = pharyngealShortening(doubleCell, vertScalar, siScalar)
         hpUES_points = [hpx, hpy; uesX, uesY];
 
         %get lengths of each set of points to form edge and add to array
-        hpUES_dist = pdist(hpUES_points,'euclidean');
+        hpUES_dist = coordinates_dist(hpUES_points);
        
         
         if(~isnan(vertScalar))
@@ -939,9 +944,9 @@ function botrr = baseOfTongueRetractionRatio(doubleCell, vertScalar, siScalar)
 
         %get lengths of each set of points to form edges of triangle
 
-        c1c4_dist = pdist(c1c4_points,'euclidean');
-        c1val_dist = pdist(c1val_points,'euclidean');
-        c4val_dist = pdist(c4val_points,'euclidean');
+        c1c4_dist = coordinates_dist(c1c4_points);
+        c1val_dist = coordinates_dist(c1val_points);
+        c4val_dist = coordinates_dist(c4val_points);
    
         %Using Law of Cosines to find angle at c1
         valc1c4angle = acos(( c1val_dist ^ 2 + c1c4_dist ^ 2 - c4val_dist ^ 2) / (2 * c1val_dist * c1c4_dist));
@@ -1011,9 +1016,9 @@ function oldahm = oldanteriorHyoidMovement(doubleCell, phaseFramesCell)
         c1hy_points = [c1x, c1y; hyx, hyy];
         c4hy_points = [c4x, c4y; hyx, hyy];
 
-        c1c4_dist = pdist(c1c4_points,'euclidean');
-        c1hy_dist = pdist(c1hy_points,'euclidean');
-        c4hy_dist = pdist(c4hy_points,'euclidean');
+        c1c4_dist = coordinates_dist(c1c4_points);
+        c1hy_dist = coordinates_dist(c1hy_points);
+        c4hy_dist = coordinates_dist(c4hy_points);
         
 
         %push to all c1,hy lengths
@@ -1067,7 +1072,7 @@ function hybotex = hyoidbotexcursionratio(doubleCell, siScalar)
         hyval_points = [hyx, hyy; valX, valY];
        
         %get lengths of each set of points to form edge and add to array
-        hyval_dist = pdist(hyval_points,'euclidean');
+        hyval_dist = coordinates_dist(hyval_points);
         
         if(~isnan(vertScalar))
             allVertMovements(i) = hyval_dist / vertScalar;
