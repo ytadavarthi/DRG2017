@@ -1179,11 +1179,10 @@ for i = 1:numFrames
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
-       AnchorPoint = 'RightTop';
        if repeatCounter == 1
            AnchorPoint = 'LeftTop';
        end
-       currentFrame = insertText(currentFrame,[position_x position_y], 'Ramus Mandible', 'AnchorPoint', AnchorPoint);
+       currentFrame = insertText(currentFrame,[position_x position_y], 'Ramus Mandible');
        repeatCounter = repeatCounter + 1;
    end
        
@@ -1191,14 +1190,7 @@ for i = 1:numFrames
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
-       AnchorPoint = 'RightTop';
-       if repeatCounter == 1
-           AnchorPoint = 'LeftTop';
-       elseif repeatCounter == 2
-           AnchorPoint = 'RightTop';
-           position_y = floor(0.1*frameSize(1));
-       end
-       currentFrame = insertText(currentFrame,[position_x position_y], 'Hyoid Burst', 'AnchorPoint', AnchorPoint);
+       currentFrame = insertText(currentFrame,[position_x position_y], 'Hyoid Burst');
        repeatCounter = repeatCounter + 1;
    end
        
@@ -1206,17 +1198,7 @@ for i = 1:numFrames
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
-       AnchorPoint = 'RightTop';
-       if repeatCounter == 1
-           AnchorPoint = 'LeftTop';
-       elseif repeatCounter == 2
-           AnchorPoint = 'RightTop';
-           position_y = floor(0.1*frameSize(1));
-       elseif repeatCounter == 3
-           AnchorPoint = 'LeftTop';
-           position_y = floor(0.1*frameSize(1));
-       end
-       currentFrame = insertText(currentFrame,[position_x position_y], 'UES Closure', 'AnchorPoint', AnchorPoint);
+       currentFrame = insertText(currentFrame,[position_x position_y], 'UES Closure');
        repeatCounter = repeatCounter + 1;
    end
    
@@ -1224,20 +1206,7 @@ for i = 1:numFrames
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
        position_y = 1;
-       AnchorPoint = 'RightTop';
-       if repeatCounter == 1
-           AnchorPoint = 'LeftTop';
-       elseif repeatCounter == 2
-           AnchorPoint = 'RightTop';
-           position_y = floor(0.08*frameSize(1));
-       elseif repeatCounter == 3
-           AnchorPoint = 'LeftTop';
-           position_y = floor(0.1*frameSize(1));
-       elseif repeatCounter == 4;
-           AnchorPoint = 'RightTop';
-           position_x = frameSize(2);
-       end
-       currentFrame = insertText(currentFrame,[position_x position_y], 'At Rest', 'AnchorPoint', AnchorPoint);
+       currentFrame = insertText(currentFrame,[position_x position_y], 'At Rest');
    end
        
    step(videoFileWriter, currentFrame);
