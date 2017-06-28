@@ -820,7 +820,7 @@ function hla = hyolaryngealApproximation(doubleCell, vertScalar, siScalar)
        
 
         %get lengths of each set of points to form edge and add to array
-        hyAntCric_dist = coordinates_dist(hyAntCric_points, 'euclidean');
+        hyAntCric_dist = coordinates_dist(hyAntCric_points);
 
         if(~isnan(vertScalar))
             allVertMovements(i) = hyAntCric_dist / vertScalar;

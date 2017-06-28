@@ -1435,7 +1435,7 @@ function estSize_Callback(hObject, eventdata, handles)
         end
         bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
         bothPoints_dist = coordinates_dist(bothPoints);
-        bothPoints_dist2 = pdist(bothPoints, 'euclidean');
+        %bothPoints_dist2 = pdist(bothPoints, 'euclidean');
 
         estSize = str2double(get(hObject,'String'));
         globalStudyInfo.pixelspercm = bothPoints_dist / estSize;
