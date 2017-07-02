@@ -1148,31 +1148,32 @@ for i = 1:numFrames
      end
    end
 
-   %Insert the frame number at the top left
-   currentFrame = insertText(currentFrame, [1 1], sprintf('%d / %d', i, numFrames));
+   %Insert the frame number at the bottom right
+   frameSize = size(currentFrame);
+   AnchorPoint = 'LeftBottom';
+   currentFrame = insertText(currentFrame, [1 frameSize(1)], sprintf('%d / %d', i, numFrames),'AnchorPoint', AnchorPoint);
    
    
    %Insert push button frames
    if i == globalStudyInfo.start_frame
-       frameSize = size(currentFrame);
        position_x = floor(frameSize(2)/4);
-       position_y = 1;
-       currentFrame = insertText(currentFrame,[position_x position_y], 'Start Frame');
+       position_y = frameSize(1);
+       AnchorPoint = 'LeftBottom';
+       currentFrame = insertText(currentFrame,[position_x position_y], 'Start Frame','AnchorPoint', AnchorPoint);
        
    elseif i == globalStudyInfo.end_frame
-       frameSize = size(currentFrame);
        position_x = floor(frameSize(2)/4);
-       position_y = 1;
-       currentFrame = insertText(currentFrame,[position_x position_y], 'End Frame');
+       position_y = frameSize(1);
+       AnchorPoint = 'LeftBottom';
+       currentFrame = insertText(currentFrame,[position_x position_y], 'End Frame','AnchorPoint', AnchorPoint);
    end
    
    repeatCounter = 0;
    
    if i == globalStudyInfo.hold_position
-       frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
-       position_y = 1;
-       AnchorPoint = 'RightTop';
+       position_y = frameSize(1);
+       AnchorPoint = 'RightBottom';
        currentFrame = insertText(currentFrame,[position_x position_y], 'Hold Position', 'AnchorPoint', AnchorPoint);
        repeatCounter = repeatCounter + 1;
    end
@@ -1180,63 +1181,60 @@ for i = 1:numFrames
    if i == globalStudyInfo.ramus_mandible
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
-       position_y = 1;
-       AnchorPoint = 'RightTop';
+       position_y = frameSize(1);
+       AnchorPoint = 'RightBottom';
        if repeatCounter == 1
-           AnchorPoint = 'LeftTop';
+           AnchorPoint = 'LeftBottom';
        end
        currentFrame = insertText(currentFrame,[position_x position_y], 'Ramus Mandible', 'AnchorPoint', AnchorPoint);
        repeatCounter = repeatCounter + 1;
    end
        
    if i == globalStudyInfo.hyoid_burst
-       frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
-       position_y = 1;
-       AnchorPoint = 'RightTop';
+       position_y = frameSize(1);
+       AnchorPoint = 'RightBottom';
        if repeatCounter == 1
-           AnchorPoint = 'LeftTop';
+           AnchorPoint = 'LeftBottom';
        elseif repeatCounter == 2
-           AnchorPoint = 'RightTop';
-           position_y = floor(0.1*frameSize(1));
+           AnchorPoint = 'RightBottom';
+           position_y = floor(0.92*frameSize(1));
        end
        currentFrame = insertText(currentFrame,[position_x position_y], 'Hyoid Burst', 'AnchorPoint', AnchorPoint);
        repeatCounter = repeatCounter + 1;
    end
        
    if i == globalStudyInfo.ues_closure
-       frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
-       position_y = 1;
-       AnchorPoint = 'RightTop';
+       position_y = frameSize(1);
+       AnchorPoint = 'RightBottom';
        if repeatCounter == 1
-           AnchorPoint = 'LeftTop';
+           AnchorPoint = 'LeftBottom';
        elseif repeatCounter == 2
-           AnchorPoint = 'RightTop';
-           position_y = floor(0.1*frameSize(1));
+           AnchorPoint = 'RightBottom';
+           position_y = floor(0.92*frameSize(1));
        elseif repeatCounter == 3
-           AnchorPoint = 'LeftTop';
-           position_y = floor(0.1*frameSize(1));
+           AnchorPoint = 'LeftBottom';
+           position_y = floor(.92*frameSize(1));
        end
        currentFrame = insertText(currentFrame,[position_x position_y], 'UES Closure', 'AnchorPoint', AnchorPoint);
        repeatCounter = repeatCounter + 1;
    end
    
    if i == globalStudyInfo.at_rest
-       frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
-       position_y = 1;
-       AnchorPoint = 'RightTop';
+       position_y = frameSize(1);
+       AnchorPoint = 'RightBottom';
        if repeatCounter == 1
-           AnchorPoint = 'LeftTop';
+           AnchorPoint = 'LeftBottom';
        elseif repeatCounter == 2
-           AnchorPoint = 'RightTop';
-           position_y = floor(0.08*frameSize(1));
+           AnchorPoint = 'RightBottom';
+           position_y = floor(0.92*frameSize(1));
        elseif repeatCounter == 3
-           AnchorPoint = 'LeftTop';
-           position_y = floor(0.1*frameSize(1));
+           AnchorPoint = 'LeftBottom';
+           position_y = floor(0.92*frameSize(1));
        elseif repeatCounter == 4;
-           AnchorPoint = 'RightTop';
+           AnchorPoint = 'RightBottom';
            position_x = frameSize(2);
        end
        currentFrame = insertText(currentFrame,[position_x position_y], 'At Rest', 'AnchorPoint', AnchorPoint);
@@ -1514,14 +1512,14 @@ fullFileName = getappdata(handles.kinematicsButton,'fullFileName');
 
 if exist([fullFileName(1:end-length(ext)) '_morphoj_.txt'],'file')
 
-    %change directory
-    cd Compiler
+%     %change directory
+%     cd Compiler
 
     %run compiler
     kinematicValues = Compiler(fullFileName);
 
-    %return directory
-    cd ../
+%     %return directory
+%     cd ../
 
     %create table and format
     h = figure('Visible','off','Name','Kinematic Variables','NumberTitle','off', 'MenuBar', 'none', 'ToolBar' , 'none');

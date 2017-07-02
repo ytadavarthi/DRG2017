@@ -164,9 +164,15 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
 end
 
 function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
+    %change directory
+    cd Compiler
     
     %Create GUI for use-input independent variables
     [~, outputData] = GUI(fileNames);
+
+    
+    %return directory
+    cd ../
 
     %create first column from compile_coordinateData function
     firstColumn = finalCell(:,1);
@@ -202,9 +208,9 @@ function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
         
         %calculate which frames are in each phase.
         Frames_preO  = s.start_frame:(s.hold_position-1);
-        Frames_O     = s.hold_position:(s.hyoid_burst-1);
-        Frames_P     = s.hyoid_burst:(s.ues_closure-1);
-        Frames_E     = s.ues_closure:s.at_rest;
+        Frames_O     = s.hold_position:(s.hyoid_burst-2);
+        Frames_P     = (s.hyoid_burst-1):s.ues_closure;
+        Frames_E     = (s.ues_closure+1):s.at_rest;
         Frames_postE = (s.at_rest+1):s.end_frame;
         
         if isempty(s.at_rest) || s.at_rest > s.end_frame
