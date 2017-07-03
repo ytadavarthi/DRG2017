@@ -4,7 +4,7 @@ function ResultFileWriter(globalStudyInfo)
     studyCoordinates = globalStudyInfo.studyCoordinates;
     numFrames = vfVideoStructure.numFrames;
     videoFileName = vfVideoStructure.fileName;
- 
+    frameRate = vfVideoStructure.frameRate;
     
     
     [a, b] = enumeration('Data.JoveLandmarks');
@@ -70,7 +70,7 @@ function ResultFileWriter(globalStudyInfo)
     
     
     cell2 = cell(1,n);
-    cell2(1, 1:12) = {'start_frame' 'hold_position' 'ramus_mandible' 'hyoid_burst' 'ues_closure' 'at_rest' 'end_frame' 'point1_x' 'point1_y' 'point2_x' 'point2_y' 'pixelspercm'};
+    cell2(1, 1:13) = {'start_frame' 'hold_position' 'ramus_mandible' 'hyoid_burst' 'ues_closure' 'at_rest' 'end_frame' 'point1_x' 'point1_y' 'point2_x' 'point2_y' 'pixelspercm' 'frameRate'};
     
     cell3 = cell(1,n);
     
@@ -86,7 +86,7 @@ function ResultFileWriter(globalStudyInfo)
         globalStudyInfo.point1 = {globalStudyInfo.point1(1),globalStudyInfo.point1(2)};
         globalStudyInfo.point2 = {globalStudyInfo.point2(1),globalStudyInfo.point2(2)};
     end
-    cell3(1, 1:12) =   {globalStudyInfo.start_frame,   ...
+    cell3(1, 1:13) =   {globalStudyInfo.start_frame,   ...
                         globalStudyInfo.hold_position, ...
                         globalStudyInfo.ramus_mandible,...
                         globalStudyInfo.hyoid_burst,   ...
@@ -97,7 +97,8 @@ function ResultFileWriter(globalStudyInfo)
                         globalStudyInfo.point1{2},     ...
                         globalStudyInfo.point2{1},     ...
                         globalStudyInfo.point2{2},     ...
-                        globalStudyInfo.pixelspercm};
+                        globalStudyInfo.pixelspercm,   ...
+                        frameRate};
     
     kinematics_cell = [cell2; cell3];
     totalKinematicsTable = cell2table(kinematics_cell);

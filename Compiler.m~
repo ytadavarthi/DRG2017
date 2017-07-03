@@ -63,17 +63,17 @@ function varargout = Compiler(varargin)
         %disp('Done writing combined kinematics file');
         varargout{1} = output;
     else
-        finalCell = compile_coordinateData(dataStruct,fileNames,folder_name);
-        disp('Done writing combined coordinates file');
-        
-        %if morphoJ file is old and doesn't include the frame number
-        %information, the classifier data text file will not be written.
-        if cell1{1,1} == 'start_frame'
-            compile_classifierData(dataStruct,fileNames,finalCell,folder_name);
-            disp('Done writing combined classifier file');
-        else
-            disp('Warning: classifier data not found in _morphoj_ file');
-        end
+%         finalCell = compile_coordinateData(dataStruct,fileNames,folder_name);
+%         disp('Done writing combined coordinates file');
+%         
+%         %if morphoJ file is old and doesn't include the frame number
+%         %information, the classifier data text file will not be written.
+%         if cell1{1,1} == 'start_frame'
+%             compile_classifierData(dataStruct,fileNames,finalCell,folder_name);
+%             disp('Done writing combined classifier file');
+%         else
+%             disp('Warning: classifier data not found in _morphoj_ file');
+%         end
 
         compile_kinematicsData(dataStruct, fileNames,folder_name);
         disp('Done writing combined kinematics file');
@@ -294,15 +294,11 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         vertScalar = getVertScalar(doubleCell);
         
         %checks for SI calibration
+        
         if(~siScalar)
             disp('WARNING: SI normalization not calculated. You will not have kinematics values in cm');
         else
             fprintf('SI calibration detected. %-.2fpx/cm\n', siScalar);
-        end
-        
-        %checking for frame rate
-        if (isnan(phaseFramesCell(13)))
-           fprintf('WARNING: %s - No Frame Rate Found. Using 30 fps as default.', fileNames{i})
         end
         
         %for kinematics functions
@@ -1018,10 +1014,8 @@ end
 function std = stageTransitionDuration (phasesCell)
     if (isnan(phasesCell(4)) || isnan(phasesCell(3)))
         std = 0;
-    elseif (isnan(phasesCell(13)))
-        std = (phasesCell(3) - phasesCell(2)) / 30;
     else
-        std = (phasesCell(4) - phasesCell(3)) / phasesCell(13);
+        std = (phasesCell(4) - phasesCell(3)) / 24;
     end
 end
 
@@ -1029,10 +1023,8 @@ end
 function ptt = pharyngealTransitTime (phasesCell)
     if (isnan(phasesCell(5)) || isnan(phasesCell(3)))
         ptt = 0;
-    elseif (isnan(phasesCell(13)))
-        ptt = (phasesCell(5) - phasesCell(3)) / 30;
     else    
-        ptt = (phasesCell(5) - phasesCell(3)) / phasesCell(13);
+        ptt = (phasesCell(5) - phasesCell(3)) / 24;
     end
 end
 
@@ -1040,10 +1032,8 @@ end
 function optt = oropharyngealTransitTime (phasesCell)
     if (isnan(phasesCell(5)) || isnan(phasesCell(2)))
         optt = 0;
-    elseif (isnan(phasesCell(13)))
-        optt = (phasesCell(5) - phasesCell(2)) / 30;
     else
-        optt = (phasesCell(5) - phasesCell(2)) / phasesCell(13);
+        optt = (phasesCell(5) - phasesCell(2)) / 24;
     end
 end
 
@@ -1051,10 +1041,8 @@ end
 function pdt = pharyngealDelayTime (phasesCell)
     if (isnan(phasesCell(4)) || isnan(phasesCell(3)))
         pdt = 0;
-    elseif (isnan(phasesCell(13)))
-        pdt = (phasesCell(4) - phasesCell(3)) / 30;
     else
-        pdt = (phasesCell(4) - phasesCell(3)) / phasesCell(13);
+        pdt = (phasesCell(4) - phasesCell(3)) / 24;
     end
 end
 

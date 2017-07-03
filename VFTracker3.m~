@@ -1148,52 +1148,96 @@ for i = 1:numFrames
      end
    end
 
-   %Insert the frame number at the top left
-   currentFrame = insertText(currentFrame, [1 1], sprintf('%d / %d', i, numFrames));
+   %Insert the frame number at the bottom right
+   frameSize = size(currentFrame);
+   AnchorPoint = 'LeftBottom';
+   currentFrame = insertText(currentFrame, [1 frameSize(1)], sprintf('%d / %d', i, numFrames),'AnchorPoint', AnchorPoint);
+   
    
    %Insert push button frames
    if i == globalStudyInfo.start_frame
-       frameSize = size(currentFrame);
        position_x = floor(frameSize(2)/4);
-       position_y = 1;
-       currentFrame = insertText(currentFrame,[position_x position_y], 'Start Frame');
+       position_y = frameSize(1);
+       AnchorPoint = 'LeftBottom';
+       currentFrame = insertText(currentFrame,[position_x position_y], 'Start Frame','AnchorPoint', AnchorPoint);
        
    elseif i == globalStudyInfo.end_frame
-       frameSize = size(currentFrame);
        position_x = floor(frameSize(2)/4);
-       position_y = 1;
-       currentFrame = insertText(currentFrame,[position_x position_y], 'End Frame');
+       position_y = frameSize(1);
+       AnchorPoint = 'LeftBottom';
+       currentFrame = insertText(currentFrame,[position_x position_y], 'End Frame','AnchorPoint', AnchorPoint);
    end
    
-   if i == globalStudyInfo.hold_position
-       frameSize = size(currentFrame);
-       position_x = floor(frameSize(2)*3/4);
-       position_y = 1;
-       currentFrame = insertText(currentFrame,[position_x position_y], 'Hold Position');
-       
-   elseif i == globalStudyInfo.ramus_mandible
-       frameSize = size(currentFrame);
-       position_x = floor(frameSize(2)*3/4);
-       position_y = 1;
-       currentFrame = insertText(currentFrame,[position_x position_y], 'Ramus Mandible');
-       
-   elseif i == globalStudyInfo.hyoid_burst
-       frameSize = size(currentFrame);
-       position_x = floor(frameSize(2)*3/4);
-       position_y = 1;
-       currentFrame = insertText(currentFrame,[position_x position_y], 'Hyoid Burst');
-       
-   elseif i == globalStudyInfo.ues_closure
-       frameSize = size(currentFrame);
-       position_x = floor(frameSize(2)*3/4);
-       position_y = 1;
-       currentFrame = insertText(currentFrame,[position_x position_y], 'UES Closure');
+   repeatCounter = 0;
    
-   elseif i == globalStudyInfo.at_rest
+   if i == globalStudyInfo.hold_position
+       position_x = floor(frameSize(2)*3/4);
+       position_y = frameSize(1);
+       AnchorPoint = 'RightBottom';
+       currentFrame = insertText(currentFrame,[position_x position_y], 'Hold Position', 'AnchorPoint', AnchorPoint);
+       repeatCounter = repeatCounter + 1;
+   end
+       
+   if i == globalStudyInfo.ramus_mandible
        frameSize = size(currentFrame);
        position_x = floor(frameSize(2)*3/4);
-       position_y = 1;
-       currentFrame = insertText(currentFrame,[position_x position_y], 'At Rest');
+       position_y = frameSize(1);
+       AnchorPoint = 'RightBottom';
+       if repeatCounter == 1
+           AnchorPoint = 'LeftBottom';
+       end
+       currentFrame = insertText(currentFrame,[position_x position_y], 'Ramus Mandible', 'AnchorPoint', AnchorPoint);
+       repeatCounter = repeatCounter + 1;
+   end
+       
+   if i == globalStudyInfo.hyoid_burst
+       position_x = floor(frameSize(2)*3/4);
+       position_y = frameSize(1);
+       AnchorPoint = 'RightBottom';
+       if repeatCounter == 1
+           AnchorPoint = 'LeftBottom';
+       elseif repeatCounter == 2
+           AnchorPoint = 'RightBottom';
+           position_y = floor(0.92*frameSize(1));
+       end
+       currentFrame = insertText(currentFrame,[position_x position_y], 'Hyoid Burst', 'AnchorPoint', AnchorPoint);
+       repeatCounter = repeatCounter + 1;
+   end
+       
+   if i == globalStudyInfo.ues_closure
+       position_x = floor(frameSize(2)*3/4);
+       position_y = frameSize(1);
+       AnchorPoint = 'RightBottom';
+       if repeatCounter == 1
+           AnchorPoint = 'LeftBottom';
+       elseif repeatCounter == 2
+           AnchorPoint = 'RightBottom';
+           position_y = floor(0.92*frameSize(1));
+       elseif repeatCounter == 3
+           AnchorPoint = 'LeftBottom';
+           position_y = floor(.92*frameSize(1));
+       end
+       currentFrame = insertText(currentFrame,[position_x position_y], 'UES Closure', 'AnchorPoint', AnchorPoint);
+       repeatCounter = repeatCounter + 1;
+   end
+   
+   if i == globalStudyInfo.at_rest
+       position_x = floor(frameSize(2)*3/4);
+       position_y = frameSize(1);
+       AnchorPoint = 'RightBottom';
+       if repeatCounter == 1
+           AnchorPoint = 'LeftBottom';
+       elseif repeatCounter == 2
+           AnchorPoint = 'RightBottom';
+           position_y = floor(0.92*frameSize(1));
+       elseif repeatCounter == 3
+           AnchorPoint = 'LeftBottom';
+           position_y = floor(0.92*frameSize(1));
+       elseif repeatCounter == 4;
+           AnchorPoint = 'RightBottom';
+           position_x = frameSize(2);
+       end
+       currentFrame = insertText(currentFrame,[position_x position_y], 'At Rest', 'AnchorPoint', AnchorPoint);
    end
        
    step(videoFileWriter, currentFrame);
@@ -1389,7 +1433,7 @@ function estSize_Callback(hObject, eventdata, handles)
         end
         bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
         bothPoints_dist = coordinates_dist(bothPoints);
-        bothPoints_dist2 = pdist(bothPoints,);
+        %bothPoints_dist2 = pdist(bothPoints, 'euclidean');
 
         estSize = str2double(get(hObject,'String'));
         globalStudyInfo.pixelspercm = bothPoints_dist / estSize;
@@ -1449,6 +1493,14 @@ set(hObject, 'String', '');
 set(hObject, 'enable', 'on');
 uicontrol(hObject);
 
+function kineBool = checkStartEndFrames(handles)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    if (isnan(globalStudyInfo.start_frame) || isnan(globalStudyInfo.end_frame))
+        kineBool = false;
+        warningMessage = sprintf('Error: Cannot display kinematics because start and end frames not designated. Please assign these frames.');
+        uiwait(msgbox(warningMessage));
+    else
+        kineBool = true;
 
 % --- Executes on button press in kinematicsButton.
 function kinematicsButton_Callback(hObject, eventdata, handles)
@@ -1456,43 +1508,9 @@ function kinematicsButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%automatically saving the file
-saveButton_ClickedCallback(hObject, eventdata, handles);
-
-%close previous window if it exists
-close(findobj('type','figure','name','Kinematic Variables'))
-
-% %retreive file path information stored in initialize
-fullFileName = getappdata(handles.kinematicsButton,'fullFileName');
-[pathstr name ext] = fileparts(fullFileName);
-
-if exist([fullFileName(1:end-length(ext)) '_morphoj_.txt'],'file')
-
-    %change directory
-    cd Compiler
-
-    %run compiler
-    kinematicValues = Compiler(fullFileName);
-
-    %return directory
-    cd ../
-
-    %create table and format
-    h = figure('Visible','off','Name','Kinematic Variables','NumberTitle','off', 'MenuBar', 'none', 'ToolBar' , 'none');
-    u = uitable(h,'Data',kinematicValues);
-    columnWidth = fitColumns(u.Data);
-    u.ColumnWidth = columnWidth;
-    table_extent = get(u,'Extent');
-    figure_size = get(h,'outerposition');
-    desired_fig_size = [figure_size(1) figure_size(2) table_extent(3)+36 table_extent(4)+65];
-    set(u,'Position',[1 20 table_extent(3)+35 table_extent(4)])
-    set(h,'outerposition', desired_fig_size);
-    set(h,'Visible','on');
+    if (checkStartEndFrames(handles))
     
-else
-    warningMessage = sprintf('Warning: Cannot display kinematics because file does not exist. Click "save" first!');
-    uiwait(msgbox(warningMessage));
-end
+    end
 
 function columnWidth = fitColumns(data)
     dataSize = size(data);
@@ -1524,7 +1542,6 @@ function pushbutton11_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 close('VFTracker3')
 VFTracker3
-
 
 % --- Executes on button press in unitCalibrationButton.
 function unitCalibrationButton_Callback(hObject, eventdata, handles)

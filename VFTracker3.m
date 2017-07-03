@@ -166,9 +166,7 @@ pointerShape = [ ...
 
     studyCoordinates = Data.StudyCoordinates(vfVideoStructure);
     globalStudyInfo.studyCoordinates = studyCoordinates;
-
-    
-        globalStudyInfo.vfVideoStructure = vfVideoStructure;
+    globalStudyInfo.vfVideoStructure = vfVideoStructure;
     
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     
@@ -1493,6 +1491,15 @@ set(hObject, 'String', '');
 set(hObject, 'enable', 'on');
 uicontrol(hObject);
 
+function kineBool = checkStartEndFrames(handles)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    if (isempty(globalStudyInfo.start_frame) || isempty(globalStudyInfo.end_frame))
+        kineBool = false;
+        warningMessage = sprintf('Error: Cannot display kinematics because start and end frames not designated. Please assign these frames.');
+        uiwait(msgbox(warningMessage));
+    else
+        kineBool = true;
+    end
 
 % --- Executes on button press in kinematicsButton.
 function kinematicsButton_Callback(hObject, eventdata, handles)
@@ -1500,43 +1507,46 @@ function kinematicsButton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-%automatically saving the file
-saveButton_ClickedCallback(hObject, eventdata, handles);
+    if (checkStartEndFrames(handles))
+        %automatically saving the file
+        saveButton_ClickedCallback(hObject, eventdata, handles);
 
-%close previous window if it exists
-close(findobj('type','figure','name','Kinematic Variables'))
+        %close previous window if it exists
+        close(findobj('type','figure','name','Kinematic Variables'))
 
-% %retreive file path information stored in initialize
-fullFileName = getappdata(handles.kinematicsButton,'fullFileName');
-[pathstr name ext] = fileparts(fullFileName);
+        % %retreive file path information stored in initialize
+        fullFileName = getappdata(handles.kinematicsButton,'fullFileName');
+        [pathstr name ext] = fileparts(fullFileName);
 
-if exist([fullFileName(1:end-length(ext)) '_morphoj_.txt'],'file')
+        if exist([fullFileName(1:end-length(ext)) '_morphoj_.txt'],'file')
 
-%     %change directory
-%     cd Compiler
+        %     %change directory
+        %     cd Compiler
 
-    %run compiler
-    kinematicValues = Compiler(fullFileName);
+            %run compiler
+            kinematicValues = Compiler(fullFileName);
 
-%     %return directory
-%     cd ../
+        %     %return directory
+        %     cd ../
 
-    %create table and format
-    h = figure('Visible','off','Name','Kinematic Variables','NumberTitle','off', 'MenuBar', 'none', 'ToolBar' , 'none');
-    u = uitable(h,'Data',kinematicValues);
-    columnWidth = fitColumns(u.Data);
-    u.ColumnWidth = columnWidth;
-    table_extent = get(u,'Extent');
-    figure_size = get(h,'outerposition');
-    desired_fig_size = [figure_size(1) figure_size(2) table_extent(3)+36 table_extent(4)+65];
-    set(u,'Position',[1 20 table_extent(3)+35 table_extent(4)])
-    set(h,'outerposition', desired_fig_size);
-    set(h,'Visible','on');
+            %create table and format
+            h = figure('Visible','off','Name','Kinematic Variables','NumberTitle','off', 'MenuBar', 'none', 'ToolBar' , 'none');
+            u = uitable(h,'Data',kinematicValues);
+            columnWidth = fitColumns(u.Data);
+            u.ColumnWidth = columnWidth;
+            table_extent = get(u,'Extent');
+            figure_size = get(h,'outerposition');
+            desired_fig_size = [figure_size(1) figure_size(2) table_extent(3)+36 table_extent(4)+65];
+            set(u,'Position',[1 20 table_extent(3)+35 table_extent(4)])
+            set(h,'outerposition', desired_fig_size);
+            set(h,'Visible','on');
+
+        else
+            warningMessage = sprintf('Warning: Cannot display kinematics because file does not exist. Click "save" first!');
+            uiwait(msgbox(warningMessage));
+        end
+    end
     
-else
-    warningMessage = sprintf('Warning: Cannot display kinematics because file does not exist. Click "save" first!');
-    uiwait(msgbox(warningMessage));
-end
 
 function columnWidth = fitColumns(data)
     dataSize = size(data);
