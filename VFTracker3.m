@@ -80,6 +80,7 @@ function varargout = VFTracker3_OutputFcn(hObject, eventdata, handles)
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+set(gcf, 'units','normalized','outerposition',[0 0 1 1]);
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
@@ -308,7 +309,7 @@ pointerShape = [ ...
     set(handles.blockSizeEditBox, 'String', num2str(globalStudyInfo.kltTrackerParameters.blockSize));
    
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-    
+
     %Render the first frame
     Render(handles);
     

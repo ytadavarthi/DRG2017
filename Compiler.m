@@ -291,7 +291,7 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         doubleCell = points2doubleSansLabels(dataStruct, i);
         phaseFramesCell = frames2doubleSansLabels(dataStruct, i);
         siScalar = getSIscalar(phaseFramesCell);
-        vertScalar = getVertScalar(doubleCell);
+        vertScalar = getVertScalar(doubleCell, phaseFramesCell(1), phaseFramesCell(7));
         
         %checks for SI calibration
         if(~siScalar)
@@ -386,7 +386,6 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         doubleCell = points2doubleSansLabels(dataStruct, i);
         phaseFramesCell = frames2doubleSansLabels(dataStruct, i);
         siScalar = getSIscalar(phaseFramesCell);
-        vertScalar = getVertScalar(doubleCell);
         startFrame = 0;
         endFrame = 0;
         
@@ -403,6 +402,9 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
             startFrame = phaseFramesCell(1);
             endFrame = phaseFramesCell(7);
         end
+        
+        vertScalar = getVertScalar(doubleCell, startFrame, endFrame);
+
         
         %checking for frame rate
         if (isnan(phaseFramesCell(13)))
@@ -479,13 +481,13 @@ function phaseFramesCell = frames2doubleSansLabels(dataStruct, videoIndex)
 end
 
 %Gets Average C2-C4 Lengths to normalize the distances across patients
-function vertScalar = getVertScalar(doubleCell)
+function vertScalar = getVertScalar(doubleCell, startFrame, endFrame)
     doubleCellSize = size(doubleCell);
     
     allVertLengths = 0;
     totalTrackedPoints = 0;
     
-    for i= 1:doubleCellSize(1)
+    for i= startFrame:endFrame
         c2x = doubleCell(i,7);
         c2y = doubleCell(i,8);
         c4x = doubleCell(i,9);
