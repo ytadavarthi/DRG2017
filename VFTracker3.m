@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 06-Jul-2017 12:58:00
+% Last Modified by GUIDE v2.5 06-Jul-2017 17:34:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -617,7 +617,7 @@ function performTracking(handles)
 %            disp('corners detected');
             Utilities.CustomPrinters.printInfo('Harris corner detected');
             cornersFound = true;
-            set(handles.feedbackLabel, 'String', '');
+            showFeedbackPopup(handles,'No corners detected',0);
         end
     end
     
@@ -655,7 +655,7 @@ function performTracking(handles)
          end
      end
      Utilities.CustomPrinters.printInfo('Tracking is done');
-     showFeedbackPopup(handles,'',0);
+     showFeedbackPopup(handles,'Tracking is done',2);
      Render(handles);
     
 
@@ -809,7 +809,7 @@ showFeedbackPopup(handles, 'Saving...',1);
 
 drawnow()
 Utilities.ResultFileWriter(globalStudyInfo);
-showFeedbackPopup(handles, 'Saved',2);
+showFeedbackPopup(handles, 'Saved', 2);
 
 
 %allows you to display text to the screen
@@ -821,11 +821,17 @@ function showFeedbackPopup(handles, string, visibility)
         set(handles.feedbackLabel, 'String', '');
         set(handles.feedbackPanel, 'visible', 'off');
     elseif (visibility == 2)
+        set(handles.feedbackPanel, 'BackgroundColor', 'green');
+        set(handles.feedbackLabel, 'BackgroundColor', 'green');
+        set(handles.feedbackLabel, 'ForegroundColor', 'black');
         set(handles.feedbackPanel, 'visible', 'on');
         set(handles.feedbackLabel, 'String', string);
         pause(.5)
         set(handles.feedbackLabel, 'String', '');
         set(handles.feedbackPanel, 'visible', 'off');
+        set(handles.feedbackPanel, 'BackgroundColor', 'red');
+        set(handles.feedbackLabel, 'BackgroundColor', 'red');
+        set(handles.feedbackLabel, 'ForegroundColor', 'white');
     end
     
     
@@ -1369,11 +1375,7 @@ function numPyramidLevelsLabel_CreateFcn(hObject, eventdata, handles)
 % set(hObject, 'Parent', handles.semiautoOptions);
 
 
-% --- Executes during object creation, after setting all properties.
-function feedbackLabel_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to feedbackLabel (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+
 
 % --- Executes during object creation, after setting all properties.
 function text11_CreateFcn(hObject, eventdata, handles)
@@ -1441,6 +1443,8 @@ function estSize_Callback(hObject, eventdata, handles)
         estSize = str2double(get(hObject,'String'));
         globalStudyInfo.pixelspercm = bothPoints_dist / estSize;
         set(handles.pixelspercm_text, 'String', num2str(globalStudyInfo.pixelspercm));
+        showFeedbackPopup(handles,'SI Scalar Calculated',2);
+
     end
     
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
@@ -1474,7 +1478,7 @@ function calibrateSIbutton_Callback(hObject, eventdata, handles)
         globalStudyInfo.point1 = [x(1) y(1)];
         set(handles.point1_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
         set(hObject,'String','Click opposite edge');
-        showFeedbackPopup(handles,'Point 1 Tracked',1);
+        showFeedbackPopup(handles,'Point 1 Tracked',2);
 
         [x, y] = mygetpts();
         globalStudyInfo.point2 = [x(1) y(1)];
@@ -1641,7 +1645,3 @@ else
       handles.zoomHandle.Enable = 'off';
       handles.zoomHandle.ActionPostCallback = [];
 end
-
-
-
-
