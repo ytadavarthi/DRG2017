@@ -180,7 +180,7 @@ end
 % Subfunction KeyPress
 %--------------------------------------------------
 function KeyPress %#ok
-disp('KEYPRESS CALLED')
+%disp('KEYPRESS CALLED')
 global GETPTS_FIG GETPTS_H1 GETPTS_H2
 
 key = get(GETPTS_FIG, 'CurrentCharacter');
@@ -215,7 +215,7 @@ end
 % Subfunction FirstButtonDown
 %--------------------------------------------------
 function FirstButtonDown %#ok
-disp('FIRST BUTTON DOWN CALLED')
+%disp('FIRST BUTTON DOWN CALLED')
 global GETPTS_FIG GETPTS_AX GETPTS_H1 GETPTS_H2
 
 [x,y] = getcurpt(GETPTS_AX);
