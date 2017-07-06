@@ -1626,7 +1626,7 @@ function un_zoom(obj,evd,handles)
 persistent chk
 if isempty(chk)
       chk = 1;
-      pause(0.3); %Add a delay to distinguish single click from a double click
+      pause(0.5); %Add a delay to distinguish single click from a double click
       if chk == 1
         chk = [];
         handles.zoomHandle.ModeHandle.Blocking = false;
@@ -1637,9 +1637,6 @@ else
       chk = [];
       zoom out
       zoom reset
-      handles.zoomHandle.ModeHandle.Blocking = false;
-      handles.zoomHandle.Enable = 'off';
-      handles.zoomHandle.ActionPostCallback = [];
 end
 
 
