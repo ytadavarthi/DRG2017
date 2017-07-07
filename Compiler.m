@@ -214,7 +214,7 @@ function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
         Frames_postE = (s.at_rest+1):s.end_frame;
         
         if isempty(s.at_rest) || s.at_rest > s.end_frame
-            Frames_E = s.ues_closure:s.end_frame;
+            Frames_E = (s.ues_closure+1):s.end_frame;
         end
         
         swallowPhaseData = cell(m-1,1);
@@ -301,7 +301,7 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         end
         
         %checking for frame rate
-        if (isnan(phaseFramesCell(13)))
+        if length(phaseFramesCell)<13 || (isnan(phaseFramesCell(13)))
            fprintf('WARNING: %s - No Frame Rate Found. Using 30 fps as default.', fileNames{i})
         end
         
@@ -407,7 +407,7 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
 
         
         %checking for frame rate
-        if (isnan(phaseFramesCell(13)))
+        if length(phaseFramesCell)<13 || (isnan(phaseFramesCell(13)))
            fprintf('WARNING: %s - No Frame Rate Found. Using 30 fps as default.', fileNames{i})
         end
         
@@ -1009,7 +1009,7 @@ end
 function ott = oralTransitTime (phasesCell)
     if (isnan(phasesCell(3)) || isnan(phasesCell(2)))
         ott = 0;
-    elseif (isnan(phasesCell(13)))
+    elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
         ott = (phasesCell(3) - phasesCell(2)) / 30;
     else
         ott = (phasesCell(3) - phasesCell(2)) / phasesCell(13);
@@ -1020,7 +1020,7 @@ end
 function std = stageTransitionDuration (phasesCell)
     if (isnan(phasesCell(4)) || isnan(phasesCell(3)))
         std = 0;
-    elseif (isnan(phasesCell(13)))
+    elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
         std = (phasesCell(3) - phasesCell(2)) / 30;
     else
         std = (phasesCell(4) - phasesCell(3)) / phasesCell(13);
@@ -1031,7 +1031,7 @@ end
 function ptt = pharyngealTransitTime (phasesCell)
     if (isnan(phasesCell(5)) || isnan(phasesCell(3)))
         ptt = 0;
-    elseif (isnan(phasesCell(13)))
+    elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
         ptt = (phasesCell(5) - phasesCell(3)) / 30;
     else    
         ptt = (phasesCell(5) - phasesCell(3)) / phasesCell(13);
@@ -1042,7 +1042,7 @@ end
 function optt = oropharyngealTransitTime (phasesCell)
     if (isnan(phasesCell(5)) || isnan(phasesCell(2)))
         optt = 0;
-    elseif (isnan(phasesCell(13)))
+    elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
         optt = (phasesCell(5) - phasesCell(2)) / 30;
     else
         optt = (phasesCell(5) - phasesCell(2)) / phasesCell(13);
@@ -1053,7 +1053,7 @@ end
 function pdt = pharyngealDelayTime (phasesCell)
     if (isnan(phasesCell(4)) || isnan(phasesCell(3)))
         pdt = 0;
-    elseif (isnan(phasesCell(13)))
+    elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
         pdt = (phasesCell(4) - phasesCell(3)) / 30;
     else
         pdt = (phasesCell(4) - phasesCell(3)) / phasesCell(13);
