@@ -1398,15 +1398,10 @@ button_state = get(hObject,'Value');
 
 if button_state == get(hObject,'Max')
     set(handles.semiautoOptions, 'visible', 'on');
-    set(handles.kinematicsButton, 'visible', 'off');
-    set(handles.unitCalibrationButton, 'visible', 'off');
     set(handles.unitCalibrationPanel, 'visible', 'off');
 
 elseif button_state == get(hObject,'Min')
     set(handles.semiautoOptions, 'visible', 'off');
-    set(handles.kinematicsButton, 'visible', 'on');
-    set(handles.unitCalibrationButton, 'visible', 'on');    
-    set(handles.unitCalibrationButton, 'Value', '0');
     set(handles.unitCalibrationPanel, 'visible', 'off');
 end
 
@@ -1600,8 +1595,21 @@ button_state = get(hObject,'Value');
 
 if button_state == get(hObject,'Max')
     set(handles.unitCalibrationPanel, 'visible', 'on');
+    set(handles.semiautoOptions, 'visible', 'off');
+%     set(handles.text21, 'visible', 'off');
+%     set(handles.noiseFilterLevelSlider, 'visible', 'off');
+%     set(handles.gammaAdjustSlider, 'visible', 'off');
+%     set(handles.noiseFilterLevelIndicator, 'visible', 'off');
+%     set(handles.gammaAdjustLevelIndicator, 'visible', 'off');
+
 elseif button_state == get(hObject,'Min')
     set(handles.unitCalibrationPanel, 'visible', 'off');
+%     set(handles.semiautoOptions, 'visible', 'on');
+%     set(handles.text21, 'visible', 'on');
+%     set(handles.noiseFilterLevelSlider, 'visible', 'on');
+%     set(handles.gammaAdjustSlider, 'visible', 'on');
+%     set(handles.noiseFilterLevelIndicator, 'visible', 'on');
+%     set(handles.gammaAdjustLevelIndicator, 'visible', 'on');
 end
 
 drawnow();

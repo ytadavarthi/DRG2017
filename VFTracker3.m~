@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 19-Jun-2017 14:10:28
+% Last Modified by GUIDE v2.5 06-Jul-2017 17:34:43
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -80,6 +80,7 @@ function varargout = VFTracker3_OutputFcn(hObject, eventdata, handles)
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+set(gcf, 'units','normalized','outerposition',[0 0 1 1]);
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
@@ -148,6 +149,18 @@ pointerShape = [ ...
     
     %display file name
     handles.text11.String = fileName;
+    
+    %adjust filename font until entire file name fits on screen.
+    for fontSize = [22,20,18,16,14,12,10,9,8,7,6,5,4]
+        set(handles.text11,'FontSize',fontSize)
+        titleExtent = get(handles.text11,'Extent');
+        titleSize = handles.text11.Position;
+        titleWidth = titleSize(3);
+        if titleExtent(3) < titleWidth
+            break;
+        end
+    end
+    
     uicontrol(handles.text11);
     
     %%% Uncomment to load a file direclty without the file chooser:
@@ -166,9 +179,7 @@ pointerShape = [ ...
 
     studyCoordinates = Data.StudyCoordinates(vfVideoStructure);
     globalStudyInfo.studyCoordinates = studyCoordinates;
-
-    
-        globalStudyInfo.vfVideoStructure = vfVideoStructure;
+    globalStudyInfo.vfVideoStructure = vfVideoStructure;
     
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     
@@ -310,7 +321,7 @@ pointerShape = [ ...
     set(handles.blockSizeEditBox, 'String', num2str(globalStudyInfo.kltTrackerParameters.blockSize));
    
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-    
+
     %Render the first frame
     Render(handles);
     
@@ -441,14 +452,6 @@ function result = preprocessImage(handles, img)
     else
         result = img;
     end
-
-
-% --------------------------------------------------------------------
-function uitoggletool2_OffCallback(hObject, eventdata, handles)
-% hObject    handle to uitoggletool2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-handle(handles.frameScrubber);
 
 
 % --- Executes on slider movement.
@@ -614,7 +617,7 @@ function performTracking(handles)
 %            disp('corners detected');
             Utilities.CustomPrinters.printInfo('Harris corner detected');
             cornersFound = true;
-            set(handles.feedbackLabel, 'String', '');
+            showFeedbackPopup(handles,'No corners detected',0);
         end
     end
     
@@ -652,7 +655,7 @@ function performTracking(handles)
          end
      end
      Utilities.CustomPrinters.printInfo('Tracking is done');
-     showFeedbackPopup(handles,'',0);
+     showFeedbackPopup(handles,'Tracking is done',2);
      Render(handles);
     
 
@@ -806,7 +809,7 @@ showFeedbackPopup(handles, 'Saving...',1);
 
 drawnow()
 Utilities.ResultFileWriter(globalStudyInfo);
-showFeedbackPopup(handles, 'Saved',2);
+showFeedbackPopup(handles, 'Saved', 2);
 
 
 %allows you to display text to the screen
@@ -818,11 +821,17 @@ function showFeedbackPopup(handles, string, visibility)
         set(handles.feedbackLabel, 'String', '');
         set(handles.feedbackPanel, 'visible', 'off');
     elseif (visibility == 2)
+        set(handles.feedbackPanel, 'BackgroundColor', 'green');
+        set(handles.feedbackLabel, 'BackgroundColor', 'green');
+        set(handles.feedbackLabel, 'ForegroundColor', 'black');
         set(handles.feedbackPanel, 'visible', 'on');
         set(handles.feedbackLabel, 'String', string);
         pause(.5)
         set(handles.feedbackLabel, 'String', '');
         set(handles.feedbackPanel, 'visible', 'off');
+        set(handles.feedbackPanel, 'BackgroundColor', 'red');
+        set(handles.feedbackLabel, 'BackgroundColor', 'red');
+        set(handles.feedbackLabel, 'ForegroundColor', 'white');
     end
     
     
@@ -1366,11 +1375,7 @@ function numPyramidLevelsLabel_CreateFcn(hObject, eventdata, handles)
 % set(hObject, 'Parent', handles.semiautoOptions);
 
 
-% --- Executes during object creation, after setting all properties.
-function feedbackLabel_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to feedbackLabel (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
+
 
 % --- Executes during object creation, after setting all properties.
 function text11_CreateFcn(hObject, eventdata, handles)
@@ -1393,15 +1398,10 @@ button_state = get(hObject,'Value');
 
 if button_state == get(hObject,'Max')
     set(handles.semiautoOptions, 'visible', 'on');
-    set(handles.kinematicsButton, 'visible', 'off');
-    set(handles.unitCalibrationButton, 'visible', 'off');
     set(handles.unitCalibrationPanel, 'visible', 'off');
 
 elseif button_state == get(hObject,'Min')
     set(handles.semiautoOptions, 'visible', 'off');
-    set(handles.kinematicsButton, 'visible', 'on');
-    set(handles.unitCalibrationButton, 'visible', 'on');    
-    set(handles.unitCalibrationButton, 'Value', '0');
     set(handles.unitCalibrationPanel, 'visible', 'off');
 end
 
@@ -1438,6 +1438,8 @@ function estSize_Callback(hObject, eventdata, handles)
         estSize = str2double(get(hObject,'String'));
         globalStudyInfo.pixelspercm = bothPoints_dist / estSize;
         set(handles.pixelspercm_text, 'String', num2str(globalStudyInfo.pixelspercm));
+        showFeedbackPopup(handles,'SI Scalar Calculated',2);
+
     end
     
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
@@ -1471,7 +1473,7 @@ function calibrateSIbutton_Callback(hObject, eventdata, handles)
         globalStudyInfo.point1 = [x(1) y(1)];
         set(handles.point1_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
         set(hObject,'String','Click opposite edge');
-        showFeedbackPopup(handles,'Point 1 Tracked',1);
+        showFeedbackPopup(handles,'Point 1 Tracked',2);
 
         [x, y] = mygetpts();
         globalStudyInfo.point2 = [x(1) y(1)];
@@ -1495,12 +1497,13 @@ uicontrol(hObject);
 
 function kineBool = checkStartEndFrames(handles)
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-    if (isnan(globalStudyInfo.start_frame) || isnan(globalStudyInfo.end_frame))
+    if (isempty(globalStudyInfo.start_frame) || isempty(globalStudyInfo.end_frame))
         kineBool = false;
         warningMessage = sprintf('Error: Cannot display kinematics because start and end frames not designated. Please assign these frames.');
         uiwait(msgbox(warningMessage));
     else
         kineBool = true;
+    end
 
 % --- Executes on button press in kinematicsButton.
 function kinematicsButton_Callback(hObject, eventdata, handles)
@@ -1509,8 +1512,45 @@ function kinematicsButton_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
     if (checkStartEndFrames(handles))
-    
+        %automatically saving the file
+        saveButton_ClickedCallback(hObject, eventdata, handles);
+
+        %close previous window if it exists
+        close(findobj('type','figure','name','Kinematic Variables'))
+
+        % %retreive file path information stored in initialize
+        fullFileName = getappdata(handles.kinematicsButton,'fullFileName');
+        [pathstr name ext] = fileparts(fullFileName);
+
+        if exist([fullFileName(1:end-length(ext)) '_morphoj_.txt'],'file')
+
+        %     %change directory
+        %     cd Compiler
+
+            %run compiler
+            kinematicValues = Compiler(fullFileName);
+
+        %     %return directory
+        %     cd ../
+
+            %create table and format
+            h = figure('Visible','off','Name','Kinematic Variables','NumberTitle','off', 'MenuBar', 'none', 'ToolBar' , 'none');
+            u = uitable(h,'Data',kinematicValues);
+            columnWidth = fitColumns(u.Data);
+            u.ColumnWidth = columnWidth;
+            table_extent = get(u,'Extent');
+            figure_size = get(h,'outerposition');
+            desired_fig_size = [figure_size(1) figure_size(2) table_extent(3)+36 table_extent(4)+65];
+            set(u,'Position',[1 20 table_extent(3)+35 table_extent(4)])
+            set(h,'outerposition', desired_fig_size);
+            set(h,'Visible','on');
+
+        else
+            warningMessage = sprintf('Warning: Cannot display kinematics because file does not exist. Click "save" first!');
+            uiwait(msgbox(warningMessage));
+        end
     end
+    
 
 function columnWidth = fitColumns(data)
     dataSize = size(data);
@@ -1555,8 +1595,21 @@ button_state = get(hObject,'Value');
 
 if button_state == get(hObject,'Max')
     set(handles.unitCalibrationPanel, 'visible', 'on');
+    set(handles.kinematicsButton, 'visible', 'off');
+    set(handles.text21, 'visible', 'off');
+    set(handles.noiseFilterLevelSlider, 'visible', 'off');
+    set(handles.gammaAdjustSlider, 'visible', 'off');
+    set(handles.noiseFilterLevelIndicator, 'visible', 'off');
+    set(handles.gammaAdjustLevelIndicator, 'visible', 'off');
+
 elseif button_state == get(hObject,'Min')
     set(handles.unitCalibrationPanel, 'visible', 'off');
+    set(handles.kinematicsButton, 'visible', 'on');
+    set(handles.text21, 'visible', 'on');
+    set(handles.noiseFilterLevelSlider, 'visible', 'on');
+    set(handles.gammaAdjustSlider, 'visible', 'on');
+    set(handles.noiseFilterLevelIndicator, 'visible', 'on');
+    set(handles.gammaAdjustLevelIndicator, 'visible', 'on');
 end
 
 drawnow();
@@ -1568,3 +1621,35 @@ function unitCalibrationPanel_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 set(hObject, 'visible', 'off');
+
+
+% --------------------------------------------------------------------
+function customZoom_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to customZoom (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+handles.zoomHandle = zoom;
+handles.zoomHandle.ActionPostCallback = {@un_zoom,handles};
+handles.zoomHandle.Enable = 'on';
+%
+
+function un_zoom(obj,evd,handles)
+    
+persistent chk
+if isempty(chk)
+      chk = 1;
+      pause(0.3); %Add a delay to distinguish single click from a double click
+      if chk == 1
+        chk = [];
+        handles.zoomHandle.ModeHandle.Blocking = false;
+        handles.zoomHandle.Enable = 'off';
+        handles.zoomHandle.ActionPostCallback = [];
+      end
+else
+      chk = [];
+      zoom out
+      zoom reset
+      handles.zoomHandle.ModeHandle.Blocking = false;
+      handles.zoomHandle.Enable = 'off';
+      handles.zoomHandle.ActionPostCallback = [];
+end
