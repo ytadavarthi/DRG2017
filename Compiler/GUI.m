@@ -218,9 +218,13 @@ if strcmp(eventdata.Key,'v') && ~isempty(eventdata.Modifier) && (strcmp(eventdat
     editable = false;
     format = {'char'};
     for i = 2:n
-        handles.uitable1.Data{1,i} = ['<html><b>' handles.uitable1.Data{1,i} '<html></b>'];
-        editable(i) = true;
-        format(i) = {'char'};
+        if strcmp(handles.uitable1.Data{1,i}(1:9),'<html><b>')
+            
+        else
+            handles.uitable1.Data{1,i} = ['<html><b>' handles.uitable1.Data{1,i} '<html></b>'];
+            editable(i) = true;
+            format(i) = {'char'};
+        end
     end
     handles.uitable1.ColumnEditable = editable;
     handles.uitable1.ColumnFormat = format;
