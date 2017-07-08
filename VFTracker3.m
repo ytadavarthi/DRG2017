@@ -612,7 +612,7 @@ function performTracking(handles)
             cornersFound = false;
             Utilities.CustomPrinters.printWarning('No Harris corners detected. Increase search window or try a different spot');
 %            disp('no corners detected');
-            showFeedbackPopup(handles,'No corners detected',2);
+            showFeedbackPopup(handles,'No corners detected',3);
         else
 %            disp('corners detected');
             Utilities.CustomPrinters.printInfo('Harris corner detected');
@@ -823,6 +823,18 @@ function showFeedbackPopup(handles, string, visibility)
     elseif (visibility == 2)
         set(handles.feedbackPanel, 'BackgroundColor', 'green');
         set(handles.feedbackLabel, 'BackgroundColor', 'green');
+        set(handles.feedbackLabel, 'ForegroundColor', 'black');
+        set(handles.feedbackPanel, 'visible', 'on');
+        set(handles.feedbackLabel, 'String', string);
+        pause(.5)
+        set(handles.feedbackLabel, 'String', '');
+        set(handles.feedbackPanel, 'visible', 'off');
+        set(handles.feedbackPanel, 'BackgroundColor', 'red');
+        set(handles.feedbackLabel, 'BackgroundColor', 'red');
+        set(handles.feedbackLabel, 'ForegroundColor', 'white');
+    elseif (visibility == 3)
+        set(handles.feedbackPanel, 'BackgroundColor', 'yellow');
+        set(handles.feedbackLabel, 'BackgroundColor', 'yellow');
         set(handles.feedbackLabel, 'ForegroundColor', 'black');
         set(handles.feedbackPanel, 'visible', 'on');
         set(handles.feedbackLabel, 'String', string);
