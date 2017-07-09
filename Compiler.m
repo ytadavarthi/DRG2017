@@ -46,7 +46,7 @@ function varargout = Compiler(varargin)
     
     %make compiled structure for coordinates, classifiers, and kinematics
     for i = 1:length(fileNames)
-        file = fullfile(pathName{i},fileNames{i});
+        file = fullfile(pathNames{i},fileNames{i});
         cell1 = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
             
         if cell1{1,1} == 'start_frame'
