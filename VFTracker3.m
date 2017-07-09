@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 07-Jul-2017 09:48:26
+% Last Modified by GUIDE v2.5 09-Jul-2017 19:56:15
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -161,7 +161,7 @@ pointerShape = [ ...
         end
     end
     
-    uicontrol(handles.text11);
+    uicontrol(handles.frameScrubber);
     
     %%% Uncomment to load a file direclty without the file chooser:
     %fullFileName = 'C:\Users\johndoe\Desktop\ThirdRevision\testvideo.avi';
@@ -520,59 +520,16 @@ function noiseFilterLevelIndicator_CreateFcn(hObject, eventdata, handles)
 
 
 % --- Executes on key press with focus on appFigure and none of its controls.
-%This is not being used.
-%function appFigure_KeyPressFcn(hObject, eventdata, handles)
+% This is not being used.
+function appFigure_KeyPressFcn(hObject, eventdata, handles)
 % hObject    handle to appFigure (see GCBO)
 % eventdata  structure with the following fields (see FIGURE)
-%	Key: name of the key that was pressed, in lower case
-%	Character: character interpretation of the key(s) that was pressed
-%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% 	Key: name of the key that was pressed, in lower case
+% 	Character: character interpretation of the key(s) that was pressed
+% 	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
-% 
-% globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-% 
-% switch(lower(eventdata.Character))
-%     case 's'
-%         performTracking(handles);
-%     case 'q'
-%         close(handles.appFigure);
-%     case 'm'
-%         %disp('called')
-%         %performManualAnnotation(handles);
-%         x = [];
-%         y = [];
-%         done = false;
-%         currentFrameIndex = floor(get(handles.frameScrubber, 'Value'));
-%         
-%         numFrames = globalStudyInfo.vfVideoStructure.numFrames;
-%         
-%         while(currentFrameIndex <= numFrames && done == false)
-%             [x, y] = mygetpts();
-%             done = isempty([x y]);
-%             if (~done)
-%                currentlyTrackedLandmark = globalStudyInfo.currentlyTrackedLandmark;
-%                globalStudyInfo.studyCoordinates.setCoordinate(currentFrameIndex, currentlyTrackedLandmark, [x y]);
-%             end
-%             
-%             if (currentFrameIndex < numFrames)
-%                 currentFrameIndex = currentFrameIndex + 1;
-%             end
-%             
-%             
-%             set(handles.frameScrubber, 'Value', currentFrameIndex);
-%         end        
-%         
-%     %'i' for interpolation
-%     case 'i'
-%         userQuery = inputdlg('Enter start and end frame numbers');
-%         userQuery = userQuery{1};
-%         userQuery = str2num(userQuery);
-%         startFrame = userQuery(1);
-%         endFrame = userQuery(2);
-%         Interpolater(handles, startFrame, endFrame);
-%         
-% 
-% end
+
+appFigure_WindowKeyPressFcn(hObject, eventdata, handles);
 
 
 
@@ -749,9 +706,10 @@ function appFigure_WindowKeyPressFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+totalFrames = globalStudyInfo.vfVideoStructure.numFrames;
 
     
-switch(lower(eventdata.Character))
+switch(lower(eventdata.Key))
     case 's'
         performTracking(handles);
     case 'q'
@@ -780,10 +738,29 @@ switch(lower(eventdata.Character))
             
             
             set(handles.frameScrubber, 'Value', currentFrameIndex);
-        end    
+        end
+    case 'rightarrow'
+        %frameScrubber
+        currentFrame = get(handles.frameScrubber, 'Value');
         
-            
+        if (currentFrame ~= totalFrames)
+            currentFrame = currentFrame + 1;
+        end
+
+        set(handles.frameScrubber, 'Value', currentFrame);
+        uicontrol(handles.frameScrubber);
+    
+    case 'leftarrow'
+        %frameScrubber
+        currentFrame = get(handles.frameScrubber, 'Value');
         
+        if (currentFrame ~= 1)
+            currentFrame = currentFrame - 1;
+        end
+
+        set(handles.frameScrubber, 'Value', currentFrame);          
+        uicontrol(handles.frameScrubber);
+
 %     %'i' for interpolation
 %     case 'i'
 %         userQuery = inputdlg('Enter start and end frame numbers');
@@ -1665,3 +1642,37 @@ else
       handles.zoomHandle.Enable = 'off';
       handles.zoomHandle.ActionPostCallback = [];
 end
+
+
+% --- Executes on key press with focus on frameScrubber and none of its controls.
+function frameScrubber_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to frameScrubber (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+switch(lower(eventdata.Key))
+    case '1'
+        startButton_Callback(hObject, eventdata, handles);
+    case '2'
+        pushbutton1_Callback(hObject, eventdata, handles);
+    case '3'
+        pushbutton2_Callback(hObject, eventdata, handles);
+    case '4'
+        pushbutton3_Callback(hObject, eventdata, handles);
+    case '5'
+        pushbutton4_Callback(hObject, eventdata, handles);
+    case '6'
+        pushbutton5_Callback(hObject, eventdata, handles);
+    case '7'
+        endButton_Callback(hObject, eventdata, handles);
+end
+
+% --------------------------------------------------------------------
+function legendToggle_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to legendToggle (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    set(hObject, 'State', 'Off');
+    h = msgbox({'Shortcuts Legend' '' 's - Semiautomatic tracking' 'm - Manual tracking' 'p - Pointer' '' 'Right Arrow - Increase Frame Number +1' 'Left Arrow - Increase Frame Number - 1' '' '1 - Start Frame' '2 - Hold Position' '3 - Ramus of Mandible' '4 - Hyoid Burst' '5 - UES Closure' '6 - At Rest' '7 - End Frame'});

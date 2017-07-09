@@ -15,7 +15,6 @@ function varargout = Compiler(varargin)
             
         %if compile all morphoj files in selected folder is chosen
         elseif choice == 2
-            fprintf('finding _morphoj_.txt files')
             folder_name = uigetdir();
             [P, F] = subdir(folder_name); %gathers all folder paths and file names in the chosen directory.
                    
@@ -29,9 +28,11 @@ function varargout = Compiler(varargin)
             for i = 1:length(F)
                 for j = 1:length(F{i})
                     fileNames{end+1} = F{i}{j};
-                    pathNames{end+1} = P{i};
+                    pathName{end+1} = P{i};
                 end
             end
+            fprintf('Found %d morphoj files\n', length(fileNames));
+
             
         % if neither is chosen or something weird happens.
         else
@@ -51,13 +52,13 @@ function varargout = Compiler(varargin)
         
     % if for some reason more than 1 input is given.
     elseif length(varargin) > 1
-        error('too many inputs')
+        error('Too many inputs')
     end
        
     
     %make compiled structure for coordinates, classifiers, and kinematics
     for i = 1:length(fileNames)
-        file = fullfile(pathNames{i},fileNames{i});
+        file = fullfile(pathName{i},fileNames{i});
         cell1 = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
             
         if cell1{1,1} == 'start_frame'
@@ -88,16 +89,21 @@ function varargout = Compiler(varargin)
     %if kinematicsButton is not true, then we need to run the full compiler
     %functions
     else
+        %Making makeshift progress bar
+        fprintf('Compiling Coordinate Data..');
+        
         finalCell = compile_coordinateData(dataStruct,fileNames,folder_name);
         disp('Done writing combined coordinates file');
         
         %if morphoJ file is old and doesn't include the frame number
         %information, the classifier data text file will not be written.
+        %Making makeshift progress bar
+        fprintf('Compiling Classifier Data..');
         if cell1{1,1} == 'start_frame'
             compile_classifierData(dataStruct,fileNames,finalCell,folder_name);
             disp('Done writing combined classifier file');
         else
-            disp('Warning: classifier data not found in _morphoj_ file');
+            fprintf('WARNING: Classifier data not found in _morphoj_ file');
         end
 
         compile_kinematicsData(dataStruct, fileNames,folder_name);
@@ -106,12 +112,19 @@ function varargout = Compiler(varargin)
 end
 
 function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
+    
     %initialize finalCell
     finalCell = dataStruct(1).coordinateData(1,:);
     finalCell{1,1} = 'Swallow ID';
     
     %for the number of videos
     for i = 1:length(dataStruct)
+        %adding to the loading bar
+        fprintf('..');
+        
+        if(i == length(dataStruct))
+            fprintf('\n');
+        end
         
         %extract data from structure
         classifierData = dataStruct(i).classifierData;
@@ -206,6 +219,13 @@ function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
     secondColumn = {};
     classifierColumns = {};
     for i = 1:length(dataStruct)
+        
+        %makeshift progress bar
+        fprintf('..');
+        if (i == length(dataStruct))
+            fprintf('\n');
+        end
+        
         %extract data from structure
         classifierData = dataStruct(i).classifierData;
         coordinateData = dataStruct(i).coordinateData;
@@ -270,7 +290,7 @@ function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
     for i = 2:length(outputData(1,:))
         title = outputData{1,i};
         if length(title) > 8 && strcmp(title(1:9), '<html><b>')
-            outputData{1,i} = title(length('<html><b>')+1:end-length('</b></html>'));
+            outputData{1,i} = title(length('<html><p><b>')+1:end-length('</b></p></html>'));
         end
     end
     classifierColumns = [outputData(1,2:end);classifierColumns];
@@ -320,14 +340,12 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         
         %checks for SI calibration
         if(~siScalar)
-            disp('WARNING: SI normalization not calculated. You will not have kinematics values in cm');
-        else
-            fprintf('SI calibration detected. %-.2fpx/cm\n', siScalar);
+            fprintf('WARNING: %s - SI normalization not calculated. You will not have kinematics values in cm\n', fileNames{i});
         end
         
         %checking for frame rate
-        if length(phaseFramesCell)<13 || (isnan(phaseFramesCell(13)))
-           fprintf('WARNING: %s - No Frame Rate Found. Using 30 fps as default.', fileNames{i})
+        if (length(phaseFramesCell)<13 || (isnan(phaseFramesCell(13))))
+           fprintf('WARNING: %s - No Frame Rate Found. Using 30 fps as default.\n', fileNames{i})
         end
         
         %for kinematics functions
@@ -429,18 +447,20 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         end
         
         vertScalar = getVertScalar(doubleCell, startFrame, endFrame);
-
+        
+        if (vertScalar == 0)
+            fprintf('%s - Recheck C2-C4 annotations\n',fileNames{i});
+        end
         
         %checking for frame rate
         if length(phaseFramesCell)<13 || (isnan(phaseFramesCell(13)))
-           fprintf('WARNING: %s - No Frame Rate Found. Using 30 fps as default.', fileNames{i})
+           fprintf('WARNING: %s - No Frame Rate Found. Using 30 fps as default.\n', fileNames{i})
         end
         
         if(~siScalar)
-            disp('WARNING: SI normalization not calculated. You will not have kinematics values in cm');
-        else
-            fprintf('SI calibration detected. %-.2fpx/cm\n',siScalar);
+            fprintf('WARNING: %s - SI normalization not calculated. You will not have kinematics values in cm\n', fileNames{i});
         end
+        
 
         %all kinematics functions
         ahm = anteriorHyoidMovement(doubleCell, vertScalar, siScalar, startFrame, endFrame);
@@ -526,6 +546,8 @@ function vertScalar = getVertScalar(doubleCell, startFrame, endFrame)
         
         if(c2x == 0 || c2y == 0 || c4x == 0 || c4y == 0)
             fprintf('WARNING: C2-C4 points for Frame %d have NOT been tracked\n', i);
+            vertScalar = 0;
+            return;
         else
             c2c4_points = [c2x, c2y; c4x, c4y];
             dist = coordinates_dist(c2c4_points);
