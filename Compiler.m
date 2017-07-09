@@ -12,15 +12,22 @@ function varargout = Compiler(varargin)
             pathName(1:length(fileNames)) = {folder_name};
         elseif choice == 2
             folder_name = uigetdir();
-            [pathName, F] = subdir(folder_name); %gathers all folder paths and file names in the chosen directory.
-            
-            %un-nests the nested F cell matrix
+            [P, F] = subdir(folder_name); %gathers all folder paths and file names in the chosen directory.
+                   
+            %un-nests the nested F cell matrix where each cell in the
+            %matrix represents the name of each morphoJ file. Alsocreates 
+            %pathName cell matrix where each cell in the matrix
+            %represents the path for each morphoJ file, such that
+            %[pathname(1) fileName 1] is the full path for each file.
             fileNames = {};
+            pathNames = {};
             for i = 1:length(F)
                 for j = 1:length(F{i})
                     fileNames{end+1} = F{i}{j};
+                    pathNames{end+1} = P{i};
                 end
             end
+            
             
         else
             error('Something went wrong, try again')
@@ -145,7 +152,7 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
         previousSize = size(finalCell);
         currentSize = size(coordinateData);
         if previousSize(2) ~= currentSize(2)
-            error('Inconsistent number of landmarks were annotated in' fileNames{i} '!')
+            error(['Inconsistent number of landmarks were annotated in ' fileNames{i} '!'])
         end
         
         
