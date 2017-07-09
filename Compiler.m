@@ -3,6 +3,8 @@ function varargout = Compiler(varargin)
     if isempty(varargin)
         choice = menu('Select an option','Compile selected files','Compile all _morphoj files in a selected folder');
         kinematicsButton = false;
+        
+        %if compile selected files is chosen
         if choice == 1
             [fileNames, folder_name] = uigetfile({'.txt'},'MultiSelect','on');
             if ~iscellstr(fileNames)
@@ -10,12 +12,14 @@ function varargout = Compiler(varargin)
             end
             pathName = {};
             pathName(1:length(fileNames)) = {folder_name};
+            
+        %if compile all morphoj files in selected folder is chosen
         elseif choice == 2
             folder_name = uigetdir();
             [P, F] = subdir(folder_name); %gathers all folder paths and file names in the chosen directory.
                    
             %un-nests the nested F cell matrix where each cell in the
-            %matrix represents the name of each morphoJ file. Alsocreates 
+            %matrix represents the name of each morphoJ file. Also creates 
             %pathName cell matrix where each cell in the matrix
             %represents the path for each morphoJ file, such that
             %[pathname(1) fileName 1] is the full path for each file.
@@ -28,10 +32,14 @@ function varargout = Compiler(varargin)
                 end
             end
             
-            
+        % if neither is chosen or something weird happens.
         else
             error('Something went wrong, try again')
         end
+        
+    %if varargin = 1 that means that there was an input given to the
+    %compiler, This only happens when the display kinematics button is
+    %pressed in VFTracker3
     elseif length(varargin) == 1
         fullFileName = varargin{1};
         [~,fileNames,ext] = fileparts(fullFileName);
@@ -39,6 +47,8 @@ function varargout = Compiler(varargin)
         fileNames = {[fileNames '_morphoj_']};
         
         kinematicsButton = true;
+        
+    % if for some reason more than 1 input is given.
     elseif length(varargin) > 1
         error('too many inputs')
     end
@@ -65,10 +75,17 @@ function varargout = Compiler(varargin)
     end
     dataStruct = struct('coordinateData',coordinateData,'classifierData',classifierData);
     
+    %if kinematicsbutton is true, meaning that the compiler is only being
+    %used for the display kinematics button in VFTracker3, then we only
+    %need to run the compile_kinematicsButton function
     if kinematicsButton
         output = compile_kinematicsButton(dataStruct, fileNames);
         %disp('Done writing combined kinematics file');
         varargout{1} = output;
+        
+        
+    %if kinematicsButton is not true, then we need to run the full compiler
+    %functions
     else
         finalCell = compile_coordinateData(dataStruct,fileNames,folder_name);
         disp('Done writing combined coordinates file');
