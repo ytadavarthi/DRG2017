@@ -15,6 +15,7 @@ function varargout = Compiler(varargin)
             
         %if compile all morphoj files in selected folder is chosen
         elseif choice == 2
+            fprintf('finding _morphoj_.txt files')
             folder_name = uigetdir();
             [P, F] = subdir(folder_name); %gathers all folder paths and file names in the chosen directory.
                    
@@ -268,8 +269,8 @@ function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
     %add classifier titles to classifierColumns
     for i = 2:length(outputData(1,:))
         title = outputData{1,i};
-        if strcmp(title(1:9), '<html><b>')
-            outputData{1,i} = title(length('<html><b>')+1:end-length('</b><html>'));
+        if length(title) > 8 && strcmp(title(1:9), '<html><b>')
+            outputData{1,i} = title(length('<html><b>')+1:end-length('</b></html>'));
         end
     end
     classifierColumns = [outputData(1,2:end);classifierColumns];

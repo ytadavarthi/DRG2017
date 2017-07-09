@@ -66,7 +66,7 @@ function GUI_OpeningFcn(hObject, eventdata, handles, varargin)
         fileNames{i} = fileNames{i}(1:end-4);
     end
     
-    fileNames{1} = ['<html><b>' fileNames{1} '</b></html>'];
+    fileNames{1} = ['<html><b>' fileNames{1} '</b><html>'];
   
     handles.uitable1.Data = fileNames; %handles.uitable1.Data = fileNames(2:end,:);
     
@@ -149,7 +149,7 @@ function uitable1_CellEditCallback(hObject, eventdata, handles)
 
     % Make bold
     if eventdata.Indices(1) == 1 && ~isempty(eventdata.NewData)
-        handles.uitable1.Data{eventdata.Indices(1),eventdata.Indices(2)} = ['<html><b>' eventdata.NewData '</b></html>'];
+        handles.uitable1.Data{eventdata.Indices(1),eventdata.Indices(2)} = ['<html><b>' eventdata.NewData '<html></b>'];
     end
     % Fit Columns
     columnWidth = fitColumns(handles.uitable1.Data);
@@ -218,11 +218,11 @@ if strcmp(eventdata.Key,'v') && ~isempty(eventdata.Modifier) && (strcmp(eventdat
     editable = false;
     format = {'char'};
     for i = 2:n
-        if length(handles.uitable1.Data{1,i}) > 8 && strcmp(handles.uitable1.Data{1,i}(1:9),'<html><b>')
+        if length(handles.uitable1.Data{1,i} >strcmp(handles.uitable1.Data{1,i}(1:9),'<html><b>')
             editable(i) = true;
             format(i) = {'char'};
         else
-            handles.uitable1.Data{1,i} = ['<html><b>' handles.uitable1.Data{1,i} '</b></html>'];
+            handles.uitable1.Data{1,i} = ['<html><b>' handles.uitable1.Data{1,i} '</b><html>'];
             editable(i) = true;
             format(i) = {'char'};
         end
@@ -520,7 +520,7 @@ function columnWidth = fitColumns(data)
         for j = 1:dataSize(1)
             len = length(data{j,i});
             if j == 1
-                len = length(data{j,i}) - length('<html><b></b></html>');
+                len = length(data{j,i}) - length('<html><b></b><html>');
             end
             
             if(len>maxLen(1,i))
