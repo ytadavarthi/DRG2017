@@ -395,7 +395,11 @@ function x = paste(dec,sep,lf)
 % 2014-03-19    Bug fix, thanks to Soren Preus.
     % handle optional parameters
     if nargin < 3
-        lf = char(10);  % default is line feed (char 10)
+        if ispc
+            lf = char(10);  % default is line feed (char 10)
+        elseif ismac
+            lf = char(13);  % default is line feed for mac (char 13)
+        end
     end
     if nargin < 2
         sep = char(9);  % default is tabulator (char 9)

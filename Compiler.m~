@@ -15,7 +15,7 @@ function varargout = Compiler(varargin)
             
         %if compile all morphoj files in selected folder is chosen
         elseif choice == 2
-            fprintf('finding _morphoj_.txt files\n')
+            fprintf('finding _morphoj_.txt files')
             folder_name = uigetdir();
             [P, F] = subdir(folder_name); %gathers all folder paths and file names in the chosen directory.
                    
@@ -29,7 +29,7 @@ function varargout = Compiler(varargin)
             for i = 1:length(F)
                 for j = 1:length(F{i})
                     fileNames{end+1} = F{i}{j};
-                    pathName{end+1} = P{i};
+                    pathNames{end+1} = P{i};
                 end
             end
             
@@ -57,7 +57,7 @@ function varargout = Compiler(varargin)
     
     %make compiled structure for coordinates, classifiers, and kinematics
     for i = 1:length(fileNames)
-        file = fullfile(pathName{i},fileNames{i});
+        file = fullfile(pathNames{i},fileNames{i});
         cell1 = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
             
         if cell1{1,1} == 'start_frame'
@@ -270,7 +270,7 @@ function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
     for i = 2:length(outputData(1,:))
         title = outputData{1,i};
         if length(title) > 8 && strcmp(title(1:9), '<html><b>')
-            outputData{1,i} = title(length('<html><p><b>')+1:end-length('</b></p></html>'));
+            outputData{1,i} = title(length('<html><b>')+1:end-length('</b></html>'));
         end
     end
     classifierColumns = [outputData(1,2:end);classifierColumns];
