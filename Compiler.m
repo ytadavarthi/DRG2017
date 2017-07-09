@@ -145,7 +145,7 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
         previousSize = size(finalCell);
         currentSize = size(coordinateData);
         if previousSize(2) ~= currentSize(2)
-            error('Inconsistent number of landmarks were annotated in' fileNames{i} '!')
+            error(['Inconsistent number of landmarks were annotated in ' fileNames{i} '!'])
         end
         
         
