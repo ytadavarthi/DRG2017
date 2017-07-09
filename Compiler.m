@@ -15,7 +15,7 @@ function varargout = Compiler(varargin)
             
         %if compile all morphoj files in selected folder is chosen
         elseif choice == 2
-            fprintf('finding _morphoj_.txt files')
+            fprintf('finding _morphoj_.txt files\n')
             folder_name = uigetdir();
             [P, F] = subdir(folder_name); %gathers all folder paths and file names in the chosen directory.
                    
@@ -25,11 +25,11 @@ function varargout = Compiler(varargin)
             %represents the path for each morphoJ file, such that
             %[pathname(1) fileName 1] is the full path for each file.
             fileNames = {};
-            pathNames = {};
+            pathName = {};
             for i = 1:length(F)
                 for j = 1:length(F{i})
                     fileNames{end+1} = F{i}{j};
-                    pathNames{end+1} = P{i};
+                    pathName{end+1} = P{i};
                 end
             end
             
@@ -57,7 +57,7 @@ function varargout = Compiler(varargin)
     
     %make compiled structure for coordinates, classifiers, and kinematics
     for i = 1:length(fileNames)
-        file = fullfile(pathNames{i},fileNames{i});
+        file = fullfile(pathName{i},fileNames{i});
         cell1 = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
             
         if cell1{1,1} == 'start_frame'

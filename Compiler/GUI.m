@@ -221,6 +221,9 @@ if strcmp(eventdata.Key,'v') && ~isempty(eventdata.Modifier) && (strcmp(eventdat
         if length(handles.uitable1.Data{1,i}) > 8 && strcmp(handles.uitable1.Data{1,i}(1:9),'<html><b>')
             editable(i) = true;
             format(i) = {'char'};
+        elseif isempty(handles.uitable1.Data{1,i})
+            editable(i) = true;
+            format(i) = {'char'};
         else
             handles.uitable1.Data{1,i} = ['<html><b>' handles.uitable1.Data{1,i} '</b></html>'];
             editable(i) = true;
