@@ -309,8 +309,8 @@ end
 function output = compile_kinematicsButton(dataStruct, fileNames)
     lengthDataStruct = length(dataStruct);
     numKinematicsFunctions = 11;
-    % numKinematicsFunctions + 5 for the timing variables + 1 for filename
-    numColumns = numKinematicsFunctions*2 + 5 + 1;
+    % numKinematicsFunctions + 4 for the timing variables + 1 for filename
+    numColumns = numKinematicsFunctions*2 + 4 + 1;
     kinematicsArray = cell(lengthDataStruct+1, numColumns);    
     
     kinematicsArray(1, 1:numColumns) = ...
@@ -329,8 +329,7 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         'ott',    ...
         'std',    ...
         'ptt',    ...
-        'optt',    ...
-        'pdt'};
+        'optt'};
     
     for i = 1:lengthDataStruct
     
@@ -371,7 +370,7 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         ptt = pharyngealTransitTime(phaseFramesCell);
         optt = oropharyngealTransitTime(phaseFramesCell);
         %????? 1st jump larynx - if hyoid then it would be the same as stageTransitionDuration????%
-        pdt = pharyngealDelayTime(phaseFramesCell);
+%         pdt = pharyngealDelayTime(phaseFramesCell);
         
         kinematicsArray(i+1, 1:numColumns) = {{fileNames{i}(1:end-4)},...
                                                 ahm{1},  ahm{2},  ...
@@ -388,8 +387,7 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
                                                 ott,    ...
                                                 std,    ...
                                                 ptt,    ...
-                                                optt,    ...
-                                                pdt};
+                                                optt};
         
     end
     
@@ -401,8 +399,8 @@ end
 function compile_kinematicsData(dataStruct, fileNames, pathName)
     lengthDataStruct = length(dataStruct);
     numKinematicsFunctions = 11;
-    % numKinematicsFunctions + 5 for the timing variables + 1 for filename
-    numColumns = numKinematicsFunctions*2 + 5 + 1;
+    % numKinematicsFunctions + 4 for the timing variables + 1 for filename
+    numColumns = numKinematicsFunctions*2 + 4 + 1;
     
     
     kinematicsArray = cell(lengthDataStruct+1, numColumns);
@@ -422,8 +420,7 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         'ott',    ...
         'std',    ...
         'ptt',    ...
-        'optt',    ...
-        'pdt'};
+        'optt'};
     
     for i = 1:lengthDataStruct
         
@@ -485,7 +482,7 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         ptt = pharyngealTransitTime(phaseFramesCell);
         optt = oropharyngealTransitTime(phaseFramesCell);
         %????? 1st jump larynx - if hyoid then it would be the same as stageTransitionDuration????%
-        pdt = pharyngealDelayTime(phaseFramesCell);
+%         pdt = pharyngealDelayTime(phaseFramesCell);
         
         kinematicsArray(i+1, 1:numColumns) = {{fileNames{i}(1:end-4)},...
                                                 ahm{1},  ahm{2},  ...
@@ -502,8 +499,7 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
                                                 ott,    ...
                                                 std,    ...
                                                 ptt,    ...
-                                                optt,    ...
-                                                pdt};
+                                                optt};
         
     end
     
