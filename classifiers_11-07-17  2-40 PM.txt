@@ -1,0 +1,13 @@
+Swallow ID	Swallow Stage
++testvideo2_morphoj_1	Post-Esophageal Stage
++testvideo2_morphoj_2	Post-Esophageal Stage
++testvideo2_morphoj_3	Post-Esophageal Stage
++testvideo2_morphoj_4	Post-Esophageal Stage
++testvideo2_morphoj_5	Post-Esophageal Stage
++testvideo2_morphoj_6	Post-Esophageal Stage
++testvideo2_morphoj_7	Post-Esophageal Stage
++testvideo2_morphoj_8	Post-Esophageal Stage
++testvideo2_morphoj_9	Post-Esophageal Stage
++testvideo2_morphoj_10	Post-Esophageal Stage
++testvideo2_morphoj_11	Post-Esophageal Stage
++testvideo2_morphoj_12	Post-Esophageal Stage

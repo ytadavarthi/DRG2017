@@ -1238,7 +1238,16 @@ function [sub,fls] = subdir(CurrPath)
        tmp = dir(CurrPath);
        tmp = tmp(~ismember({tmp.name},{'.' '..'}));
        names = {tmp(~[tmp.isdir]).name};
-       hasMorphoj = strfind(names,'_morphoj_','ForceCellOutput',true);
+       
+       %originally the following commented line was used, but it seems like
+       %the forcecelloutput is only in newer versions of matlab, so the
+       %following if statement incorporates that feature.
+       %hasMorphoj = strfind(names,'_morphoj_','ForceCellOutput',true);
+       hasMorphoj = strfind(names,'_morphoj_');
+       if ~iscell(hasMorphoj)
+           hasMorphoj = {hasMorphoj};
+       end
+       
        keep = ~cellfun(@isempty,hasMorphoj);
        names = names(keep);
        
