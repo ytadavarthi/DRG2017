@@ -1272,7 +1272,11 @@ function [sub,fls] = subfolder(CurrPath,sub,fls)
        else
           tmp = dir(sub{end});
           names = {tmp(~[tmp.isdir]).name};
-          hasMorphoj = strfind(names,'_morphoj_','ForceCellOutput',true);
+          hasMorphoj = strfind(names,'_morphoj_');
+          if ~iscell(hasMorphoj)
+           hasMorphoj = {hasMorphoj};
+          end
+       
           keep = ~cellfun(@isempty,hasMorphoj);
           fls{end+1} = names(keep);
           [sub fls] = subfolder(sub{end},sub,fls);
