@@ -1,7 +1,10 @@
 function graphCorrection
     
+    %open dialogue box and ask for file name.
+    [file_name, folder_name] = uigetfile({'*.*'},'File Selector');
+    
     %import the .svg file as a cell matrix of strings.
-    raw = importdata('test.svg');
+    raw = importdata([folder_name,file_name]);
     
     %for each line of text...
     cell_coordinates = {};
@@ -56,7 +59,7 @@ function graphCorrection
     %easier to work with and plot as I write the rest of the code. This
     %will probably be un-done later.
     %coordinates(:,[3,4]) = height - coordinates(:,[3,4]);
-    %plot(coordinates(:,1),coordinates(:,3),'rx',coordinates(:,2),coordinates(:,4),'bx');
+    plot(coordinates(:,1),coordinates(:,3),'rx',coordinates(:,2),coordinates(:,4),'bx');
     
     %define variables that store the coordinates of the tips and the dots
     %for coordinates 1 through 5
@@ -78,8 +81,8 @@ function graphCorrection
     %This formula will be used to transform all the tips and find the new
     %value for the tips.
     [d,fittedTips,tr] = procrustes(dots_to_fit,tips_to_fit);
-%     hold on
-%     plot(fittedTips(:,1),fittedTips(:,2),'ko')
+    hold on
+    plot(fittedTips(:,1),fittedTips(:,2),'ko')
 
     %define original coordinate points for all the tips, and then use the
     %transformation to make new tips
@@ -89,6 +92,7 @@ function graphCorrection
         newTips(i,:) = newTipsMinusC(i,:) + tr.c(1,:);
     end
     
+    figure
     plot(coordinates(:,1),coordinates(:,3),'rx',coordinates(:,2),coordinates(:,4),'bx',newTips(:,1),newTips(:,2),'gs');
     
     %writing new vector files
@@ -111,7 +115,7 @@ function graphCorrection
     
     %this writes a text file called newVectors.txt which includes the new
     %vector coordinates.
-    newVectors_ID = fopen('newVectors.svg','w');
+    newVectors_ID = fopen([folder_name file_name(1:end-4) '_newVectors.svg'],'w');
     for i = 1:length(newVectors)
         fprintf(newVectors_ID,'%s\r\n',newVectors{i,:});
     end
@@ -119,7 +123,7 @@ function graphCorrection
     
     %this writes a text file called bothVectors.txt which includes both
     %vector coordinates.
-    bothVectors_ID = fopen('bothVectors.svg','w');
+    bothVectors_ID = fopen([folder_name file_name(1:end-4) '_bothVectors.svg'],'w');
     for i = 1:length(bothVectors)
         fprintf(bothVectors_ID,'%s\r\n',bothVectors{i,:});
     end
