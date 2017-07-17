@@ -13,11 +13,18 @@ classdef GlobalStudyInfo < handle
       at_rest;
       start_frame;
       end_frame;
+      lvc_onset;
+      lvc_offset;
       
       %Calibration for SI units
       point1;
       point2;
       pixelspercm;
+      
+      %Calibration for PCR
+      holdpos_points;
+      holdarea;
+      pcr;
       
       %Global sessoin info
       currentlyTrackedLandmark = Data.JoveLandmarks.Mandible;

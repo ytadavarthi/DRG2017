@@ -68,7 +68,7 @@ function ResultFileWriter(globalStudyInfo)
     
     cell1 = table2cell(t2);
     
-    %Num Columns for Frame Number Information + Hold Area + Frame Rate
+    %Num Columns for Frame Number Information + PCR + Frame Rate
     phaseFramesNumColumns = 16;
     
     cell2 = cell(1,n);

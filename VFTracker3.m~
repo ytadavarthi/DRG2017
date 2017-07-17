@@ -254,8 +254,8 @@ pointerShape = [ ...
                 globalStudyInfo.point2         = [str2num(morphoJTable{2,10}), str2num(morphoJTable{2,11})];
                 globalStudyInfo.pixelspercm    = str2num(morphoJTable{2,12});
                 globalStudyInfo.holdarea       = str2num(morphoJTable{2,14});
-                globalStudyInfo.lvc_onset        = str2num(morphoJTable{2,15});
-                globalStudyInfo.lvc_offset       = str2num(morphoJTable{2,16});
+                globalStudyInfo.lv_open        = str2num(morphoJTable{2,15});
+                globalStudyInfo.lv_close       = str2num(morphoJTable{2,16});
 
 
                 set(handles.text12, 'String', globalStudyInfo.hold_position);
@@ -265,8 +265,8 @@ pointerShape = [ ...
                 set(handles.text16, 'String', globalStudyInfo.at_rest);
                 set(handles.text17, 'String', globalStudyInfo.start_frame);
                 set(handles.text18, 'String', globalStudyInfo.end_frame);
-                set(handles.text36, 'String', globalStudyInfo.lvc_onset);
-                set(handles.text37, 'String', globalStudyInfo.lvc_offset);
+                set(handles.text36, 'String', globalStudyInfo.lv_close);
+                set(handles.text37, 'String', globalStudyInfo.lv_open);
                 
                 set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,8}),str2num(morphoJTable{2,9})));
                 set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,10}),str2num(morphoJTable{2,11})));
@@ -1730,15 +1730,14 @@ function calibratePCRbutton_Callback(hObject, eventdata, handles)
     for i = 1:numPoints
         % Coordinate based area calculation
         if i == numPoints
-            holdarea = holdarea + ((holdPointsCell{i}{1} * holdPointsCell{mod(i+1,numPoints)}{2}) ...
-                - (holdPointsCell{i}{2} * holdPointsCell{mod(i+1,numPoints)}{1}));
+            holdarea = holdarea + holdPointsCell{i}{1} * holdPointsCell{mod(i+1,numPoints)}{2} ...
+                - holdPointsCell{i}{2} * holdPointsCell{mod(i+1,numPoints)}{1};
             
-            holdarea = abs(holdarea / 2);
-            showFeedbackPopup(handles, sprintf('Hold Area: %-.2f', holdarea), 2);
-            Utilities.CustomPrinters.printInfo(sprintf('Hold Area: %-.2f', holdarea));
+            holdarea = holdarea / 2;
+            showFeedbackPopup(handles,
         else
-            holdarea = holdarea + ((holdPointsCell{i}{1} * holdPointsCell{i+1}{2}) ...
-                - (holdPointsCell{i}{2} * holdPointsCell{i+1}{1}));
+            holdarea = holdarea + holdPointsCell{i}{1} * holdPointsCell{i+1}{2} ...
+                - holdPointsCell{i}{2} * holdPointsCell{i+1}{1};
         end
     end
         
@@ -1753,8 +1752,8 @@ function pushbutton14_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-    globalStudyInfo.lvc_onset = floor(get(handles.frameScrubber, 'Value'));
-    set(handles.text36, 'String', globalStudyInfo.lvc_onset);
+    globalStudyInfo.lv_close = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text36, 'String', globalStudyInfo.lv_close);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     uicontrol(handles.frameScrubber);
 
@@ -1764,7 +1763,7 @@ function pushbutton15_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-    globalStudyInfo.lvc_offset = floor(get(handles.frameScrubber, 'Value'));
-    set(handles.text37, 'String', globalStudyInfo.lvc_offset);
+    globalStudyInfo.lv_open = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text37, 'String', globalStudyInfo.lv_open);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     uicontrol(handles.frameScrubber);
