@@ -329,7 +329,7 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         'ott',    ...
         'std',    ...
         'ptt',    ...
-        'optt', 'lvc', 'pcr'};
+        'optt', 'lvc', 'ePCR'};
     
     for i = 1:lengthDataStruct
     
@@ -1154,7 +1154,7 @@ function pcr = pharyngealConstrictionRatio(doubleCell, vertScalar, siScalar, sta
         current_area = abs(((uesX*valY - uesY*valX) + (valX*spcY - valY*spcX) + ...
             (spcX*mpcY - spcY*mpcX) + (mpcX*uesY - mpcY*uesX))/2);
         
-        allAreas(i) = current_area / holdarea;
+        allAreas(i) = current_area;
         
         if(~isnan(vertScalar))        
             allVertAreas(i) = current_area / holdarea / (vertScalar^2);
@@ -1167,9 +1167,10 @@ function pcr = pharyngealConstrictionRatio(doubleCell, vertScalar, siScalar, sta
     
     vertPCR = max(allVertAreas(allVertAreas>0));
     siPCR = max(allSIAreas(allSIAreas>0));
-    pixPCR = max(allAreas(allAreas>0));
+    
+    ePCR = min(allAreas(allAreas>0)) / max(allAreas(allAreas>0));
 
-    pcr = siPCR;
+    pcr = ePCR;
 end
 
 %OLD Anterior Hyoid Movement; Needs C1, C4, Hyoid
