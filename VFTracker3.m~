@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 17-Jul-2017 10:39:17
+% Last Modified by GUIDE v2.5 18-Jul-2017 16:36:22
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -250,13 +250,14 @@ pointerShape = [ ...
                 globalStudyInfo.at_rest        = str2num(morphoJTable{2,6});
                 globalStudyInfo.start_frame    = str2num(morphoJTable{2,1});
                 globalStudyInfo.end_frame      = str2num(morphoJTable{2,7});
-                globalStudyInfo.point1         = [str2num(morphoJTable{2,8}), str2num(morphoJTable{2,9})];
-                globalStudyInfo.point2         = [str2num(morphoJTable{2,10}), str2num(morphoJTable{2,11})];
+                globalStudyInfo.si_point1         = [str2num(morphoJTable{2,8}), str2num(morphoJTable{2,9})];
+                globalStudyInfo.si_point2         = [str2num(morphoJTable{2,10}), str2num(morphoJTable{2,11})];
                 globalStudyInfo.pixelspercm    = str2num(morphoJTable{2,12});
                 globalStudyInfo.holdarea       = str2num(morphoJTable{2,14});
-                globalStudyInfo.lv_open        = str2num(morphoJTable{2,15});
-                globalStudyInfo.lv_close       = str2num(morphoJTable{2,16});
-
+                globalStudyInfo.lvc_onset        = str2num(morphoJTable{2,15});
+                globalStudyInfo.lvc_offset       = str2num(morphoJTable{2,16});
+                globalStudyInfo.laryngeal_jump        = str2num(morphoJTable{2,17});
+                globalStudyInfo.ues_opening       = str2num(morphoJTable{2,18});
 
                 set(handles.text12, 'String', globalStudyInfo.hold_position);
                 set(handles.text13, 'String', globalStudyInfo.ramus_mandible);
@@ -265,18 +266,18 @@ pointerShape = [ ...
                 set(handles.text16, 'String', globalStudyInfo.at_rest);
                 set(handles.text17, 'String', globalStudyInfo.start_frame);
                 set(handles.text18, 'String', globalStudyInfo.end_frame);
-                set(handles.text36, 'String', globalStudyInfo.lv_close);
-                set(handles.text37, 'String', globalStudyInfo.lv_open);
+                set(handles.text36, 'String', globalStudyInfo.lvc_onset);
+                set(handles.text37, 'String', globalStudyInfo.lvc_offset);
                 
-                set(handles.point1_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,8}),str2num(morphoJTable{2,9})));
-                set(handles.point2_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,10}),str2num(morphoJTable{2,11})));
+                set(handles.si_point1_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,8}),str2num(morphoJTable{2,9})));
+                set(handles.si_point2_text, 'String', sprintf('%-.2f \t %-.2f',str2num(morphoJTable{2,10}),str2num(morphoJTable{2,11})));
                 set(handles.pixelspercm_text, 'String', sprintf('%-.2f',globalStudyInfo.pixelspercm));
 
-                if isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2)
+                if isempty(globalStudyInfo.si_point1) || isempty(globalStudyInfo.si_point2)
                     estSize = '';
                     set(handles.estSize, 'String', num2str(estSize));
                 else
-                    bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
+                    bothPoints = [globalStudyInfo.si_point1(1),globalStudyInfo.si_point1(2);globalStudyInfo.si_point2(1),globalStudyInfo.si_point2(2)];
                     bothPoints_dist = coordinates_dist(bothPoints);
 
                     estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
@@ -775,8 +776,8 @@ switch(lower(eventdata.Key))
 %         startFrame = userQuery(1);
 %         endFrame = userQuery(2);
 %         Interpolater(handles, startFrame, endFrame);
-        
-
+    case 'escape'
+        return;
 end
 
 
@@ -1367,7 +1368,7 @@ function numPyramidLevelsLabel_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 % set(hObject,'BackgroundColor',[.21 .21 .21]);
 % set(hObject,'Font',[1 1 1]);
-% set(hObject, 'Parent', handles.semiautoOptions);
+% set(hObject, 'Parent', handles.semiautoPanel);
 
 
 
@@ -1392,11 +1393,11 @@ function text21_Callback(hObject, eventdata, handles)
 button_state = get(hObject,'Value');
 
 if button_state == get(hObject,'Max')
-    set(handles.semiautoOptions, 'visible', 'on');
+    set(handles.semiautoPanel, 'visible', 'on');
     set(handles.unitCalibrationPanel, 'visible', 'off');
 
 elseif button_state == get(hObject,'Min')
-    set(handles.semiautoOptions, 'visible', 'off');
+    set(handles.semiautoPanel, 'visible', 'off');
     set(handles.unitCalibrationPanel, 'visible', 'off');
 end
 
@@ -1404,8 +1405,8 @@ drawnow();
 
 
 % --- Executes during object creation, after setting all properties.
-function semiautoOptions_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to semiautoOptions (see GCBO)
+function semiautoPanel_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to semiautoPanel (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 set(hObject, 'visible', 'off');
@@ -1419,14 +1420,14 @@ function estSize_Callback(hObject, eventdata, handles)
 %        str2double(get(hObject,'String')) returns contents of estSize as a double
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
     
-    if(isempty(globalStudyInfo.point1) || isempty(globalStudyInfo.point2))
+    if(isempty(globalStudyInfo.si_point1) || isempty(globalStudyInfo.si_point2))
         showFeedbackPopup(handles,'Please Track Points',1);
 
     else
         if(isnan(str2double(get(hObject,'String'))))
             showFeedbackPopup(handles,'Please Enter Valid Number',1);
         end
-        bothPoints = [globalStudyInfo.point1(1),globalStudyInfo.point1(2);globalStudyInfo.point2(1),globalStudyInfo.point2(2)];
+        bothPoints = [globalStudyInfo.si_point1(1),globalStudyInfo.si_point1(2);globalStudyInfo.si_point2(1),globalStudyInfo.si_point2(2)];
         bothPoints_dist = coordinates_dist(bothPoints);
         %bothPoints_dist2 = pdist(bothPoints, 'euclidean');
 
@@ -1465,14 +1466,14 @@ function calibrateSIbutton_Callback(hObject, eventdata, handles)
         set(hObject,'String','Click one edge');
 
         [x, y] = mygetpts();
-        globalStudyInfo.point1 = [x(1) y(1)];
-        set(handles.point1_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
+        globalStudyInfo.si_point1 = [x(1) y(1)];
+        set(handles.si_point1_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
         set(hObject,'String','Click opposite edge');
         showFeedbackPopup(handles,'Point 1 Tracked',2);
 
         [x, y] = mygetpts();
-        globalStudyInfo.point2 = [x(1) y(1)];
-        set(handles.point2_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
+        globalStudyInfo.si_point2 = [x(1) y(1)];
+        set(handles.si_point2_text, 'String', sprintf('%-.2f  ,  %-.2f',x,y));
         set(hObject,'String','Calibrate SI Units');
         set(hObject,'Value',0);
         showFeedbackPopup(handles,'Point 2 Tracked',2);
@@ -1570,14 +1571,6 @@ function columnWidth = fitColumns(data)
     columnWidth = num2cell(maxLen*6);
 
 
-% --- Executes on button press in pushbutton11.
-function pushbutton11_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton11 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-close('VFTracker3')
-VFTracker3
-
 % --- Executes on button press in unitCalibrationButton.
 function unitCalibrationButton_Callback(hObject, eventdata, handles)
 % hObject    handle to unitCalibrationButton (see GCBO)
@@ -1590,7 +1583,7 @@ button_state = get(hObject,'Value');
 
 if button_state == get(hObject,'Max')
     set(handles.unitCalibrationPanel, 'visible', 'on');
-    set(handles.semiautoOptions, 'visible', 'off');
+    set(handles.semiautoPanel, 'visible', 'off');
 %     set(handles.text21, 'visible', 'off');
 %     set(handles.noiseFilterLevelSlider, 'visible', 'off');
 %     set(handles.gammaAdjustSlider, 'visible', 'off');
@@ -1599,7 +1592,7 @@ if button_state == get(hObject,'Max')
 
 elseif button_state == get(hObject,'Min')
     set(handles.unitCalibrationPanel, 'visible', 'off');
-%     set(handles.semiautoOptions, 'visible', 'on');
+%     set(handles.semiautoPanel, 'visible', 'on');
 %     set(handles.text21, 'visible', 'on');
 %     set(handles.noiseFilterLevelSlider, 'visible', 'on');
 %     set(handles.gammaAdjustSlider, 'visible', 'on');
@@ -1730,14 +1723,15 @@ function calibratePCRbutton_Callback(hObject, eventdata, handles)
     for i = 1:numPoints
         % Coordinate based area calculation
         if i == numPoints
-            holdarea = holdarea + holdPointsCell{i}{1} * holdPointsCell{mod(i+1,numPoints)}{2} ...
-                - holdPointsCell{i}{2} * holdPointsCell{mod(i+1,numPoints)}{1};
+            holdarea = holdarea + ((holdPointsCell{i}{1} * holdPointsCell{mod(i+1,numPoints)}{2}) ...
+                - (holdPointsCell{i}{2} * holdPointsCell{mod(i+1,numPoints)}{1}));
             
-            holdarea = holdarea / 2;
-            showFeedbackPopup(handles,
+            holdarea = abs(holdarea / 2);
+            showFeedbackPopup(handles, sprintf('Hold Area: %-.2f', holdarea), 2);
+            Utilities.CustomPrinters.printInfo(sprintf('Hold Area: %-.2f', holdarea));
         else
-            holdarea = holdarea + holdPointsCell{i}{1} * holdPointsCell{i+1}{2} ...
-                - holdPointsCell{i}{2} * holdPointsCell{i+1}{1};
+            holdarea = holdarea + ((holdPointsCell{i}{1} * holdPointsCell{i+1}{2}) ...
+                - (holdPointsCell{i}{2} * holdPointsCell{i+1}{1}));
         end
     end
         
@@ -1752,8 +1746,8 @@ function pushbutton14_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-    globalStudyInfo.lv_close = floor(get(handles.frameScrubber, 'Value'));
-    set(handles.text36, 'String', globalStudyInfo.lv_close);
+    globalStudyInfo.lvc_onset = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text36, 'String', globalStudyInfo.lvc_onset);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     uicontrol(handles.frameScrubber);
 
@@ -1763,7 +1757,55 @@ function pushbutton15_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-    globalStudyInfo.lv_open = floor(get(handles.frameScrubber, 'Value'));
-    set(handles.text37, 'String', globalStudyInfo.lv_open);
+    globalStudyInfo.lvc_offset = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text37, 'String', globalStudyInfo.lvc_offset);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    uicontrol(handles.frameScrubber);
+
+
+% --------------------------------------------------------------------
+function openFileButton_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to openFileButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    close('VFTracker3');
+    VFTracker3;
+
+% --------------------------------------------------------------------
+function semiautoOptions_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to semiautoPanel (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    button_state = get(hObject,'State');
+    
+    switch button_state
+        case 'on'
+            set(handles.semiautoPanel, 'visible', 'on');
+            set(handles.unitCalibrationPanel, 'visible', 'off');
+        case 'off'
+            set(handles.semiautoPanel, 'visible', 'off');
+            set(handles.unitCalibrationPanel, 'visible', 'off');
+    end
+
+
+% --- Executes on button press in pushbutton16 - ues opening.
+function pushbutton16_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton16 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.ues_opening = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text39, 'String', globalStudyInfo.ues_opening);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    uicontrol(handles.frameScrubber);
+
+% --- Executes on button press in pushbutton17 - laryngeal jump.
+function pushbutton17_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton17 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.laryngeal_jump = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text40, 'String', globalStudyInfo.laryngeal_jump);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     uicontrol(handles.frameScrubber);

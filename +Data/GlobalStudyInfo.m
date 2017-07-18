@@ -15,10 +15,16 @@ classdef GlobalStudyInfo < handle
       end_frame;
       lvc_onset;
       lvc_offset;
+      laryngeal_jump;
+      ues_opening;
+      
+      %UES Distension Points
+      ues_point1;
+      ues_point2;
       
       %Calibration for SI units
-      point1;
-      point2;
+      si_point1;
+      si_point2;
       pixelspercm;
       
       %Calibration for PCR
