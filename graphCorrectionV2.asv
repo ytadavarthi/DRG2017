@@ -44,7 +44,7 @@ function graphCorrectionV2
     
     bothVectors = [before_defs_line;arrowhead_lines;post_arrowhead_lines;new_vectors_blue;new_vectors_red;orig_vectors_blue;orig_anchor;tips_anchor;circle_lines;text_lines;final_lines];
     
-    newVectors_no_numbers = [before_defs_line;arrowhead_lines;post_arrowhead_lines;new_vectors_blue;orig_anchor;new_anchor;circle_lines;'      />';final_lines];
+    newVectors_no_numbers = [before_defs_line;arrowhead_lines;post_arrowhead_lines;new_vectors_blue;orig_anchor;new_anchor;circle_lines;text_lines;final_lines];
     
     %this writes a text file called newVectors.txt which includes the new
     %vector coordinates.
@@ -60,7 +60,7 @@ function graphCorrectionV2
     for i = 1:length(newVectors_no_numbers)
         fprintf(newVectors_no_numbers_ID,'%s\r\n',newVectors_no_numbers{i,:});
     end
-    fclose(newVectors_no_numbers_ID);
+    fclose(newVectors_ID);
     
     %this writes a text file called bothVectors.txt which includes both
     %vector coordinates.
