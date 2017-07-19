@@ -1701,43 +1701,45 @@ function calibratePCRbutton_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of calibratePCRbutton
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
     button_state = get(hObject,'Value');
-    
-    %number of points to track in hold position
-    numPoints = 6;
-    
-    holdPointsCell = cell(1, numPoints);
+
+    allPoints = [0,0];
     
     if (button_state == get(hObject,'Max'))
-        for i = 1:numPoints
-            set(hObject,'String',sprintf('Click Point %d', i));
-            [x, y] = mygetpts();
-            holdPointsCell{i} = {x(1) y(1)};
-            showFeedbackPopup(handles,sprintf('Point %d Tracked',i), 2);
-        end
         
-        showFeedbackPopup(handles,'All Points Tracked', 2);
+        [x, y] = getpts(handles.frameViewer);
+        allPoints = [x,y];
+        
+        showFeedbackPopup(handles,sprintf('Point %d Tracked', length(x)), 2);
+        
+        showFeedbackPopup(handles,sprintf('All Points Tracked - %d', length(x)), 2);
         set(hObject,'String','Calibrate PCR');
         set(hObject,'Value',0);
     end
     
     holdarea = 0;
+    numPoints = length(allPoints);
     
     for i = 1:numPoints
+        if numPoints == 1
+            disp('Only 1 point selected, PCR will not be calculated');
+            break;
+        end
+        
         % Coordinate based area calculation
         if i == numPoints
-            holdarea = holdarea + ((holdPointsCell{i}{1} * holdPointsCell{mod(i+1,numPoints)}{2}) ...
-                - (holdPointsCell{i}{2} * holdPointsCell{mod(i+1,numPoints)}{1}));
+            holdarea = holdarea + ((allPoints(i,1) * allPoints(mod(i+1,numPoints),2)) ...
+                - (allPoints(i,2) * allPoints(mod(i+1,numPoints),1)));
             
             holdarea = abs(holdarea / 2);
             showFeedbackPopup(handles, sprintf('Hold Area: %-.2f', holdarea), 2);
             Utilities.CustomPrinters.printInfo(sprintf('Hold Area: %-.2f', holdarea));
         else
-            holdarea = holdarea + ((holdPointsCell{i}{1} * holdPointsCell{i+1}{2}) ...
-                - (holdPointsCell{i}{2} * holdPointsCell{i+1}{1}));
+            holdarea = holdarea + ((allPoints(i,1) * allPoints(i+1,2)) ...
+                - (allPoints(i,2) * allPoints(i+1,1)));
         end
     end
         
-    globalStudyInfo.holdpos_points = holdPointsCell;
+    globalStudyInfo.holdpos_points = allPoints;
     globalStudyInfo.holdarea = holdarea;
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
