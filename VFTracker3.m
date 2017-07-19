@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 19-Jul-2017 02:09:01
+% Last Modified by GUIDE v2.5 19-Jul-2017 11:58:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1972,7 +1972,7 @@ function piriarea_toggle_Callback(hObject, eventdata, handles)
     
     if (button_state == get(hObject,'Max'))
         
-        [x, y] = getpts(handles.frameViewer);
+        [x, y] = getline(handles.frameViewer);
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
@@ -2005,4 +2005,40 @@ function piriarea_toggle_Callback(hObject, eventdata, handles)
         
     globalStudyInfo.nrrs_totalpiri_points = allPoints;
     globalStudyInfo.nrrs_totalpiri_area = totalpiri_area;
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+
+% --- Executes on button press in uesd_toggle.
+function uesd_toggle_Callback(hObject, eventdata, handles)
+% hObject    handle to uesd_toggle (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of uesd_toggle
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    button_state = get(hObject,'Value');
+    allPoints = [0,0];
+    
+    if (button_state == get(hObject,'Max'))
+        
+        [x, y] = getline(handles.frameViewer);
+        allPoints = [x,y];
+        
+        showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
+        set(hObject,'String','UES Distension');
+        set(hObject,'Value',0);
+    end
+    
+    
+    numPoints = length(allPoints);
+    
+    if numPoints == 1
+        disp('Only 1 point selected, Piriform Residue Area will not be calculated');
+        return;
+    end
+
+    uesd = coordinates_dist(allPoints);
+        
+    globalStudyInfo.uesd_points = allPoints;
+    globalStudyInfo.uesd_dist = uesd;
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
