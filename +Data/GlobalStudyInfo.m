@@ -27,10 +27,26 @@ classdef GlobalStudyInfo < handle
       si_point2;
       pixelspercm;
       
+      %UES distension
+      uesd_points;
+      uesd_dist;
+      
+      %NRRS valleculae - val res = residue in valleculae
+      nrrs_valres_points;
+      nrrs_valres_area;
+      nrrs_totalval_points;
+      nrrs_totalval_area;
+      
+      %NRRS piriform - piri res = residue in piriform recess
+      nrrs_pirires_points;
+      nrrs_pirires_area;
+      nrrs_totalpiri_points;
+      nrrs_totalpiri_area;
+      
       %Calibration for PCR
-      holdpos_points;
-      holdarea;
+      pcr_points;
       pcr;
+      ePCR;
       
       %Global sessoin info
       currentlyTrackedLandmark = Data.JoveLandmarks.Mandible;

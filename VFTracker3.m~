@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 18-Jul-2017 16:36:22
+% Last Modified by GUIDE v2.5 19-Jul-2017 01:44:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -253,7 +253,7 @@ pointerShape = [ ...
                 globalStudyInfo.si_point1      = [str2num(morphoJTable{2,8}), str2num(morphoJTable{2,9})];
                 globalStudyInfo.si_point2      = [str2num(morphoJTable{2,10}), str2num(morphoJTable{2,11})];
                 globalStudyInfo.pixelspercm    = str2num(morphoJTable{2,12});
-                globalStudyInfo.holdarea       = str2num(morphoJTable{2,14});
+                globalStudyInfo.ePCR           = str2num(morphoJTable{2,14});
                 globalStudyInfo.lvc_onset      = str2num(morphoJTable{2,15});
                 globalStudyInfo.lvc_offset     = str2num(morphoJTable{2,16});
                 globalStudyInfo.laryngeal_jump = str2num(morphoJTable{2,17});
@@ -1548,7 +1548,6 @@ function kinematicsButton_Callback(hObject, eventdata, handles)
             uiwait(msgbox(warningMessage));
         end
     end
-    
 
 function columnWidth = fitColumns(data)
     dataSize = size(data);
@@ -1571,7 +1570,6 @@ function columnWidth = fitColumns(data)
     end
     
     columnWidth = num2cell(maxLen*6);
-
 
 % --- Executes on button press in unitCalibrationButton.
 function unitCalibrationButton_Callback(hObject, eventdata, handles)
@@ -1604,14 +1602,12 @@ end
 
 drawnow();
 
-
 % --- Executes during object creation, after setting all properties.
 function unitCalibrationPanel_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to unitCalibrationPanel (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 set(hObject, 'visible', 'off');
-
 
 % --------------------------------------------------------------------
 function customZoom_ClickedCallback(hObject, eventdata, handles)
@@ -1687,6 +1683,7 @@ function legendToggle_ClickedCallback(hObject, eventdata, handles)
         'ps - Pharyngeal Shortening' 'botrr - Base of Tongue Retraction Ratio' ...
         'ott - Oral Transport Time' 'std - Stage Transition Duration' ...
         'ptt - Pharyngeal Transport Time' 'optt - Oropharyngeal Transport Time' ...
+        'lvc - Laryngeal Vestibule Closure Duration' ...
         '' 'Suffixes' ''...
         '_vert - Normalized to the length of C2-C4' ... 
         '_si - Normalized to the size of the coin on the screen'});
@@ -1702,7 +1699,6 @@ function calibratePCRbutton_Callback(hObject, eventdata, handles)
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
     button_state = get(hObject,'Value');
 
-    holdPointsCell = cell(1, numPoints);
     allPoints = [0,0];
     
     if (button_state == get(hObject,'Max'))
@@ -1710,15 +1706,12 @@ function calibratePCRbutton_Callback(hObject, eventdata, handles)
         [x, y] = getpts(handles.frameViewer);
         allPoints = [x,y];
         
-        fprintf('x: %d --- y: %d\n', x, y);
-        showFeedbackPopup(handles,sprintf('Point %d Tracked', length(x)), 2);
-        
-        showFeedbackPopup(handles,sprintf('All Points Tracked - %d', length(x)), 2);
+        showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
         set(hObject,'String','Calibrate PCR');
         set(hObject,'Value',0);
     end
     
-    holdarea = 0;
+    pcr = 0;
     numPoints = length(allPoints);
     
     for i = 1:numPoints
@@ -1729,22 +1722,21 @@ function calibratePCRbutton_Callback(hObject, eventdata, handles)
         
         % Coordinate based area calculation
         if i == numPoints
-            holdarea = holdarea + ((allPoints(i,1) * allPoints(mod(i+1,numPoints),2)) ...
+            pcr = pcr + ((allPoints(i,1) * allPoints(mod(i+1,numPoints),2)) ...
                 - (allPoints(i,2) * allPoints(mod(i+1,numPoints),1)));
             
-            holdarea = abs(holdarea / 2);
-            showFeedbackPopup(handles, sprintf('Hold Area: %-.2f', holdarea), 2);
-            Utilities.CustomPrinters.printInfo(sprintf('Hold Area: %-.2f', holdarea));
+            pcr = abs(pcr / 2);
+            showFeedbackPopup(handles, sprintf('PCR: %-.2f', pcr), 2);
+            Utilities.CustomPrinters.printInfo(sprintf('PCR: %-.2f', pcr));
         else
-            holdarea = holdarea + ((holdPointsCell{i}{1} * holdPointsCell{i+1}{2}) ...
-                - (holdPointsCell{i}{2} * holdPointsCell{i+1}{1}));
+            pcr = pcr + ((allPoints(i,1) * allPoints(i+1,2)) ...
+                - (allPoints(i,2) * allPoints(i+1,1)));
         end
     end
         
-    globalStudyInfo.holdpos_points = holdPointsCell;
-    globalStudyInfo.holdarea = holdarea;
+    globalStudyInfo.pcr_points = allPoints;
+    globalStudyInfo.pcr = pcr;
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-
 
 % --- Executes on button press in laryngeal vestibule closing.
 function pushbutton14_Callback(hObject, eventdata, handles)
@@ -1767,7 +1759,6 @@ function pushbutton15_Callback(hObject, eventdata, handles)
     set(handles.text37, 'String', globalStudyInfo.lvc_offset);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     uicontrol(handles.frameScrubber);
-
 
 % --------------------------------------------------------------------
 function openFileButton_ClickedCallback(hObject, eventdata, handles)
@@ -1793,7 +1784,6 @@ function semiautoOptions_ClickedCallback(hObject, eventdata, handles)
             set(handles.unitCalibrationPanel, 'visible', 'off');
     end
 
-
 % --- Executes on button press in pushbutton16 - ues opening.
 function pushbutton16_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton16 (see GCBO)
@@ -1815,3 +1805,204 @@ function pushbutton17_Callback(hObject, eventdata, handles)
     set(handles.text40, 'String', globalStudyInfo.laryngeal_jump);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     uicontrol(handles.frameScrubber);
+
+
+% --- Executes on button press in valres_toggle.
+function valres_toggle_Callback(hObject, eventdata, handles)
+% hObject    handle to valres_toggle (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of valres_toggle
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    button_state = get(hObject,'Value');
+    allPoints = [0,0];
+    
+    if (button_state == get(hObject,'Max'))
+        
+        [x, y] = getpts(handles.frameViewer);
+        allPoints = [x,y];
+        
+        showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
+        set(hObject,'String','Valleculae Residue');
+        set(hObject,'Value',0);
+    end
+    
+    valres_area = 0;
+    numPoints = length(allPoints);
+    
+    for i = 1:numPoints
+        if numPoints == 1
+            disp('Only 1 point selected, Valleculae Resid will not be calculated');
+            break;
+        end
+        
+        % Coordinate based area calculation
+        if i == numPoints
+            valres_area = valres_area + ((allPoints(i,1) * allPoints(mod(i+1,numPoints),2)) ...
+                - (allPoints(i,2) * allPoints(mod(i+1,numPoints),1)));
+            
+            valres_area = abs(valres_area / 2);
+            showFeedbackPopup(handles, sprintf('Val Res Area: %-.2f', valres_area), 2);
+            Utilities.CustomPrinters.printInfo(sprintf('Val Res Area: %-.2f', valres_area));
+        else
+            valres_area = valres_area + ((allPoints(i,1) * allPoints(i+1,2)) ...
+                - (allPoints(i,2) * allPoints(i+1,1)));
+        end
+    end
+        
+    globalStudyInfo.nrrs_valres_points = allPoints;
+    globalStudyInfo.nrrs_valres_area = valres_area;
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+% --- Executes during object creation, after setting all properties.
+function semiautoOptions_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to semiautoOptions (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+    set(hObject, 'State', 'off');
+
+
+% --- Executes on button press in valarea_toggle.
+function valarea_toggle_Callback(hObject, eventdata, handles)
+% hObject    handle to valarea_toggle (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of valarea_toggle
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    button_state = get(hObject,'Value');
+    allPoints = [0,0];
+    
+    if (button_state == get(hObject,'Max'))
+        
+        [x, y] = getpts(handles.frameViewer);
+        allPoints = [x,y];
+        
+        showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
+        set(hObject,'String','Total Valleculae Area');
+        set(hObject,'Value',0);
+    end
+    
+    totalval_area = 0;
+    numPoints = length(allPoints);
+    
+    for i = 1:numPoints
+        if numPoints == 1
+            disp('Only 1 point selected, PCR will not be calculated');
+            break;
+        end
+        
+        % Coordinate based area calculation
+        if i == numPoints
+            totalval_area = totalval_area + ((allPoints(i,1) * allPoints(mod(i+1,numPoints),2)) ...
+                - (allPoints(i,2) * allPoints(mod(i+1,numPoints),1)));
+            
+            totalval_area = abs(totalval_area / 2);
+            showFeedbackPopup(handles, sprintf('Total Valleculae Area: %-.2f', totalval_area), 2);
+            Utilities.CustomPrinters.printInfo(sprintf('Total Valleculae Area: %-.2f', totalval_area));
+        else
+            totalval_area = totalval_area + ((allPoints(i,1) * allPoints(i+1,2)) ...
+                - (allPoints(i,2) * allPoints(i+1,1)));
+        end
+    end
+        
+    globalStudyInfo.nrrs_totalval_points = allPoints;
+    globalStudyInfo.nrrs_totalval_area = totalval_area;
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+% --- Executes on button press in pirires_toggle.
+function pirires_toggle_Callback(hObject, eventdata, handles)
+% hObject    handle to pirires_toggle (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of pirires_toggle
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    button_state = get(hObject,'Value');
+    allPoints = [0,0];
+    
+    if (button_state == get(hObject,'Max'))
+        
+        [x, y] = getpts(handles.frameViewer);
+        allPoints = [x,y];
+        
+        showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
+        set(hObject,'String','Piriform Residue');
+        set(hObject,'Value',0);
+    end
+    
+    pirires_area = 0;
+    numPoints = length(allPoints);
+    
+    for i = 1:numPoints
+        if numPoints == 1
+            disp('Only 1 point selected, PCR will not be calculated');
+            break;
+        end
+        
+        % Coordinate based area calculation
+        if i == numPoints
+            pirires_area = pirires_area + ((allPoints(i,1) * allPoints(mod(i+1,numPoints),2)) ...
+                - (allPoints(i,2) * allPoints(mod(i+1,numPoints),1)));
+            
+            pirires_area = abs(pirires_area / 2);
+            showFeedbackPopup(handles, sprintf('Piriform Residue Area: %-.2f', pirires_area), 2);
+            Utilities.CustomPrinters.printInfo(sprintf('Piriform Residue Area: %-.2f', pirires_area));
+        else
+            pirires_area = pirires_area + ((allPoints(i,1) * allPoints(i+1,2)) ...
+                - (allPoints(i,2) * allPoints(i+1,1)));
+        end
+    end
+        
+    globalStudyInfo.nrrs_pirires_points = allPoints;
+    globalStudyInfo.nrrs_pirires_area = pirires_area;
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+% --- Executes on button press in piriarea_toggle.
+function piriarea_toggle_Callback(hObject, eventdata, handles)
+% hObject    handle to piriarea_toggle (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of piriarea_toggle
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    button_state = get(hObject,'Value');
+    allPoints = [0,0];
+    
+    if (button_state == get(hObject,'Max'))
+        
+        [x, y] = getpts(handles.frameViewer);
+        allPoints = [x,y];
+        
+        showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
+        set(hObject,'String','Total Piriform Area');
+        set(hObject,'Value',0);
+    end
+    
+    totalpiri_area = 0;
+    numPoints = length(allPoints);
+    
+    for i = 1:numPoints
+        if numPoints == 1
+            disp('Only 1 point selected, PCR will not be calculated');
+            break;
+        end
+        
+        % Coordinate based area calculation
+        if i == numPoints
+            totalpiri_area = totalpiri_area + ((allPoints(i,1) * allPoints(mod(i+1,numPoints),2)) ...
+                - (allPoints(i,2) * allPoints(mod(i+1,numPoints),1)));
+            
+            totalpiri_area = abs(totalpiri_area / 2);
+            showFeedbackPopup(handles, sprintf('Total Piriform Area: %-.2f', totalpiri_area), 2);
+            Utilities.CustomPrinters.printInfo(sprintf('Total Piriform Area: %-.2f', totalpiri_area));
+        else
+            totalpiri_area = totalpiri_area + ((allPoints(i,1) * allPoints(i+1,2)) ...
+                - (allPoints(i,2) * allPoints(i+1,1)));
+        end
+    end
+        
+    globalStudyInfo.nrrs_totalpiri_points = allPoints;
+    globalStudyInfo.nrrs_totalpiri_area = totalpiri_area;
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);

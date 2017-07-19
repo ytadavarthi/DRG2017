@@ -352,9 +352,6 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         startFrame = phaseFramesCell(1);
         endFrame = phaseFramesCell(7);
         
-        %for PCR
-        holdarea = phaseFramesCell(14);
-        
         ahm = anteriorHyoidMovement(doubleCell, vertScalar, siScalar, startFrame, endFrame);
         shm = superiorHyoidMovement(doubleCell, vertScalar, siScalar, startFrame, endFrame);
         hyExMand = hyoidExcursionToMandible(doubleCell, vertScalar, siScalar, startFrame, endFrame);
@@ -378,7 +375,7 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
 %         pdt = pharyngealDelayTime(phaseFramesCell);
 
         %pharyngeal constriction ratio to determine pharynx strength
-        pcr = pharyngealConstrictionRatio(doubleCell, vertScalar, siScalar, startFrame, endFrame, holdarea);
+        ePCR = pharyngealConstrictionRatio(doubleCell, vertScalar, siScalar, startFrame, endFrame);
         
         kinematicsArray(i+1, 1:numColumns) = {{fileNames{i}(1:end-4)},...
                                                 ahm{1},  ahm{2},  ...
@@ -395,7 +392,7 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
                                                 ott,    ...
                                                 std,    ...
                                                 ptt,    ...
-                                                optt, lvc, pcr};
+                                                optt, lvc, ePCR};
         
     end
     
@@ -1127,7 +1124,7 @@ function lvc = laryngealVestibuleClosure (phasesCell)
 end
 
 %Pharyngeal Constriction Ratio; Needs points 6,10,11,12
-function pcr = pharyngealConstrictionRatio(doubleCell, vertScalar, siScalar, startFrame, endFrame, holdarea)
+function ePCR = pharyngealConstrictionRatio(doubleCell, vertScalar, siScalar, startFrame, endFrame)
     
     doubleCellSize = size(doubleCell);
 
@@ -1146,7 +1143,7 @@ function pcr = pharyngealConstrictionRatio(doubleCell, vertScalar, siScalar, sta
         mpcY = doubleCell(i,24);
         
         if(find([uesX uesY valX valY spcX spcY mpcX mpcY]==0))
-            pcr = {0,0};
+            ePCR = {0,0};
             return;
         end
         
@@ -1157,20 +1154,18 @@ function pcr = pharyngealConstrictionRatio(doubleCell, vertScalar, siScalar, sta
         allAreas(i) = current_area;
         
         if(~isnan(vertScalar))        
-            allVertAreas(i) = current_area / holdarea / (vertScalar^2);
+            allVertAreas(i) = current_area / (vertScalar^2);
         end
         
         if(siScalar)
-            allSIAreas(i) = current_area / holdarea / (siScalar^2);
+            allSIAreas(i) = current_area / (siScalar^2);
         end
     end
     
-    vertPCR = max(allVertAreas(allVertAreas>0));
-    siPCR = max(allSIAreas(allSIAreas>0));
+    vertPCR = min(allVertAreas(allVertAreas>0)) / max(allVertAreas(allVertAreas>0));
+    siPCR = min(allSIAreas(allSIAreas>0)) / max(allSIAreas(allSIAreas>0));
     
     ePCR = min(allAreas(allAreas>0)) / max(allAreas(allAreas>0));
-
-    pcr = ePCR;
 end
 
 %OLD Anterior Hyoid Movement; Needs C1, C4, Hyoid
