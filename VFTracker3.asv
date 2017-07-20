@@ -257,13 +257,10 @@ pointerShape = [ ...
                         if isnan(calibration_points.(morphoJTable{1,j}))
                            calibration_points.(morphoJTable{1,j}) = [];
                         end
-                    elseif strcmp(morphoJTable{1,j},'frameRate') || strcmp(morphoJTable{1,j},'')
+                    elseif strcmp(morphoJTable{1,j},'frameRate')
                         %if frameRate is stored, we do not want to load it.
                         %The value will be extracted from video file later.
-                        %otherwise, if the value is blank, it means there
-                        %are extraneous columns in the _morphoJ file,
-                        %ignore those too.
-                    elseif isprop(globalStudyInfo,morphoJTable{1,j})
+                    elseif 
                         globalStudyInfo.(morphoJTable{1,j}) = str2double(morphoJTable{2,j});
                         if isnan(globalStudyInfo.(morphoJTable{1,j}))
                            globalStudyInfo.(morphoJTable{1,j}) = [];
@@ -273,14 +270,10 @@ pointerShape = [ ...
                             set(handles.([morphoJTable{1,j} '_text']), 'String', globalStudyInfo.(morphoJTable{1,j}));
                         end
                         
-                    else 
-                        error('Something went wrong with loading the _morphoJ_ file!')         
                     end
-                    j
                 end
-                
-                globalStudyInfo.si_point1      = [calibration_points.si_point1_x,calibration_points.si_point1_y];
-                globalStudyInfo.si_point2      = [calibration_points.si_point2_x,calibration_points.si_point2_y];
+                globalStudyInfo.si_point1      = [calibration_points.point1_x,calibration_points.point1_y];
+                globalStudyInfo.si_point2      = [calibration_points.point2_x,calibration_points.point2_y];
                 set(handles.si_point1_text, 'String', sprintf('%-.2f, \t %-.2f',globalStudyInfo.si_point1(1),globalStudyInfo.si_point1(2)));
                 set(handles.si_point2_text, 'String', sprintf('%-.2f, \t %-.2f',globalStudyInfo.si_point1(1),globalStudyInfo.si_point1(2)));
                 
