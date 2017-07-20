@@ -1750,7 +1750,7 @@ function pcr_min_area_button_Callback(hObject, eventdata, handles)
     allPoints = [0,0];
     
     if (button_state == get(hObject,'Max'))
-        [x, y] = getpts(handles.frameViewer);
+        [x, y] = getline(handles.frameViewer);
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
@@ -1796,7 +1796,7 @@ function pcr_max_area_button_Callback(hObject, eventdata, handles)
     allPoints = [0,0];
     
     if (button_state == get(hObject,'Max'))
-        [x, y] = getpts(handles.frameViewer);
+        [x, y] = getline(handles.frameViewer);
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
