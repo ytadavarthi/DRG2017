@@ -1231,9 +1231,7 @@ function pcr = pharyngealConstrictionRatio (phasesCell)
     if isnan(pcr_min_area) || isnan(pcr_max_area)
         pcr = 0;
     else
-        pcr_vert = pcr_min_area / pcr_max_area;
-        pcr_si = nrrs_pirires_area / nrrs_totalpiri_area;
-        pcr = {pcr_vert, pcr_si};
+        pcr = pcr_min_area / pcr_max_area;
     end
 end
 
