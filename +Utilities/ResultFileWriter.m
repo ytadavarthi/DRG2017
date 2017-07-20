@@ -68,8 +68,8 @@ function ResultFileWriter(globalStudyInfo)
     
     cell1 = table2cell(t2);
     
-    %Num Columns for Frame Number Information + Hold Area + Frame Rate
-    phaseFramesNumColumns = 24;
+    %Num Columns for Frame Number Information
+    phaseFramesNumColumns = 25;
     
     cell2 = cell(1,n);
     cell2(1, 1:phaseFramesNumColumns) = {'start_frame' 'hold_position' ...
@@ -83,7 +83,7 @@ function ResultFileWriter(globalStudyInfo)
                                         'ues_opening' 'uesd_dist' ...
                                         'nrrs_valres_area' 'nrrs_totalval_area'...
                                         'nrrs_pirires_area' 'nrrs_totalpiri_area' ...
-                                        'pcr_min_area' 'pcr_max_area';
+                                        'pcr_min_area' 'pcr_max_area' 'pas';
 };
     
     cell3 = cell(1,n);
@@ -123,7 +123,8 @@ function ResultFileWriter(globalStudyInfo)
                         globalStudyInfo.nrrs_pirires_area , ...
                         globalStudyInfo.nrrs_totalpiri_area, ...
                         globalStudyInfo.pcr_min_area    , ...
-                        globalStudyInfo.pcr_max_area };
+                        globalStudyInfo.pcr_max_area, ...
+                        globalStudyInfo.pas};
     
     kinematics_cell = [cell2; cell3];
     totalKinematicsTable = cell2table(kinematics_cell);

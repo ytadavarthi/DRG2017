@@ -311,8 +311,8 @@ end
 function output = compile_kinematicsButton(dataStruct, fileNames)
     lengthDataStruct = length(dataStruct);
     numKinematicsFunctions = 11;
-    % numKinematicsFunctions*2 + 6 for the timing variables + 4 for nrrs + 2 for pcr + 1 for filename
-    numColumns = numKinematicsFunctions*2 + 6 + 4 + 2 + 1;
+    % numKinematicsFunctions*2 + 6 for the timing variables + 4 for nrrs + 3 for pcr + 2 for ues_dist +  1 for filename
+    numColumns = numKinematicsFunctions*2 + 6 + 4 + 3 + 2 + 1;
     kinematicsArray = cell(lengthDataStruct+1, numColumns);    
     
     kinematicsArray(1, 1:numColumns) = ...
@@ -336,8 +336,7 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         'lvc',    ...
         'nrrs_val_vert', 'nrrs_val_si' ...
         'nrrs_piri_vert', 'nrrs_piri_si'...
-        'pcr'...
-        'ePCR'};
+        'pcr' 'ePCR' 'pas' 'ues_dist_vert' 'ues_dist_si'};
     
     for i = 1:lengthDataStruct
     
@@ -386,6 +385,8 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         pcr = pharyngealConstrictionRatio(phaseFramesCell);
         nrrs_val = nrrsValleculae(phaseFramesCell, vertScalar, siScalar);
         nrrs_piri = nrrsPiriform(phaseFramesCell, vertScalar, siScalar);
+        pas = phaseFramesCell(25);
+        ues_dist = uesDistension(phaseFramesCell, vertScalar, siScalar);
         
         kinematicsArray(i+1, 1:numColumns) = {{fileNames{i}(1:end-4)},...
                                                 ahm{1},  ahm{2},  ...
@@ -407,7 +408,9 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
                                                 lvc,    ... 
                                                 nrrs_val{1}, nrrs_val{2}, ...
                                                 nrrs_piri{1}, nrrs_piri{2}, ...
-                                                pcr, ePCR};
+                                                pcr, ePCR, pas, ...
+                                                ues_dist{1}, ues_dist{2};
+};
         
     end
     
@@ -419,8 +422,8 @@ end
 function compile_kinematicsData(dataStruct, fileNames, pathName)
     lengthDataStruct = length(dataStruct);
     numKinematicsFunctions = 11;
-    % numKinematicsFunctions + 4 for the timing variables + 1 for filename
-    numColumns = numKinematicsFunctions*2 + 4 + 1;
+    % numKinematicsFunctions*2 + 6 for the timing variables + 4 for nrrs + 3 for pcr/pas + 2 for ues + 1 for filename
+    numColumns = numKinematicsFunctions*2 + 6 + 4 + 3 + 2 + 1;
     
     
     kinematicsArray = cell(lengthDataStruct+1, numColumns);
@@ -440,7 +443,12 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         'ott',    ...
         'std',    ...
         'ptt',    ...
-        'optt'};
+        'optt',   ...
+        'pdt',    ...
+        'lvc',    ...
+        'nrrs_val_vert', 'nrrs_val_si' ...
+        'nrrs_piri_vert', 'nrrs_piri_si'...
+        'pcr' 'ePCR' 'pas' 'ues_dist_vert' 'ues_dist_si'};
     
     for i = 1:lengthDataStruct
         
@@ -501,8 +509,17 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         std = stageTransitionDuration(phaseFramesCell);
         ptt = pharyngealTransitTime(phaseFramesCell);
         optt = oropharyngealTransitTime(phaseFramesCell);
-        %????? 1st jump larynx - if hyoid then it would be the same as stageTransitionDuration????%
-%         pdt = pharyngealDelayTime(phaseFramesCell);
+        lvc = laryngealVestibuleClosure (phaseFramesCell);
+        %1st jump larynx
+        pdt = pharyngealDelayTime(phaseFramesCell);
+
+        %pharyngeal constriction ratio to determine pharynx strength
+        ePCR = experimentalPharyngealConstrictionRatio(doubleCell, vertScalar, siScalar, startFrame, endFrame);
+        pcr = pharyngealConstrictionRatio(phaseFramesCell);
+        nrrs_val = nrrsValleculae(phaseFramesCell, vertScalar, siScalar);
+        nrrs_piri = nrrsPiriform(phaseFramesCell, vertScalar, siScalar);
+        pas = phaseFramesCell(25);
+        ues_dist = uesDistension(phaseFramesCell, vertScalar, siScalar);
         
         kinematicsArray(i+1, 1:numColumns) = {{fileNames{i}(1:end-4)},...
                                                 ahm{1},  ahm{2},  ...
@@ -519,7 +536,13 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
                                                 ott,    ...
                                                 std,    ...
                                                 ptt,    ...
-                                                optt};
+                                                optt,   ...
+                                                pdt,    ...
+                                                lvc,    ... 
+                                                nrrs_val{1}, nrrs_val{2}, ...
+                                                nrrs_piri{1}, nrrs_piri{2}, ...
+                                                pcr, ePCR, pas, ... 
+                                                ues_dist{1}, ues_dist{2}};
         
     end
     
@@ -1129,12 +1152,12 @@ end
 
 %Laryngeal Vestibule Closure Duration; Needs LVC Close and LVC Open
 function lvc = laryngealVestibuleClosure (phasesCell)
-    if (isnan(phasesCell(15)) || isnan(phasesCell(16)))
+    if (isnan(phasesCell(15)) || isnan(phasesCell(15)))
         lvc = 0;
     elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
-        lvc = (phasesCell(16) - phasesCell(15)) / 30;
+        lvc = (phasesCell(15) - phasesCell(14)) / 30;
     else
-        lvc = (phasesCell(16) - phasesCell(15)) / phasesCell(13);
+        lvc = (phasesCell(15) - phasesCell(14)) / phasesCell(13);
     end
 end
 
@@ -1176,6 +1199,24 @@ function nrrs_piri = nrrsPiriform (phasesCell, vertScalar, siScalar)
         
         if(siScalar)
             nrrs_piri{2} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / siScalar^2);
+        end
+    end
+end
+
+function ues_dist = uesDistension (phasesCell, vertScalar, siScalar)
+    ues_dist_px = phasesCell(18);
+    
+    ues_dist = {0,0};
+
+    if isnan(ues_dist_px)
+        return;
+    else
+        if(~isnan(vertScalar))
+            ues_dist{1} =  ues_dist_px / vertScalar; 
+        end
+        
+        if(siScalar)
+            ues_dist{2} =  ues_dist_px / siScalar;
         end
     end
 end
