@@ -276,78 +276,25 @@ pointerShape = [ ...
                     else 
                         error('Something went wrong with loading the _morphoJ_ file!')         
                     end
-                    j
+                    
                 end
                 
                 globalStudyInfo.si_point1      = [calibration_points.si_point1_x,calibration_points.si_point1_y];
                 globalStudyInfo.si_point2      = [calibration_points.si_point2_x,calibration_points.si_point2_y];
-                set(handles.si_point1_text, 'String', sprintf('%-.2f, \t %-.2f',globalStudyInfo.si_point1(1),globalStudyInfo.si_point1(2)));
-                set(handles.si_point2_text, 'String', sprintf('%-.2f, \t %-.2f',globalStudyInfo.si_point1(1),globalStudyInfo.si_point1(2)));
-                
+
                 if isempty(globalStudyInfo.si_point1) || isempty(globalStudyInfo.si_point2)
                     estSize = '';
                     set(handles.estSize, 'String', num2str(estSize));
                 else
+                    set(handles.si_point1_text, 'String', sprintf('%-.2f, \t %-.2f',globalStudyInfo.si_point1(1),globalStudyInfo.si_point1(2)));
+                    set(handles.si_point2_text, 'String', sprintf('%-.2f, \t %-.2f',globalStudyInfo.si_point1(1),globalStudyInfo.si_point1(2)));
+                
                     bothPoints = [globalStudyInfo.si_point1(1),globalStudyInfo.si_point1(2);globalStudyInfo.si_point2(1),globalStudyInfo.si_point2(2)];
                     bothPoints_dist = coordinates_dist(bothPoints);
 
                     estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
                     set(handles.estSize, 'String', num2str(estSize));
                 end
-%                 %set frame information to each textbox corresponding to push
-%                 %buttons
-%                 globalStudyInfo.hold_position  = str2num(morphoJTable{2,2});
-%                 globalStudyInfo.ramus_mandible = str2num(morphoJTable{2,3});
-%                 globalStudyInfo.hyoid_burst    = str2num(morphoJTable{2,4});
-%                 globalStudyInfo.ues_closure    = str2num(morphoJTable{2,5});
-%                 globalStudyInfo.at_rest        = str2num(morphoJTable{2,6});
-%                 globalStudyInfo.start_frame    = str2num(morphoJTable{2,1});
-%                 globalStudyInfo.end_frame      = str2num(morphoJTable{2,7});
-%                 globalStudyInfo.si_point1      = [str2num(morphoJTable{2,8}), str2num(morphoJTable{2,9})];
-%                 globalStudyInfo.si_point2      = [str2num(morphoJTable{2,10}), str2num(morphoJTable{2,11})];
-%                 globalStudyInfo.pixelspercm    = str2num(morphoJTable{2,12});
-%                 globalStudyInfo.lvc_onset      = str2num(morphoJTable{2,14});
-%                 globalStudyInfo.lvc_offset     = str2num(morphoJTable{2,15});
-%                 globalStudyInfo.laryngeal_jump = str2num(morphoJTable{2,16});
-%                 globalStudyInfo.ues_opening    = str2num(morphoJTable{2,17});
-%                 globalStudyInfo.uesd_dist      = str2num(morphoJTable{2,18});     
-%                 globalStudyInfo.nrrs_valres_area     = str2num(morphoJTable{2,19});
-%                 globalStudyInfo.nrrs_totalval_area   = str2num(morphoJTable{2,20});      
-%                 globalStudyInfo.nrrs_pirires_area    = str2num(morphoJTable{2,21});
-%                 globalStudyInfo.nrrs_totalpiri_area  = str2num(morphoJTable{2,22});
-%                 globalStudyInfo.pcr_min_area    = str2num(morphoJTable{2,23});
-%                 globalStudyInfo.pcr_max_area    = str2num(morphoJTable{2,24});
-%                 globalStudyInfo.pas    = str2num(morphoJTable{2,25});
-%                 
-%                 set(handles.hold_position_text, 'String', globalStudyInfo.hold_position);
-%                 set(handles.ramus_mandible_text, 'String', globalStudyInfo.ramus_mandible);
-%                 set(handles.hyoid_burst_text, 'String', globalStudyInfo.hyoid_burst);
-%                 set(handles.ues_closure_text, 'String', globalStudyInfo.ues_closure);
-%                 set(handles.at_rest_text, 'String', globalStudyInfo.at_rest);
-%                 set(handles.start_frame_text, 'String', globalStudyInfo.start_frame);
-%                 set(handles.end_frame_text, 'String', globalStudyInfo.end_frame);
-%                 set(handles.lvc_onset_text, 'String', globalStudyInfo.lvc_onset);
-%                 set(handles.lvc_offset_text, 'String', globalStudyInfo.lvc_offset);
-%                 set(handles.laryngeal_jump_text, 'String', globalStudyInfo.laryngeal_jump);
-%                 set(handles.ues_opening_text, 'String', globalStudyInfo.ues_opening);
-%                 set(handles.pas_text, 'String', globalStudyInfo.pas);
-%                 
-%                 set(handles.si_point1_text, 'String', sprintf('%-.2f, \t %-.2f',str2num(morphoJTable{2,8}),str2num(morphoJTable{2,9})));
-%                 set(handles.si_point2_text, 'String', sprintf('%-.2f, \t %-.2f',str2num(morphoJTable{2,10}),str2num(morphoJTable{2,11})));
-%                 set(handles.pixelspercm_text, 'String', sprintf('%-.2f',globalStudyInfo.pixelspercm));
-% 
-%                 if isempty(globalStudyInfo.si_point1) || isempty(globalStudyInfo.si_point2)
-%                     estSize = '';
-%                     set(handles.estSize, 'String', num2str(estSize));
-%                 else
-%                     bothPoints = [globalStudyInfo.si_point1(1),globalStudyInfo.si_point1(2);globalStudyInfo.si_point2(1),globalStudyInfo.si_point2(2)];
-%                     bothPoints_dist = coordinates_dist(bothPoints);
-% 
-%                     estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
-%                     set(handles.estSize, 'String', num2str(estSize));
-%                 end
-% 
-%                 %setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
             end
         end

@@ -1255,7 +1255,7 @@ function ePCR = experimentalPharyngealConstrictionRatio(doubleCell, vertScalar, 
         mpcY = doubleCell(i,24);
         
         if(find([uesX uesY valX valY spcX spcY mpcX mpcY]==0))
-            ePCR = {0,0};
+            ePCR = 0;
             return;
         end
         
