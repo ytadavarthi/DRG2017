@@ -241,12 +241,12 @@ pointerShape = [ ...
 
             if ~strcmpi(morphoJTable{1,1},'FrameNumber')
 
-%                 for j = 1:length(morphoJTable(1,:))
-%                     globalStudyInfo.(morphoJTable{1,j}) = str2double(morphoJTable{2,j});
-%                     if isnan(globalStudyInfo.(morphoJTable{1,j}))
-%                        globalStudyInfo.(morphoJTable{1,j}) = [];
-%                     end
-%                 end
+                for j = 1:length(morphoJTable(1,:))
+                    globalStudyInfo.(morphoJTable{1,j}) = str2double(morphoJTable{2,j});
+                    if isnan(globalStudyInfo.(morphoJTable{1,j}))
+                       globalStudyInfo.(morphoJTable{1,j}) = [];
+                    end
+                end
                 %set frame information to each textbox corresponding to push
                 %buttons
                 globalStudyInfo.hold_position  = str2num(morphoJTable{2,2});
