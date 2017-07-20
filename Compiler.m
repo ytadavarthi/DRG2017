@@ -61,8 +61,10 @@ function varargout = Compiler(varargin)
         file = fullfile(pathName{i},fileNames{i});
         cell1 = table2cell(readtable(file,'delimiter','\t','ReadVariableNames',false));
             
-        if cell1{1,1} == 'start_frame'
-            coordinateData{i} = cell1(3:end,:);
+        if ~strcmpi(cell1{1,1},'FrameNumber')
+            %remove all extraneous cells in coordinateData
+            keepCoordinates = ~cellfun(@isempty,cell1(3,:));
+            coordinateData{i} = cell1(3:end,keep);
 
             %remove all extraneous cells in classifierData
             keep = ~cellfun(@isempty,cell1(1,:));
