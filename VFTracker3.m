@@ -1754,7 +1754,6 @@ function pcr_min_area_button_Callback(hObject, eventdata, handles)
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
-        set(hObject,'String','Calibrate PCR');
         set(hObject,'Value',0);
     end
     
@@ -1801,7 +1800,6 @@ function pcr_max_area_button_Callback(hObject, eventdata, handles)
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
-        set(hObject,'String','Calibrate PCR');
         set(hObject,'Value',0);
     end
     
