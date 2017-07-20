@@ -44,9 +44,13 @@ classdef GlobalStudyInfo < handle
       nrrs_totalpiri_area;
       
       %Calibration for PCR
-      pcr_points;
-      pcr;
-      ePCR;
+      pcr_min_points;
+      pcr_min_area;
+      pcr_max_points;
+      pcr_max_area;
+      
+      %Penetration Aspiration Ratio
+      pas;
       
       %Global sessoin info
       currentlyTrackedLandmark = Data.JoveLandmarks.Mandible;
