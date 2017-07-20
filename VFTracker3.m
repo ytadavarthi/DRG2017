@@ -259,11 +259,17 @@ pointerShape = [ ...
                 globalStudyInfo.si_point1      = [str2num(morphoJTable{2,8}), str2num(morphoJTable{2,9})];
                 globalStudyInfo.si_point2      = [str2num(morphoJTable{2,10}), str2num(morphoJTable{2,11})];
                 globalStudyInfo.pixelspercm    = str2num(morphoJTable{2,12});
-                globalStudyInfo.ePCR           = str2num(morphoJTable{2,14});
-                globalStudyInfo.lvc_onset      = str2num(morphoJTable{2,15});
-                globalStudyInfo.lvc_offset     = str2num(morphoJTable{2,16});
-                globalStudyInfo.laryngeal_jump = str2num(morphoJTable{2,17});
-                globalStudyInfo.ues_opening    = str2num(morphoJTable{2,18});
+                globalStudyInfo.lvc_onset      = str2num(morphoJTable{2,14});
+                globalStudyInfo.lvc_offset     = str2num(morphoJTable{2,15});
+                globalStudyInfo.laryngeal_jump = str2num(morphoJTable{2,16});
+                globalStudyInfo.ues_opening    = str2num(morphoJTable{2,17});
+                globalStudyInfo.uesd_dist      = str2num(morphoJTable{2,18});     
+                globalStudyInfo.nrrs_valres_area     = str2num(morphoJTable{2,19});
+                globalStudyInfo.nrrs_totalval_area   = str2num(morphoJTable{2,20});      
+                globalStudyInfo.nrrs_pirires_area    = str2num(morphoJTable{2,21});
+                globalStudyInfo.nrrs_totalpiri_area  = str2num(morphoJTable{2,22});
+                globalStudyInfo.pcr_min_area    = str2num(morphoJTable{2,23});
+                globalStudyInfo.pcr_max_area    = str2num(morphoJTable{2,24});
 
                 set(handles.text12, 'String', globalStudyInfo.hold_position);
                 set(handles.text13, 'String', globalStudyInfo.ramus_mandible);
@@ -2095,8 +2101,10 @@ function pas_toggle_Callback(hObject, eventdata, handles)
     
     if (button_state == get(hObject,'Max'))
         set(handles.pas_edit,'Visible','on');
+        uicontrol(handles.pas_edit);
     else
         set(handles.pas_edit, 'Visible','off');
+        uicontrol(handles.frameScrubber);
     end
 
 
@@ -2130,6 +2138,7 @@ function pas_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+set(hObject, 'Visible', 'off');
 
 
 % --- If Enable == 'on', executes on mouse press in 5 pixel border.
@@ -2138,6 +2147,6 @@ function pas_edit_ButtonDownFcn(hObject, eventdata, handles)
 % hObject    handle to pas_edit (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-set(hObject, 'String', '');
-set(hObject, 'enable', 'on');
-uicontrol(hObject);
+    set(hObject, 'String', '');
+    set(hObject, 'enable', 'on');
+    uicontrol(hObject);

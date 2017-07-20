@@ -48,7 +48,6 @@ classdef GlobalStudyInfo < handle
       pcr_min_area;
       pcr_max_points;
       pcr_max_area;
-      ePCR;
       
       %Penetration Aspiration Ratio
       pas;
