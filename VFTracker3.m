@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 19-Jul-2017 11:58:48
+% Last Modified by GUIDE v2.5 19-Jul-2017 14:48:34
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1276,9 +1276,6 @@ function pushbutton1_Callback(hObject, eventdata, handles)
     set(handles.text12, 'String', globalStudyInfo.hold_position);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     uicontrol(handles.frameScrubber);
-
-    
-
     
 % --- Executes on button press in pushbutton2.
 function pushbutton2_Callback(hObject, eventdata, handles)
@@ -1290,7 +1287,6 @@ function pushbutton2_Callback(hObject, eventdata, handles)
     set(handles.text13, 'String', globalStudyInfo.ramus_mandible);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     uicontrol(handles.frameScrubber);
-
     
 % --- Executes on button press in pushbutton3.
 function pushbutton3_Callback(hObject, eventdata, handles)
@@ -1302,7 +1298,6 @@ function pushbutton3_Callback(hObject, eventdata, handles)
     set(handles.text14, 'String', globalStudyInfo.hyoid_burst);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     uicontrol(handles.frameScrubber);
-
     
 % --- Executes on button press in pushbutton4.
 function pushbutton4_Callback(hObject, eventdata, handles)
@@ -1361,6 +1356,49 @@ function endButton_Callback(hObject, eventdata, handles)
     set(handles.text18, 'String', globalStudyInfo.end_frame);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     uicontrol(handles.frameScrubber);
+% --- Executes on button press in laryngeal vestibule closing.
+function pushbutton14_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton14 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.lvc_onset = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text36, 'String', globalStudyInfo.lvc_onset);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    uicontrol(handles.frameScrubber);
+
+% --- Executes on button press for laryngeal vestibule opening.
+function pushbutton15_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton15 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.lvc_offset = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text37, 'String', globalStudyInfo.lvc_offset);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    uicontrol(handles.frameScrubber);
+
+% --- Executes on button press in pushbutton16 - ues opening.
+function pushbutton16_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton16 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.ues_opening = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text39, 'String', globalStudyInfo.ues_opening);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    uicontrol(handles.frameScrubber);
+
+% --- Executes on button press in pushbutton17 - laryngeal jump.
+function pushbutton17_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton17 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    globalStudyInfo.laryngeal_jump = floor(get(handles.frameScrubber, 'Value'));
+    set(handles.text40, 'String', globalStudyInfo.laryngeal_jump);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    uicontrol(handles.frameScrubber);
 
 
 % --- Executes during object creation, after setting all properties.
@@ -1371,8 +1409,6 @@ function numPyramidLevelsLabel_CreateFcn(hObject, eventdata, handles)
 % set(hObject,'BackgroundColor',[.21 .21 .21]);
 % set(hObject,'Font',[1 1 1]);
 % set(hObject, 'Parent', handles.semiautoPanel);
-
-
 
 
 % --- Executes during object creation, after setting all properties.
@@ -1689,20 +1725,18 @@ function legendToggle_ClickedCallback(hObject, eventdata, handles)
         '_si - Normalized to the size of the coin on the screen'});
 
 
-% --- Executes on button press in calibratePCRbutton.
-function calibratePCRbutton_Callback(hObject, eventdata, handles)
-% hObject    handle to calibratePCRbutton (see GCBO)
+% --- Executes on button press in pcr_min_area_button.
+function pcr_min_area_button_Callback(hObject, eventdata, handles)
+% hObject    handle to pcr_min_area_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of calibratePCRbutton
+% Hint: get(hObject,'Value') returns toggle state of pcr_min_area_button
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
     button_state = get(hObject,'Value');
-
     allPoints = [0,0];
     
     if (button_state == get(hObject,'Max'))
-        
         [x, y] = getpts(handles.frameViewer);
         allPoints = [x,y];
         
@@ -1734,31 +1768,58 @@ function calibratePCRbutton_Callback(hObject, eventdata, handles)
         end
     end
         
-    globalStudyInfo.pcr_points = allPoints;
-    globalStudyInfo.pcr = pcr;
+    globalStudyInfo.pcr_min_points = allPoints;
+    globalStudyInfo.pcr_min_area = pcr;
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
-% --- Executes on button press in laryngeal vestibule closing.
-function pushbutton14_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton14 (see GCBO)
+% --- Executes on button press in pcr_max_area_button.
+function pcr_max_area_button_Callback(hObject, eventdata, handles)
+% hObject    handle to pcr_max_area_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-    globalStudyInfo.lvc_onset = floor(get(handles.frameScrubber, 'Value'));
-    set(handles.text36, 'String', globalStudyInfo.lvc_onset);
-    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-    uicontrol(handles.frameScrubber);
 
-% --- Executes on button press for laryngeal vestibule opening.
-function pushbutton15_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton15 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% Hint: get(hObject,'Value') returns toggle state of pcr_max_area_button
     globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-    globalStudyInfo.lvc_offset = floor(get(handles.frameScrubber, 'Value'));
-    set(handles.text37, 'String', globalStudyInfo.lvc_offset);
+    button_state = get(hObject,'Value');
+    allPoints = [0,0];
+    
+    if (button_state == get(hObject,'Max'))
+        [x, y] = getpts(handles.frameViewer);
+        allPoints = [x,y];
+        
+        showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
+        set(hObject,'String','Calibrate PCR');
+        set(hObject,'Value',0);
+    end
+    
+    pcr = 0;
+    numPoints = length(allPoints);
+    
+    for i = 1:numPoints
+        if numPoints == 1
+            disp('Only 1 point selected, PCR will not be calculated');
+            break;
+        end
+        
+        % Coordinate based area calculation
+        if i == numPoints
+            pcr = pcr + ((allPoints(i,1) * allPoints(mod(i+1,numPoints),2)) ...
+                - (allPoints(i,2) * allPoints(mod(i+1,numPoints),1)));
+            
+            pcr = abs(pcr / 2);
+            showFeedbackPopup(handles, sprintf('PCR: %-.2f', pcr), 2);
+            Utilities.CustomPrinters.printInfo(sprintf('PCR: %-.2f', pcr));
+        else
+            pcr = pcr + ((allPoints(i,1) * allPoints(i+1,2)) ...
+                - (allPoints(i,2) * allPoints(i+1,1)));
+        end
+    end
+        
+    globalStudyInfo.pcr_max_points = allPoints;
+    globalStudyInfo.pcr_max_area = pcr;
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-    uicontrol(handles.frameScrubber);
+
+
 
 % --------------------------------------------------------------------
 function openFileButton_ClickedCallback(hObject, eventdata, handles)
@@ -1784,28 +1845,12 @@ function semiautoOptions_ClickedCallback(hObject, eventdata, handles)
             set(handles.unitCalibrationPanel, 'visible', 'off');
     end
 
-% --- Executes on button press in pushbutton16 - ues opening.
-function pushbutton16_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton16 (see GCBO)
+% --- Executes during object creation, after setting all properties.
+function semiautoOptions_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to semiautoOptions (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-    globalStudyInfo.ues_opening = floor(get(handles.frameScrubber, 'Value'));
-    set(handles.text39, 'String', globalStudyInfo.ues_opening);
-    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-    uicontrol(handles.frameScrubber);
-
-% --- Executes on button press in pushbutton17 - laryngeal jump.
-function pushbutton17_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton17 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
-    globalStudyInfo.laryngeal_jump = floor(get(handles.frameScrubber, 'Value'));
-    set(handles.text40, 'String', globalStudyInfo.laryngeal_jump);
-    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-    uicontrol(handles.frameScrubber);
-
+% handles    empty - handles not created until after all CreateFcns called
+    set(hObject, 'State', 'off');
 
 % --- Executes on button press in valres_toggle.
 function valres_toggle_Callback(hObject, eventdata, handles)
@@ -1820,7 +1865,7 @@ function valres_toggle_Callback(hObject, eventdata, handles)
     
     if (button_state == get(hObject,'Max'))
         
-        [x, y] = getpts(handles.frameViewer);
+        [x, y] = getline(handles.frameViewer);
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
@@ -1855,14 +1900,6 @@ function valres_toggle_Callback(hObject, eventdata, handles)
     globalStudyInfo.nrrs_valres_area = valres_area;
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
-% --- Executes during object creation, after setting all properties.
-function semiautoOptions_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to semiautoOptions (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-    set(hObject, 'State', 'off');
-
-
 % --- Executes on button press in valarea_toggle.
 function valarea_toggle_Callback(hObject, eventdata, handles)
 % hObject    handle to valarea_toggle (see GCBO)
@@ -1876,7 +1913,7 @@ function valarea_toggle_Callback(hObject, eventdata, handles)
     
     if (button_state == get(hObject,'Max'))
         
-        [x, y] = getpts(handles.frameViewer);
+        [x, y] = getline(handles.frameViewer);
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
@@ -1924,7 +1961,7 @@ function pirires_toggle_Callback(hObject, eventdata, handles)
     
     if (button_state == get(hObject,'Max'))
         
-        [x, y] = getpts(handles.frameViewer);
+        [x, y] = getline(handles.frameViewer);
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
@@ -2007,7 +2044,6 @@ function piriarea_toggle_Callback(hObject, eventdata, handles)
     globalStudyInfo.nrrs_totalpiri_area = totalpiri_area;
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
-
 % --- Executes on button press in uesd_toggle.
 function uesd_toggle_Callback(hObject, eventdata, handles)
 % hObject    handle to uesd_toggle (see GCBO)
@@ -2020,25 +2056,82 @@ function uesd_toggle_Callback(hObject, eventdata, handles)
     allPoints = [0,0];
     
     if (button_state == get(hObject,'Max'))
-        
-        [x, y] = getline(handles.frameViewer);
-        allPoints = [x,y];
-        
-        showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
+        %getting all points for distension distance
+        allPoints = getline(handles.frameViewer);
+        showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(allPoints)), 2);
         set(hObject,'String','UES Distension');
         set(hObject,'Value',0);
     end
     
-    
-    numPoints = length(allPoints);
-    
-    if numPoints == 1
+    if length(allPoints) == 1
         disp('Only 1 point selected, Piriform Residue Area will not be calculated');
         return;
     end
 
     uesd = coordinates_dist(allPoints);
-        
+    showFeedbackPopup(handles,sprintf('UES Distension: %-.2f', uesd), 2);
+
     globalStudyInfo.uesd_points = allPoints;
     globalStudyInfo.uesd_dist = uesd;
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+
+% --- Executes on button press in pas_toggle.
+function pas_toggle_Callback(hObject, eventdata, handles)
+% hObject    handle to pas_toggle (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of pas_toggle
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    button_state = get(hObject,'Value');
+    allPoints = [0,0];
+    
+    if (button_state == get(hObject,'Max'))
+        set(handles.pas_edit,'Visible','on');
+    else
+        set(handles.pas_edit, 'Visible','off');
+    end
+
+
+function pas_edit_Callback(hObject, eventdata, handles)
+% hObject    handle to pas_edit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of pas_edit as text
+%        str2double(get(hObject,'String')) returns contents of pas_edit as a double
+    globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+    
+    if(isnan(str2double(get(hObject,'String'))))
+        showFeedbackPopup(handles,'Please Enter Valid Number',1);
+    else
+        pas = str2double(get(hObject,'String'));
+        globalStudyInfo.pas = pas;
+        showFeedbackPopup(handles,sprintf('PAS Saved: %d', pas),2);
+    end
+    
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+% --- Executes during object creation, after setting all properties.
+function pas_edit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pas_edit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- If Enable == 'on', executes on mouse press in 5 pixel border.
+% --- Otherwise, executes on mouse press in 5 pixel border or over pas_edit.
+function pas_edit_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to pas_edit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(hObject, 'String', '');
+set(hObject, 'enable', 'on');
+uicontrol(hObject);
