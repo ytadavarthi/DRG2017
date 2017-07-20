@@ -64,7 +64,7 @@ function varargout = Compiler(varargin)
         if ~strcmpi(cell1{1,1},'FrameNumber')
             %remove all extraneous cells in coordinateData
             keepCoordinates = ~cellfun(@isempty,cell1(3,:));
-            coordinateData{i} = cell1(3:end,keep);
+            coordinateData{i} = cell1(3:end,keepCoordinates);
 
             %remove all extraneous cells in classifierData
             keep = ~cellfun(@isempty,cell1(1,:));
