@@ -101,7 +101,7 @@ function varargout = Compiler(varargin)
         %information, the classifier data text file will not be written.
         %Making makeshift progress bar
         fprintf('Compiling Classifier Data..');
-        if ~strcmpi(cell1{1,1},'FrameNumber')
+        if cell1{1,1} == 'start_frame'
             compile_classifierData(dataStruct,fileNames,finalCell,folder_name);
             disp('Done writing combined classifier file');
         else
@@ -133,37 +133,26 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
         classifierData = dataStruct(i).classifierData;
         coordinateData = dataStruct(i).coordinateData;
         
-        %find the start & end frames, these values will be used to remove
-        %extraneous frames (rows) in the next section of code
-        start_frame = [];
-        end_frame = [];
-        for j = 1:length(classifierData(1,:))
-           if strcmp(classifierData{1,j},'start_frame')
-               start_frame = str2double(classifierData{2,j});
-           elseif strcmp(classifierData{1,j},'end_frame')
-               end_frame = str2double(classifierData{2,j});
-           end
-        end
-        
         %remove extraneous frames (rows) if first and last frame are indicated:
-        if isempty(start_frame) && isempty(end_frame)
+        if isempty(classifierData{2,1}) && isempty(classifierData{2,7})
             
-        elseif isempty(start_frame) && ~isempty(end_frame)
-            start_frame = 1;
-            %+1 is added to first frame and last frame because the first
-            %row of the coordinateData matrix is the title row
-            relevantCoordinates = coordinateData(start_frame+1:end_frame+1,:); 
+        elseif isempty(classifierData{2,1}) && ~isempty(classifierData{2,7})
+            firstFrame = 2;
+            lastFrame = str2double(classifierData{2,7});
+            relevantCoordinates = coordinateData(firstFrame+1:lastFrame+1,:); 
             columnLabels = coordinateData(1,:);
             coordinateData = vertcat(columnLabels,relevantCoordinates);
             
-        elseif isempty(end_frame) && ~isempty(start_frame)
-            
-            relevantCoordinates = coordinateData(start_frame+1:end,:); 
+        elseif isempty(classifierData{2,7}) && ~isempty(classifierData{2,1})
+            firstFrame = str2double(classifierData{2,1});
+            relevantCoordinates = coordinateData(firstFrame+1:end,:); 
             columnLabels = coordinateData(1,:);
             coordinateData = vertcat(columnLabels,relevantCoordinates);
             
         else
-            relevantCoordinates = coordinateData(start_frame+1:end_frame+1,:); 
+            firstFrame = str2double(classifierData{2,1});
+            lastFrame = str2double(classifierData{2,7});
+            relevantCoordinates = coordinateData(firstFrame+1:lastFrame+1,:); 
             columnLabels = coordinateData(1,:);
             coordinateData = vertcat(columnLabels,relevantCoordinates);
         end
@@ -177,31 +166,27 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
             coordinateData{j+1,1} = [fileNames{i}(1:end-4) num2str(j)];
         end
         
-        %create listbox asking user to select landmarks to be compiled
-        if i == 1
-            [listbox_selection,~] = listdlg('ListString',finalCell(1,2:2:end),'InitialValue',[],'PromptString','Use CTRL and/or SHIFT to select multiple landmarks');
-        end
-        
-        %listbox indeces go like this: mandible, hard palate, hyoid, etc
-        %columns go like this: frame_number,mand_x,mand_y,hard_x,hard_y, hyoid_x,hyoid_y etc
-        %in this case, say mandible and hyoid are selected, have to make
-        %index go from [1,3] to [1,2,3,6,7]
-        % 1 is always included because thats the column with the frame id
-        %After that, each number is transformed as follows:
-        %1 -> [2,3]
-        %2 -> [4,5]
-        %3 -> [6,7]
-        %i -> [i*2,i*2+1]
-        %etc
-        selectedColumns = [1];
-        for j = 1:length(listbox_selection)
-            selectedColumns = [selectedColumns,listbox_selection(j)*2,listbox_selection(j)*2+1];
+        %Find all unAnnotated Columns
+        unAnnotated = [false];
+        for j = 2:n
+            %unAnnotated = [unAnnotated all(diff(sort(str2double(coordinateData(2:end,j)))) == 0)];
+            unAnnotated = [unAnnotated all(str2double(coordinateData(2:end,j)) == 0)];
+            if any(j == 3:2:n) && unAnnotated(j-1) == true
+                unAnnotated(j) = true;
+            end
         end
         
         %remove unAnnotated Columns, including column headers
-        coordinateData = coordinateData(2:end,selectedColumns);
+        coordinateData = coordinateData(2:end,~unAnnotated);
         if i == 1
-            finalCell = finalCell(selectedColumns);
+            finalCell = finalCell(~unAnnotated);
+        end
+        
+        %make sure same number of landmarks were annotated
+        previousSize = size(finalCell);
+        currentSize = size(coordinateData);
+        if previousSize(2) ~= currentSize(2)
+            error(['Inconsistent number of landmarks were annotated in ' fileNames{i} '!'])
         end
         
         
@@ -211,8 +196,7 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
     end
     
     %remove extra columns
-    space_and_comma_less_frame_ID = regexprep(finalCell(:,1),'[, ]','_');
-    finalCell = [space_and_comma_less_frame_ID, finalCell(:,2:end)];
+    
     
     finalTable = cell2table(finalCell);
     formatOut = 'dd-mm-yy HH-MM AM';
@@ -1188,19 +1172,17 @@ end
 function nrrs_val = nrrsValleculae (phasesCell, vertScalar, siScalar)
     nrrs_val = {0,0};
 
-    if length(phasesCell)<25
+    if length(phasesCell)<25 || isnan(nrrs_valres_area) || isnan(nrrs_totalval_area)
         return;
     else
         nrrs_valres_area = phasesCell(19);
         nrrs_totalval_area = phasesCell(20);
-        if ~(isnan(nrrs_valres_area) || isnan(nrrs_totalval_area))
-            if(~isnan(vertScalar))
-                nrrs_val{1} = (nrrs_valres_area / nrrs_totalval_area) * ( 10* nrrs_valres_area / vertScalar^2);
-            end
-
-            if(siScalar)
-                nrrs_val{2} = (nrrs_valres_area / nrrs_totalval_area) * ( 10* nrrs_valres_area / siScalar^2);
-            end
+        if(~isnan(vertScalar))
+            nrrs_val{1} = (nrrs_valres_area / nrrs_totalval_area) * ( 10* nrrs_valres_area / vertScalar^2);
+        end
+        
+        if(siScalar)
+            nrrs_val{2} = (nrrs_valres_area / nrrs_totalval_area) * ( 10* nrrs_valres_area / siScalar^2);
         end
     end
 end
@@ -1210,20 +1192,17 @@ end
 function nrrs_piri = nrrsPiriform (phasesCell, vertScalar, siScalar)
     nrrs_piri = {0,0};
 
-    if length(phasesCell)<25
+    if length(phasesCell)<25 || isnan(nrrs_pirires_area) || isnan(nrrs_totalpiri_area)
         return;
     else
         nrrs_pirires_area = phasesCell(21);
         nrrs_totalpiri_area = phasesCell(22);
+        if(~isnan(vertScalar))
+            nrrs_piri{1} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / vertScalar^2); 
+        end
         
-        if ~(isnan(nrrs_pirires_area) || isnan(nrrs_totalpiri_area))
-            if(~isnan(vertScalar))
-                nrrs_piri{1} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / vertScalar^2); 
-            end
-
-            if(siScalar)
-                nrrs_piri{2} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / siScalar^2);
-            end
+        if(siScalar)
+            nrrs_piri{2} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / siScalar^2);
         end
     end
 end
@@ -1232,18 +1211,16 @@ function ues_dist = uesDistension (phasesCell, vertScalar, siScalar)
     
     ues_dist = {0,0};
 
-    if length(phasesCell)<25
+    if length(phasesCell)<25 || isnan(ues_dist_px)
         return;
     else
         ues_dist_px = phasesCell(18);
-        if ~isnan(ues_dist_px)
-            if(~isnan(vertScalar))
-                ues_dist{1} =  ues_dist_px / vertScalar; 
-            end
-
-            if(siScalar)
-                ues_dist{2} =  ues_dist_px / siScalar;
-            end
+        if(~isnan(vertScalar))
+            ues_dist{1} =  ues_dist_px / vertScalar; 
+        end
+        
+        if(siScalar)
+            ues_dist{2} =  ues_dist_px / siScalar;
         end
     end
 end
@@ -1258,7 +1235,6 @@ function pcr = pharyngealConstrictionRatio (phasesCell)
     else
         pcr_min_area = phasesCell(23);
         pcr_max_area = phasesCell(24);
-        
         if ~(isnan(pcr_min_area) || isnan(pcr_max_area))
             pcr = pcr_min_area / pcr_max_area;
         end
