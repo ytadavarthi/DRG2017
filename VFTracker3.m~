@@ -284,8 +284,10 @@ pointerShape = [ ...
                         end
                         
                     else
-                        Utilities.CustomPrinters.printError(sprintf('Error on reading "%s\" from _morphoJ_ file \n', morphoJTable{1,j}));
-                        if strcmp('holdarea', morphoJTable{1,j})
+
+                        
+                        fprintf('Error on reading %s from _morphoJ_ file', morphoJTable{1,j});
+                                                if strcmp('holdarea', morphoJTable{1,j})
                             continue;
                         end
                         error('Something went wrong with loading the _morphoJ_ file!')         
@@ -1601,7 +1603,7 @@ function kinematicsButton_Callback(hObject, eventdata, handles)
             set(h,'Visible','on');
 
         else
-            warningMessage = sprintf('WARNING: Cannot display kinematics because file does not exist. Click "save" first!');
+            warningMessage = sprintf('Warning: Cannot display kinematics because file does not exist. Click "save" first!');
             uiwait(msgbox(warningMessage));
         end
     end

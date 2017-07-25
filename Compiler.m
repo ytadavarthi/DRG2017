@@ -400,7 +400,8 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         pcr = pharyngealConstrictionRatio(phaseFramesCell);
         nrrs_val = nrrsValleculae(phaseFramesCell, vertScalar, siScalar);
         nrrs_piri = nrrsPiriform(phaseFramesCell, vertScalar, siScalar);
-        pas = phaseFramesCell(25);
+        pas = getPAS(phaseFramesCell);
+        
         ues_dist = uesDistension(phaseFramesCell, vertScalar, siScalar);
         
         kinematicsArray(i+1, 1:numColumns) = {{fileNames{i}(1:end-4)},...
@@ -498,11 +499,11 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         
         %checking for frame rate
         if length(phaseFramesCell)<13 || (isnan(phaseFramesCell(13)))
-           fprintf('\nWARNING: %s - No Frame Rate Found. Using 30 fps as default.', fileNames{i})
+           Utilities.CustomPrinters.printWarning(sprintf('\nWARNING: %s - No Frame Rate Found. Using 30 fps as default.', fileNames{i}));
         end
         
         if(~siScalar)
-            fprintf('\nWARNING: %s - SI normalization not calculated. You will not have kinematics values in cm\n', fileNames{i});
+            Utilities.CustomPrinters.printWarning(sprintf('%s - SI normalization not calculated. You will not have kinematics values in cm\n', fileNames{i}));
         end
         
 
@@ -533,13 +534,7 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         pcr = pharyngealConstrictionRatio(phaseFramesCell);
         nrrs_val = nrrsValleculae(phaseFramesCell, vertScalar, siScalar);
         nrrs_piri = nrrsPiriform(phaseFramesCell, vertScalar, siScalar);
-        
-        if length(phaseFramesCell) < 25
-            pas = 0;
-        else
-            pas = phaseFramesCell(25);
-        end
-        
+        pas = getPAS(phaseFramesCell);
         ues_dist = uesDistension(phaseFramesCell, vertScalar, siScalar);
         
         kinematicsArray(i+1, 1:numColumns) = {{fileNames{i}(1:end-4)},...
@@ -1307,6 +1302,16 @@ function ePCR = experimentalPharyngealConstrictionRatio(doubleCell, vertScalar, 
 %     siPCR = min(allSIAreas(allSIAreas>0)) / max(allSIAreas(allSIAreas>0));
     
     ePCR = min(allAreas(allAreas>0)) / max(allAreas(allAreas>0));
+end
+
+%retrieving PAS
+function pas = getPAS(phasesCell)
+    pas = 0;
+    if (length(phasesCell)<25 || isnan(phasesCell(25)))
+        return;
+    else
+        pas = phasesCell(25);     
+    end
 end
 
 %OLD Anterior Hyoid Movement; Needs C1, C4, Hyoid
