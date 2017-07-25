@@ -72,7 +72,7 @@ function varargout = Compiler(varargin)
         else
             coordinateData{i} = cell1;
             [m, n] = size(cell1);
-            classifierData{i} = cell(2,n);
+            classifierData{i} = {};
             
         end
         
@@ -137,11 +137,11 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
         %extraneous frames (rows) in the next section of code
         start_frame = [];
         end_frame = [];
-        for j = 1:length(classifierData(1,:))
+        for j = length(classifierData(1,:))
            if strcmp(classifierData{1,j},'start_frame')
-               start_frame = str2double(classifierData{2,j});
+               start_frame = classifierData{2,j};
            elseif strcmp(classifierData{1,j},'end_frame')
-               end_frame = str2double(classifierData{2,j});
+               end_frame = classifierData{2,j};
            end
         end
         
@@ -152,18 +152,18 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
             start_frame = 1;
             %+1 is added to first frame and last frame because the first
             %row of the coordinateData matrix is the title row
-            relevantCoordinates = coordinateData(start_frame+1:end_frame+1,:); 
+            relevantCoordinates = coordinateData(start_frame+1:end_frame+1); 
             columnLabels = coordinateData(1,:);
             coordinateData = vertcat(columnLabels,relevantCoordinates);
             
         elseif isempty(end_frame) && ~isempty(start_frame)
             
-            relevantCoordinates = coordinateData(start_frame+1:end,:); 
+            relevantCoordinates = coordinateData(start_frame+1:end); 
             columnLabels = coordinateData(1,:);
             coordinateData = vertcat(columnLabels,relevantCoordinates);
             
         else
-            relevantCoordinates = coordinateData(start_frame+1:end_frame+1,:); 
+            relevantCoordinates = coordinateData(start_frame+1:end_frame+1); 
             columnLabels = coordinateData(1,:);
             coordinateData = vertcat(columnLabels,relevantCoordinates);
         end
@@ -179,7 +179,7 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
         
         %create listbox asking user to select landmarks to be compiled
         if i == 1
-            [listbox_selection,~] = listdlg('ListString',finalCell(1,2:2:end),'InitialValue',[],'PromptString','Use CTRL and/or SHIFT to select multiple landmarks');
+            [listbox_selection,~] = listdlg('ListString',finalCell(1,2:2:end),'InitialValue',[],'PromptString','Select landmarks to be compiled');
         end
         
         %listbox indeces go like this: mandible, hard palate, hyoid, etc
@@ -189,13 +189,10 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
         % 1 is always included because thats the column with the frame id
         %After that, each number is transformed as follows:
         %1 -> [2,3]
-        %2 -> [4,5]
-        %3 -> [6,7]
-        %i -> [i*2,i*2+1]
-        %etc
-        selectedColumns = [1];
+        %
+        selectedColumns = [];
         for j = 1:length(listbox_selection)
-            selectedColumns = [selectedColumns,listbox_selection(j)*2,listbox_selection(j)*2+1];
+            selectedColumns = [selectedColumns,listbox_selection(j)+j,listbox_selection(j)+j+1];
         end
         
         %remove unAnnotated Columns, including column headers
@@ -203,6 +200,29 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
         if i == 1
             finalCell = finalCell(selectedColumns);
         end
+        
+%         %Find all unAnnotated Columns
+%         unAnnotated = false;
+%         for j = 2:n
+%             %unAnnotated = [unAnnotated all(diff(sort(str2double(coordinateData(2:end,j)))) == 0)];
+%             unAnnotated = [unAnnotated all(str2double(coordinateData(2:end,j)) == 0)];
+%             if any(j == 3:2:n) && unAnnotated(j-1) == true
+%                 unAnnotated(j) = true;
+%             end
+%         end
+%         
+%         %remove unAnnotated Columns, including column headers
+%         coordinateData = coordinateData(2:end,~unAnnotated);
+%         if i == 1
+%             finalCell = finalCell(~unAnnotated);
+%         end
+%         
+%         %make sure same number of landmarks were annotated
+%         previousSize = size(finalCell);
+%         currentSize = size(coordinateData);
+%         if previousSize(2) ~= currentSize(2)
+%             error(['Inconsistent number of landmarks were annotated in ' fileNames{i} '!'])
+%         end
         
         
         %create finalCell
@@ -533,13 +553,7 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         pcr = pharyngealConstrictionRatio(phaseFramesCell);
         nrrs_val = nrrsValleculae(phaseFramesCell, vertScalar, siScalar);
         nrrs_piri = nrrsPiriform(phaseFramesCell, vertScalar, siScalar);
-        
-        if length(phaseFramesCell) < 25
-            pas = 0;
-        else
-            pas = phaseFramesCell(25);
-        end
-        
+        pas = phaseFramesCell(25);
         ues_dist = uesDistension(phaseFramesCell, vertScalar, siScalar);
         
         kinematicsArray(i+1, 1:numColumns) = {{fileNames{i}(1:end-4)},...
@@ -1162,7 +1176,7 @@ end
 
 %Pharyngeal Delay Time; Needs T2 (Ramus Mand.), T4 (1st Jump Larynx)
 function pdt = pharyngealDelayTime (phasesCell)
-    if (length(phasesCell)<25 || isnan(phasesCell(16)) || isnan(phasesCell(3)))
+    if (isnan(phasesCell(16)) || isnan(phasesCell(3)))
         pdt = 0;
     elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
         pdt = (phasesCell(16) - phasesCell(3)) / 30;
@@ -1173,7 +1187,7 @@ end
 
 %Laryngeal Vestibule Closure Duration; Needs LVC Close and LVC Open
 function lvc = laryngealVestibuleClosure (phasesCell)
-    if (length(phasesCell)<25 || isnan(phasesCell(15)) || isnan(phasesCell(15)))
+    if (isnan(phasesCell(15)) || isnan(phasesCell(15)))
         lvc = 0;
     elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
         lvc = (phasesCell(15) - phasesCell(14)) / 30;
@@ -1185,21 +1199,20 @@ end
 %NRRS - Normalized Residue Ratio Scale for Valleculae 
 %Needs Residue Area in Valleculae, Total Area of Valleculae
 function nrrs_val = nrrsValleculae (phasesCell, vertScalar, siScalar)
+    nrrs_valres_area = phasesCell(19);
+    nrrs_totalval_area = phasesCell(20);
+    
     nrrs_val = {0,0};
 
-    if length(phasesCell)<25
+    if isnan(nrrs_valres_area) || isnan(nrrs_totalval_area)
         return;
     else
-        nrrs_valres_area = phasesCell(19);
-        nrrs_totalval_area = phasesCell(20);
-        if ~(isnan(nrrs_valres_area) || isnan(nrrs_totalval_area))
-            if(~isnan(vertScalar))
-                nrrs_val{1} = (nrrs_valres_area / nrrs_totalval_area) * ( 10* nrrs_valres_area / vertScalar^2);
-            end
-
-            if(siScalar)
-                nrrs_val{2} = (nrrs_valres_area / nrrs_totalval_area) * ( 10* nrrs_valres_area / siScalar^2);
-            end
+        if(~isnan(vertScalar))
+            nrrs_val{1} = (nrrs_valres_area / nrrs_totalval_area) * ( 10* nrrs_valres_area / vertScalar^2);
+        end
+        
+        if(siScalar)
+            nrrs_val{2} = (nrrs_valres_area / nrrs_totalval_area) * ( 10* nrrs_valres_area / siScalar^2);
         end
     end
 end
@@ -1207,42 +1220,38 @@ end
 %NRRS - Normalized Residue Ratio Scale for Piriform
 %Needs Residue Area in Valleculae, Total Area of Piriform
 function nrrs_piri = nrrsPiriform (phasesCell, vertScalar, siScalar)
+    nrrs_pirires_area = phasesCell(21);
+    nrrs_totalpiri_area = phasesCell(22);
+    
     nrrs_piri = {0,0};
 
-    if length(phasesCell)<25
+    if isnan(nrrs_pirires_area) || isnan(nrrs_totalpiri_area)
         return;
     else
-        nrrs_pirires_area = phasesCell(21);
-        nrrs_totalpiri_area = phasesCell(22);
+        if(~isnan(vertScalar))
+            nrrs_piri{1} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / vertScalar^2); 
+        end
         
-        if ~(isnan(nrrs_pirires_area) || isnan(nrrs_totalpiri_area))
-            if(~isnan(vertScalar))
-                nrrs_piri{1} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / vertScalar^2); 
-            end
-
-            if(siScalar)
-                nrrs_piri{2} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / siScalar^2);
-            end
+        if(siScalar)
+            nrrs_piri{2} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / siScalar^2);
         end
     end
 end
 
 function ues_dist = uesDistension (phasesCell, vertScalar, siScalar)
+    ues_dist_px = phasesCell(18);
     
     ues_dist = {0,0};
 
-    if length(phasesCell)<25
+    if isnan(ues_dist_px)
         return;
     else
-        ues_dist_px = phasesCell(18);
-        if ~isnan(ues_dist_px)
-            if(~isnan(vertScalar))
-                ues_dist{1} =  ues_dist_px / vertScalar; 
-            end
-
-            if(siScalar)
-                ues_dist{2} =  ues_dist_px / siScalar;
-            end
+        if(~isnan(vertScalar))
+            ues_dist{1} =  ues_dist_px / vertScalar; 
+        end
+        
+        if(siScalar)
+            ues_dist{2} =  ues_dist_px / siScalar;
         end
     end
 end
@@ -1251,16 +1260,13 @@ end
 %Needs pcr_max_area - Area of Pharynx at Maximum Constriction
 %Needs pcr_min_area - Area of Pharynx at Minimum Constriction
 function pcr = pharyngealConstrictionRatio (phasesCell)
-    pcr = 0;
-    if length(phasesCell)<25 
-        return;
+    pcr_min_area = phasesCell(23);
+    pcr_max_area = phasesCell(24);
+    
+    if isnan(pcr_min_area) || isnan(pcr_max_area)
+        pcr = 0;
     else
-        pcr_min_area = phasesCell(23);
-        pcr_max_area = phasesCell(24);
-        
-        if ~(isnan(pcr_min_area) || isnan(pcr_max_area))
-            pcr = pcr_min_area / pcr_max_area;
-        end
+        pcr = pcr_min_area / pcr_max_area;
     end
 end
 

@@ -1,0 +1,2 @@
+FileName	ahm_vert	ahm_si	shm_vert	shm_si	hyExMand_vert	hyExMand_si	hyExC4_vert	hyExC4_si	hyExVert_vert	hyExVert_si	alm_vert	alm_si	slm_vert	slm_si	hla_vert	hla_si	le_vert	le_si	ps_vert	ps_si	botrr_vert	botrr_si	ott	std	ptt	optt	pdt	lvc	nrrs_val_vert	nrrs_val_si	nrrs_piri_vert	nrrs_piri_si	pcr	ePCR	pas	ues_dist_vert	ues_dist_si
++testvideo2_morphoj_	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0.0667022000000001	0.1000533	0.4002132	0.466915400000001	0.1667555	0	0	200.954691910171	0	363.331446158705	0.844303121942543	0	5	0	1.16184114237887
