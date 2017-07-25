@@ -1172,19 +1172,17 @@ end
 function nrrs_val = nrrsValleculae (phasesCell, vertScalar, siScalar)
     nrrs_val = {0,0};
 
-    if length(phasesCell)<25
+    if length(phasesCell)<25 || isnan(nrrs_valres_area) || isnan(nrrs_totalval_area)
         return;
     else
         nrrs_valres_area = phasesCell(19);
         nrrs_totalval_area = phasesCell(20);
-        if ~(isnan(nrrs_valres_area) || isnan(nrrs_totalval_area))
-            if(~isnan(vertScalar))
-                nrrs_val{1} = (nrrs_valres_area / nrrs_totalval_area) * ( 10* nrrs_valres_area / vertScalar^2);
-            end
-
-            if(siScalar)
-                nrrs_val{2} = (nrrs_valres_area / nrrs_totalval_area) * ( 10* nrrs_valres_area / siScalar^2);
-            end
+        if(~isnan(vertScalar))
+            nrrs_val{1} = (nrrs_valres_area / nrrs_totalval_area) * ( 10* nrrs_valres_area / vertScalar^2);
+        end
+        
+        if(siScalar)
+            nrrs_val{2} = (nrrs_valres_area / nrrs_totalval_area) * ( 10* nrrs_valres_area / siScalar^2);
         end
     end
 end
@@ -1194,20 +1192,17 @@ end
 function nrrs_piri = nrrsPiriform (phasesCell, vertScalar, siScalar)
     nrrs_piri = {0,0};
 
-    if length(phasesCell)<25
+    if length(phasesCell)<25 || isnan(nrrs_pirires_area) || isnan(nrrs_totalpiri_area)
         return;
     else
         nrrs_pirires_area = phasesCell(21);
         nrrs_totalpiri_area = phasesCell(22);
+        if(~isnan(vertScalar))
+            nrrs_piri{1} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / vertScalar^2); 
+        end
         
-        if ~(isnan(nrrs_pirires_area) || isnan(nrrs_totalpiri_area))
-            if(~isnan(vertScalar))
-                nrrs_piri{1} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / vertScalar^2); 
-            end
-
-            if(siScalar)
-                nrrs_piri{2} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / siScalar^2);
-            end
+        if(siScalar)
+            nrrs_piri{2} =  (nrrs_pirires_area / nrrs_totalpiri_area) * ( 10* nrrs_pirires_area / siScalar^2);
         end
     end
 end
@@ -1216,18 +1211,16 @@ function ues_dist = uesDistension (phasesCell, vertScalar, siScalar)
     
     ues_dist = {0,0};
 
-    if length(phasesCell)<25
+    if length(phasesCell)<25 || isnan(ues_dist_px)
         return;
     else
         ues_dist_px = phasesCell(18);
-        if ~isnan(ues_dist_px)
-            if(~isnan(vertScalar))
-                ues_dist{1} =  ues_dist_px / vertScalar; 
-            end
-
-            if(siScalar)
-                ues_dist{2} =  ues_dist_px / siScalar;
-            end
+        if(~isnan(vertScalar))
+            ues_dist{1} =  ues_dist_px / vertScalar; 
+        end
+        
+        if(siScalar)
+            ues_dist{2} =  ues_dist_px / siScalar;
         end
     end
 end
@@ -1242,7 +1235,6 @@ function pcr = pharyngealConstrictionRatio (phasesCell)
     else
         pcr_min_area = phasesCell(23);
         pcr_max_area = phasesCell(24);
-        
         if ~(isnan(pcr_min_area) || isnan(pcr_max_area))
             pcr = pcr_min_area / pcr_max_area;
         end
