@@ -211,7 +211,8 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
     end
     
     %remove extra columns
-    
+    space_and_comma_less_frame_ID = regexprep(finalCell(:,1),'[, ]','_');
+    finalCell = [space_and_comma_less_frame_ID, finalCell(:,2:end)];
     
     finalTable = cell2table(finalCell);
     formatOut = 'dd-mm-yy HH-MM AM';
