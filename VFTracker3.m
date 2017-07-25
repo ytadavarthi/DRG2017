@@ -252,11 +252,21 @@ pointerShape = [ ...
                 %which have to be loaded separately
                 calibration_points = struct;
                 for j = 1:length(morphoJTable(1,:))
-                    if strcmp(morphoJTable{1,j},'si_point1_x') || strcmp(morphoJTable{1,j},'si_point1_y') || strcmp(morphoJTable{1,j},'si_point2_x') || strcmp(morphoJTable{1,j},'si_point2_y') 
+                    if strcmp(morphoJTable{1,j},'si_point1_x') || strcmp(morphoJTable{1,j},'si_point1_y') || ...
+                            strcmp(morphoJTable{1,j},'si_point2_x') || strcmp(morphoJTable{1,j},'si_point2_y')
+                        
                         calibration_points.(morphoJTable{1,j}) = str2double(morphoJTable{2,j});
                         if isnan(calibration_points.(morphoJTable{1,j}))
                            calibration_points.(morphoJTable{1,j}) = [];
                         end
+                    elseif  strcmp(morphoJTable{1,j},'point1_x') || strcmp(morphoJTable{1,j},'point1_y') || ...
+                            strcmp(morphoJTable{1,j},'point2_x') || strcmp(morphoJTable{1,j},'point2_y')
+                        
+                        calibration_points.(strcat('si_', morphoJTable{1,j})) = str2double(morphoJTable{2,j});
+                        if isnan(calibration_points.(strcat('si_', morphoJTable{1,j})))
+                           calibration_points.(strcat('si_', morphoJTable{1,j})) = [];
+                        end
+                        
                     elseif strcmp(morphoJTable{1,j},'frameRate') || strcmp(morphoJTable{1,j},'')
                         %if frameRate is stored, we do not want to load it.
                         %The value will be extracted from video file later.
