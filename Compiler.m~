@@ -1356,7 +1356,7 @@ function ePCR = experimentalPharyngealConstrictionRatio(doubleCell, vertScalar, 
     ePCR = min(allAreas(allAreas>0)) / max(allAreas(allAreas>0));
 end
 
-%Retrieving PAS
+%retrieving PAS
 function pas = getPAS(phasesCell)
     pas = 0;
     if (length(phasesCell)<25 || isnan(phasesCell(25)))
