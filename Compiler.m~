@@ -129,8 +129,6 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
             fprintf('\n');
         end
         
-        fprintf(fileNames{i});
-        
         %extract data from structure
         classifierData = dataStruct(i).classifierData;
         coordinateData = dataStruct(i).coordinateData;
@@ -213,7 +211,8 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
     end
     
     %remove extra columns
-    
+    space_and_comma_less_frame_ID = regexprep(finalCell(:,1),'[, ]','_');
+    finalCell = [space_and_comma_less_frame_ID, finalCell(:,2:end)];
     
     finalTable = cell2table(finalCell);
     formatOut = 'dd-mm-yy HH-MM AM';
@@ -328,8 +327,8 @@ end
 function output = compile_kinematicsButton(dataStruct, fileNames)
     lengthDataStruct = length(dataStruct);
     numKinematicsFunctions = 11;
-    % numKinematicsFunctions*2 + 6 for the timing variables + 4 for nrrs + 3 for pcr + 2 for ues_dist +  1 for filename
-    numColumns = numKinematicsFunctions*2 + 6 + 4 + 3 + 2 + 1;
+    % numKinematicsFunctions*2 + 9 for the timing variables + 4 for nrrs + 3 for pcr + 2 for ues_dist +  1 for filename
+    numColumns = numKinematicsFunctions*2 + 9 + 4 + 3 + 2 + 1;
     kinematicsArray = cell(lengthDataStruct+1, numColumns);    
     
     kinematicsArray(1, 1:numColumns) = ...
@@ -351,6 +350,9 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         'optt',   ...
         'pdt',    ...
         'lvc',    ...
+        'uesod',   ...
+        'hmd',    ...
+        'lvcrt',    ... 
         'nrrs_val_vert', 'nrrs_val_si' ...
         'nrrs_piri_vert', 'nrrs_piri_si'...
         'pcr' 'ePCR' 'pas' 'ues_dist_vert' 'ues_dist_si'};
@@ -402,9 +404,7 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         pcr = pharyngealConstrictionRatio(phaseFramesCell);
         nrrs_val = nrrsValleculae(phaseFramesCell, vertScalar, siScalar);
         nrrs_piri = nrrsPiriform(phaseFramesCell, vertScalar, siScalar);
-        
-        
-        pas = phaseFramesCell(25);
+        pas = getPAS(phaseFramesCell);
         
         ues_dist = uesDistension(phaseFramesCell, vertScalar, siScalar);
         
@@ -442,8 +442,8 @@ end
 function compile_kinematicsData(dataStruct, fileNames, pathName)
     lengthDataStruct = length(dataStruct);
     numKinematicsFunctions = 11;
-    % numKinematicsFunctions*2 + 6 for the timing variables + 4 for nrrs + 3 for pcr/pas + 2 for ues + 1 for filename
-    numColumns = numKinematicsFunctions*2 + 6 + 4 + 3 + 2 + 1;
+    % numKinematicsFunctions*2 + 9 for the timing variables + 4 for nrrs + 3 for pcr/pas + 2 for ues + 1 for filename
+    numColumns = numKinematicsFunctions*2 + 9 + 4 + 3 + 2 + 1;
     
     
     kinematicsArray = cell(lengthDataStruct+1, numColumns);
@@ -466,6 +466,9 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         'optt',   ...
         'pdt',    ...
         'lvc',    ...
+        'uesod',   ...
+        'hmd',    ...
+        'lvcrt',    ... 
         'nrrs_val_vert', 'nrrs_val_si' ...
         'nrrs_piri_vert', 'nrrs_piri_si'...
         'pcr' 'ePCR' 'pas' 'ues_dist_vert' 'ues_dist_si'};
@@ -503,11 +506,11 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         
         %checking for frame rate
         if length(phaseFramesCell)<13 || (isnan(phaseFramesCell(13)))
-           fprintf('\nWARNING: %s - No Frame Rate Found. Using 30 fps as default.', fileNames{i})
+           Utilities.CustomPrinters.printWarning(sprintf('\nWARNING: %s - No Frame Rate Found. Using 30 fps as default.', fileNames{i}));
         end
         
         if(~siScalar)
-            fprintf('\nWARNING: %s - SI normalization not calculated. You will not have kinematics values in cm\n', fileNames{i});
+            Utilities.CustomPrinters.printWarning(sprintf('%s - SI normalization not calculated. You will not have kinematics values in cm\n', fileNames{i}));
         end
         
 
@@ -532,19 +535,16 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         lvc = laryngealVestibuleClosure (phaseFramesCell);
         %1st jump larynx
         pdt = pharyngealDelayTime(phaseFramesCell);
+        uesod = uesOpeningDuration(phaseFramesCell);
+        hmd = hyoidMovementDuration(phaseFramesCell);
+        lvcrt = lvClosureReactionTime(phaseFramesCell);
 
         %pharyngeal constriction ratio to determine pharynx strength
         ePCR = experimentalPharyngealConstrictionRatio(doubleCell, vertScalar, siScalar, startFrame, endFrame);
         pcr = pharyngealConstrictionRatio(phaseFramesCell);
         nrrs_val = nrrsValleculae(phaseFramesCell, vertScalar, siScalar);
         nrrs_piri = nrrsPiriform(phaseFramesCell, vertScalar, siScalar);
-        
-        if length(phaseFramesCell) < 25
-            pas = 0;
-        else
-            pas = phaseFramesCell(25);
-        end
-        
+        pas = getPAS(phaseFramesCell);
         ues_dist = uesDistension(phaseFramesCell, vertScalar, siScalar);
         
         kinematicsArray(i+1, 1:numColumns) = {{fileNames{i}(1:end-4)},...
@@ -564,7 +564,10 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
                                                 ptt,    ...
                                                 optt,   ...
                                                 pdt,    ...
-                                                lvc,    ... 
+                                                lvc,    ...
+                                                uesod,   ...
+                                                hmd,    ...
+                                                lvcrt,    ... 
                                                 nrrs_val{1}, nrrs_val{2}, ...
                                                 nrrs_piri{1}, nrrs_piri{2}, ...
                                                 pcr, ePCR, pas, ... 
@@ -1137,7 +1140,7 @@ function std = stageTransitionDuration (phasesCell)
     if (isnan(phasesCell(4)) || isnan(phasesCell(3)))
         std = 0;
     elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
-        std = (phasesCell(3) - phasesCell(2)) / 30;
+        std = (phasesCell(4) - phasesCell(3)) / 30;
     else
         std = (phasesCell(4) - phasesCell(3)) / phasesCell(13);
     end
@@ -1176,16 +1179,52 @@ function pdt = pharyngealDelayTime (phasesCell)
     end
 end
 
-%Laryngeal Vestibule Closure Duration; Needs LVC Close and LVC Open
+%Laryngeal Vestibule Closure Duration; Needs LVC Onset and LVC Offset
 function lvc = laryngealVestibuleClosure (phasesCell)
-    if (length(phasesCell)<25 || isnan(phasesCell(15)) || isnan(phasesCell(15)))
+    if (length(phasesCell)<25 || isnan(phasesCell(15)) || isnan(phasesCell(14)))
         lvc = 0;
-    elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
+    elseif length(phasesCell)<13 || isnan(phasesCell(13))
         lvc = (phasesCell(15) - phasesCell(14)) / 30;
     else
         lvc = (phasesCell(15) - phasesCell(14)) / phasesCell(13);
     end
 end
+
+%UES Opening Duration; Needs UES Close and UES Open
+function uesod = uesOpeningDuration (phasesCell)
+    if (length(phasesCell)<25 || isnan(phasesCell(17)) || isnan(phasesCell(5)))
+        uesod = 0;
+    elseif length(phasesCell)<13 || isnan(phasesCell(13))
+        uesod = (phasesCell(17) - phasesCell(5)) / 30;
+    else
+        uesod = (phasesCell(17) - phasesCell(5)) / phasesCell(13);
+    end
+end
+
+%Hyoid Movement Duration; Needs Hyoid Burst and At Rest
+function hmd = hyoidMovementDuration (phasesCell)
+    if (length(phasesCell)<25 || isnan(phasesCell(6)) || isnan(phasesCell(4)))
+        hmd = 0;
+    elseif length(phasesCell)<13 || isnan(phasesCell(13))
+        hmd = (phasesCell(6) - phasesCell(4)) / 30;
+    else
+        hmd = (phasesCell(6) - phasesCell(4)) / phasesCell(13);
+    end
+end
+
+%Laryngeal Vestibule Closure Reaction Time; Needs LVC Onset and Hyoid Burst
+function lvcrt = lvClosureReactionTime (phasesCell)
+    if (length(phasesCell)<25 || isnan(phasesCell(14)) || isnan(phasesCell(4)))
+        lvcrt = 0;
+    elseif length(phasesCell)<13 || isnan(phasesCell(13))
+        lvcrt = (phasesCell(14) - phasesCell(4)) / 30;
+    else
+        lvcrt = (phasesCell(14) - phasesCell(4)) / phasesCell(13);
+    end
+end
+
+
+
 
 %NRRS - Normalized Residue Ratio Scale for Valleculae 
 %Needs Residue Area in Valleculae, Total Area of Valleculae
@@ -1314,13 +1353,13 @@ function ePCR = experimentalPharyngealConstrictionRatio(doubleCell, vertScalar, 
     ePCR = min(allAreas(allAreas>0)) / max(allAreas(allAreas>0));
 end
 
-%r
+%retrieving PAS
 function pas = getPAS(phasesCell)
     pas = 0;
-    if (length(phasesCell)<25)
+    if (length(phasesCell)<25 || isnan(phasesCell(25)))
         return;
     else
-        pas = phasesCell(25);
+        pas = phasesCell(25);     
     end
 end
 

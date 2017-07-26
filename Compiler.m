@@ -327,8 +327,8 @@ end
 function output = compile_kinematicsButton(dataStruct, fileNames)
     lengthDataStruct = length(dataStruct);
     numKinematicsFunctions = 11;
-    % numKinematicsFunctions*2 + 6 for the timing variables + 4 for nrrs + 3 for pcr + 2 for ues_dist +  1 for filename
-    numColumns = numKinematicsFunctions*2 + 6 + 4 + 3 + 2 + 1;
+    % numKinematicsFunctions*2 + 9 for the timing variables + 4 for nrrs + 3 for pcr + 2 for ues_dist +  1 for filename
+    numColumns = numKinematicsFunctions*2 + 9 + 4 + 3 + 2 + 1;
     kinematicsArray = cell(lengthDataStruct+1, numColumns);    
     
     kinematicsArray(1, 1:numColumns) = ...
@@ -350,6 +350,9 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         'optt',   ...
         'pdt',    ...
         'lvc',    ...
+        'uesod',   ...
+        'hmd',    ...
+        'lvcrt',    ... 
         'nrrs_val_vert', 'nrrs_val_si' ...
         'nrrs_piri_vert', 'nrrs_piri_si'...
         'pcr' 'ePCR' 'pas' 'ues_dist_vert' 'ues_dist_si'};
@@ -395,6 +398,9 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         lvc = laryngealVestibuleClosure (phaseFramesCell);
         %1st jump larynx
         pdt = pharyngealDelayTime(phaseFramesCell);
+        uesod = uesOpeningDuration(phaseFramesCell);
+        hmd = hyoidMovementDuration(phaseFramesCell);
+        lvcrt = lvClosureReactionTime(phaseFramesCell);
 
         %pharyngeal constriction ratio to determine pharynx strength
         ePCR = experimentalPharyngealConstrictionRatio(doubleCell, vertScalar, siScalar, startFrame, endFrame);
@@ -423,6 +429,9 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
                                                 optt,   ...
                                                 pdt,    ...
                                                 lvc,    ... 
+                                                uesod,   ...
+                                                hmd,    ...
+                                                lvcrt,    ... 
                                                 nrrs_val{1}, nrrs_val{2}, ...
                                                 nrrs_piri{1}, nrrs_piri{2}, ...
                                                 pcr, ePCR, pas, ...
@@ -439,8 +448,8 @@ end
 function compile_kinematicsData(dataStruct, fileNames, pathName)
     lengthDataStruct = length(dataStruct);
     numKinematicsFunctions = 11;
-    % numKinematicsFunctions*2 + 6 for the timing variables + 4 for nrrs + 3 for pcr/pas + 2 for ues + 1 for filename
-    numColumns = numKinematicsFunctions*2 + 6 + 4 + 3 + 2 + 1;
+    % numKinematicsFunctions*2 + 9 for the timing variables + 4 for nrrs + 3 for pcr/pas + 2 for ues + 1 for filename
+    numColumns = numKinematicsFunctions*2 + 9 + 4 + 3 + 2 + 1;
     
     
     kinematicsArray = cell(lengthDataStruct+1, numColumns);
@@ -463,6 +472,9 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         'optt',   ...
         'pdt',    ...
         'lvc',    ...
+        'uesod',   ...
+        'hmd',    ...
+        'lvcrt',    ... 
         'nrrs_val_vert', 'nrrs_val_si' ...
         'nrrs_piri_vert', 'nrrs_piri_si'...
         'pcr' 'ePCR' 'pas' 'ues_dist_vert' 'ues_dist_si'};
@@ -529,6 +541,9 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         lvc = laryngealVestibuleClosure (phaseFramesCell);
         %1st jump larynx
         pdt = pharyngealDelayTime(phaseFramesCell);
+        uesod = uesOpeningDuration(phaseFramesCell);
+        hmd = hyoidMovementDuration(phaseFramesCell);
+        lvcrt = lvClosureReactionTime(phaseFramesCell);
 
         %pharyngeal constriction ratio to determine pharynx strength
         ePCR = experimentalPharyngealConstrictionRatio(doubleCell, vertScalar, siScalar, startFrame, endFrame);
@@ -555,7 +570,10 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
                                                 ptt,    ...
                                                 optt,   ...
                                                 pdt,    ...
-                                                lvc,    ... 
+                                                lvc,    ...
+                                                uesod,   ...
+                                                hmd,    ...
+                                                lvcrt,    ... 
                                                 nrrs_val{1}, nrrs_val{2}, ...
                                                 nrrs_piri{1}, nrrs_piri{2}, ...
                                                 pcr, ePCR, pas, ... 
@@ -1128,20 +1146,20 @@ function std = stageTransitionDuration (phasesCell)
     if (isnan(phasesCell(4)) || isnan(phasesCell(3)))
         std = 0;
     elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
-        std = (phasesCell(3) - phasesCell(2)) / 30;
+        std = (phasesCell(4) - phasesCell(3)) / 30;
     else
         std = (phasesCell(4) - phasesCell(3)) / phasesCell(13);
     end
 end
 
-%Pharyngeal Transit Time; Needs T2 (Ramus Mand.), T5 (UES Closes)
+%Pharyngeal Transit Time; Needs T3 (Hyoid Burst), T5 (UES Closes)
 function ptt = pharyngealTransitTime (phasesCell)
-    if (isnan(phasesCell(5)) || isnan(phasesCell(3)))
+    if (isnan(phasesCell(5)) || isnan(phasesCell(4)))
         ptt = 0;
     elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
-        ptt = (phasesCell(5) - phasesCell(3)) / 30;
+        ptt = (phasesCell(5) - phasesCell(4)) / 30;
     else    
-        ptt = (phasesCell(5) - phasesCell(3)) / phasesCell(13);
+        ptt = (phasesCell(5) - phasesCell(4)) / phasesCell(13);
     end
 end
 
@@ -1167,16 +1185,52 @@ function pdt = pharyngealDelayTime (phasesCell)
     end
 end
 
-%Laryngeal Vestibule Closure Duration; Needs LVC Close and LVC Open
+%Laryngeal Vestibule Closure Duration; Needs LVC Onset and LVC Offset
 function lvc = laryngealVestibuleClosure (phasesCell)
-    if (length(phasesCell)<25 || isnan(phasesCell(15)) || isnan(phasesCell(15)))
+    if (length(phasesCell)<25 || isnan(phasesCell(15)) || isnan(phasesCell(14)))
         lvc = 0;
-    elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
+    elseif length(phasesCell)<13 || isnan(phasesCell(13))
         lvc = (phasesCell(15) - phasesCell(14)) / 30;
     else
         lvc = (phasesCell(15) - phasesCell(14)) / phasesCell(13);
     end
 end
+
+%UES Opening Duration; Needs UES Close and UES Open
+function uesod = uesOpeningDuration (phasesCell)
+    if (length(phasesCell)<25 || isnan(phasesCell(17)) || isnan(phasesCell(5)))
+        uesod = 0;
+    elseif length(phasesCell)<13 || isnan(phasesCell(13))
+        uesod = (phasesCell(17) - phasesCell(5)) / 30;
+    else
+        uesod = (phasesCell(17) - phasesCell(5)) / phasesCell(13);
+    end
+end
+
+%Hyoid Movement Duration; Needs Hyoid Burst and At Rest
+function hmd = hyoidMovementDuration (phasesCell)
+    if (length(phasesCell)<25 || isnan(phasesCell(6)) || isnan(phasesCell(4)))
+        hmd = 0;
+    elseif length(phasesCell)<13 || isnan(phasesCell(13))
+        hmd = (phasesCell(6) - phasesCell(4)) / 30;
+    else
+        hmd = (phasesCell(6) - phasesCell(4)) / phasesCell(13);
+    end
+end
+
+%Laryngeal Vestibule Closure Reaction Time; Needs LVC Onset and Hyoid Burst
+function lvcrt = lvClosureReactionTime (phasesCell)
+    if (length(phasesCell)<25 || isnan(phasesCell(14)) || isnan(phasesCell(4)))
+        lvcrt = 0;
+    elseif length(phasesCell)<13 || isnan(phasesCell(13))
+        lvcrt = (phasesCell(14) - phasesCell(4)) / 30;
+    else
+        lvcrt = (phasesCell(14) - phasesCell(4)) / phasesCell(13);
+    end
+end
+
+
+
 
 %NRRS - Normalized Residue Ratio Scale for Valleculae 
 %Needs Residue Area in Valleculae, Total Area of Valleculae
