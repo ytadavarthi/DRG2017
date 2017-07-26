@@ -309,7 +309,7 @@ function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
     for i = 2:length(outputData(1,:))
         title = outputData{1,i};
         if length(title) > 8 && strcmp(title(1:9), '<html><b>')
-            outputData{1,i} = title(length('<html><p><b>')+1:end-length('</b></p></html>'));
+            outputData{1,i} = title(length('<html><b>')+1:end-length('</b></html>'));
         end
     end
     classifierColumns = [outputData(1,2:end);classifierColumns];
