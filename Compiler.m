@@ -1229,9 +1229,6 @@ function lvcrt = lvClosureReactionTime (phasesCell)
     end
 end
 
-
-
-
 %NRRS - Normalized Residue Ratio Scale for Valleculae 
 %Needs Residue Area in Valleculae, Total Area of Valleculae
 function nrrs_val = nrrsValleculae (phasesCell, vertScalar, siScalar)
