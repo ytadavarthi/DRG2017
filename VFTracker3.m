@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 20-Jul-2017 14:53:22
+% Last Modified by GUIDE v2.5 28-Jul-2017 17:44:41
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1799,9 +1799,9 @@ function pcr_min_area_button_Callback(hObject, eventdata, handles)
     if numPoints>2
         globalStudyInfo.pcr_min_points = allPoints;
         globalStudyInfo.pcr_min_area = pcr;
+        handles.pcr_min_area_text.String = num2str(pcr);
         setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     end
-    
 
 % --- Executes on button press in pcr_max_area_button.
 function pcr_max_area_button_Callback(hObject, eventdata, handles)
@@ -1848,6 +1848,8 @@ function pcr_max_area_button_Callback(hObject, eventdata, handles)
     if numPoints>2
         globalStudyInfo.pcr_max_points = allPoints;
         globalStudyInfo.pcr_max_area = pcr;
+        handles.pcr_min_area_text.String = num2str(pcr);
+
         setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     end
 
@@ -1926,10 +1928,12 @@ function valres_toggle_Callback(hObject, eventdata, handles)
                 - (allPoints(i,2) * allPoints(i+1,1)));
         end
     end
+
     
     if numPoints>2
         globalStudyInfo.nrrs_valres_points = allPoints;
         globalStudyInfo.nrrs_valres_area = valres_area;
+        handles.nrrs_valres_area_text.String = num2str(valres_area);
         setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     end
     
@@ -1980,6 +1984,8 @@ function valarea_toggle_Callback(hObject, eventdata, handles)
     if numPoints>2
         globalStudyInfo.nrrs_totalval_points = allPoints;
         globalStudyInfo.nrrs_totalval_area = totalval_area;
+        handles.nrrs_totalval_area_text.String = num2str(totalval_area);
+
         setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     end
     
@@ -2030,9 +2036,11 @@ function pirires_toggle_Callback(hObject, eventdata, handles)
     if numPoints>2
         globalStudyInfo.nrrs_pirires_points = allPoints;
         globalStudyInfo.nrrs_pirires_area = pirires_area;
+        handles.nrrs_pirires_area_text.String = num2str(pirires_area);
         setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     end
     
+
 % --- Executes on button press in piriarea_toggle.
 function piriarea_toggle_Callback(hObject, eventdata, handles)
 % hObject    handle to piriarea_toggle (see GCBO)
@@ -2077,9 +2085,11 @@ function piriarea_toggle_Callback(hObject, eventdata, handles)
         end
     end
         
+
     if numPoints>2
         globalStudyInfo.nrrs_totalpiri_points = allPoints;
         globalStudyInfo.nrrs_totalpiri_area = totalpiri_area;
+        handles.nrrs_totalpiri_area_text.String = num2str(totalpiri_area);
         setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     end
     
@@ -2111,9 +2121,9 @@ function uesd_toggle_Callback(hObject, eventdata, handles)
     showFeedbackPopup(handles,sprintf('UES Distension: %-.2f', uesd), 2);
 
     if size(allPoints,1)>1
-
         globalStudyInfo.uesd_points = allPoints;
         globalStudyInfo.uesd_dist = uesd;
+        handles.uesd_dist_text.String = num2str(uesd);
         setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     end
 
@@ -2179,3 +2189,23 @@ function pas_text_ButtonDownFcn(hObject, eventdata, handles)
     set(hObject, 'String', '');
     set(hObject, 'enable', 'on');
     uicontrol(hObject);
+
+
+
+% --- Executes on button press in results.
+function results_Callback(hObject, eventdata, handles)
+% hObject    handle to results (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of results
+a = 2;
+toggle_state = get(hObject,'Value');
+if toggle_state == 1
+    %make visible
+    handles.pas_text_in_panel.String = handles.pas_text.String;
+    handles.results_panel.Visible = 'On';
+elseif toggle_state == 0
+    %make invisible
+    handles.results_panel.Visible = 'Off';
+end
