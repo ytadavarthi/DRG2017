@@ -1796,7 +1796,7 @@ function pcr_min_area_button_Callback(hObject, eventdata, handles)
         end
     end
     
-    if numPoints>2
+    if numPoints>1
         globalStudyInfo.pcr_min_points = allPoints;
         globalStudyInfo.pcr_min_area = pcr;
         setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
@@ -1845,7 +1845,8 @@ function pcr_max_area_button_Callback(hObject, eventdata, handles)
         end
     end
     
-    if numPoints>2
+    if numPoints>1
+
         globalStudyInfo.pcr_max_points = allPoints;
         globalStudyInfo.pcr_max_area = pcr;
         setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
@@ -1926,13 +1927,12 @@ function valres_toggle_Callback(hObject, eventdata, handles)
                 - (allPoints(i,2) * allPoints(i+1,1)));
         end
     end
-    
-    if numPoints>2
-        globalStudyInfo.nrrs_valres_points = allPoints;
-        globalStudyInfo.nrrs_valres_area = valres_area;
-        setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-    end
-    
+    if numPoints>1
+
+    globalStudyInfo.nrrs_valres_points = allPoints;
+    globalStudyInfo.nrrs_valres_area = valres_area;
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
 % --- Executes on button press in valarea_toggle.
 function valarea_toggle_Callback(hObject, eventdata, handles)
 % hObject    handle to valarea_toggle (see GCBO)
@@ -1976,13 +1976,11 @@ function valarea_toggle_Callback(hObject, eventdata, handles)
                 - (allPoints(i,2) * allPoints(i+1,1)));
         end
     end
-    
-    if numPoints>2
-        globalStudyInfo.nrrs_totalval_points = allPoints;
-        globalStudyInfo.nrrs_totalval_area = totalval_area;
-        setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-    end
-    
+        
+    globalStudyInfo.nrrs_totalval_points = allPoints;
+    globalStudyInfo.nrrs_totalval_area = totalval_area;
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
 % --- Executes on button press in pirires_toggle.
 function pirires_toggle_Callback(hObject, eventdata, handles)
 % hObject    handle to pirires_toggle (see GCBO)
@@ -2026,13 +2024,11 @@ function pirires_toggle_Callback(hObject, eventdata, handles)
                 - (allPoints(i,2) * allPoints(i+1,1)));
         end
     end
-    
-    if numPoints>2
-        globalStudyInfo.nrrs_pirires_points = allPoints;
-        globalStudyInfo.nrrs_pirires_area = pirires_area;
-        setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-    end
-    
+        
+    globalStudyInfo.nrrs_pirires_points = allPoints;
+    globalStudyInfo.nrrs_pirires_area = pirires_area;
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
 % --- Executes on button press in piriarea_toggle.
 function piriarea_toggle_Callback(hObject, eventdata, handles)
 % hObject    handle to piriarea_toggle (see GCBO)
@@ -2077,12 +2073,10 @@ function piriarea_toggle_Callback(hObject, eventdata, handles)
         end
     end
         
-    if numPoints>2
-        globalStudyInfo.nrrs_totalpiri_points = allPoints;
-        globalStudyInfo.nrrs_totalpiri_area = totalpiri_area;
-        setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-    end
-    
+    globalStudyInfo.nrrs_totalpiri_points = allPoints;
+    globalStudyInfo.nrrs_totalpiri_area = totalpiri_area;
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
 % --- Executes on button press in uesd_toggle.
 function uesd_toggle_Callback(hObject, eventdata, handles)
 % hObject    handle to uesd_toggle (see GCBO)
@@ -2110,12 +2104,10 @@ function uesd_toggle_Callback(hObject, eventdata, handles)
     uesd = coordinates_dist(allPoints);
     showFeedbackPopup(handles,sprintf('UES Distension: %-.2f', uesd), 2);
 
-    if size(allPoints,1)>1
+    globalStudyInfo.uesd_points = allPoints;
+    globalStudyInfo.uesd_dist = uesd;
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
-        globalStudyInfo.uesd_points = allPoints;
-        globalStudyInfo.uesd_dist = uesd;
-        setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-    end
 
 % --- Executes on button press in pas_toggle.
 function pas_toggle_Callback(hObject, eventdata, handles)
