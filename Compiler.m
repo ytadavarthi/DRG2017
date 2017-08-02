@@ -101,12 +101,12 @@ function varargout = Compiler(varargin)
         %information, the classifier data text file will not be written.
         %Making makeshift progress bar
         fprintf('Compiling Classifier Data..');
-        if ~strcmpi(cell1{1,1},'FrameNumber')
-            compile_classifierData(dataStruct,fileNames,finalCell,folder_name);
-            disp('Done writing combined classifier file');
-        else
-            fprintf('\nWARNING: Classifier data not found in _morphoj_ file');
-        end
+         %if ~strcmpi(cell1{1,1},'FrameNumber')
+        compile_classifierData(dataStruct,fileNames,finalCell,folder_name);
+        disp('\nDone writing combined classifier file');
+         %else
+          %   fprintf('\nWARNING: Classifier data not found in _morphoj_ file\nClassifier data not written');
+         %end
         
         fprintf('Compiling Kinematics Data..');
         compile_kinematicsData(dataStruct, fileNames,folder_name);
@@ -239,67 +239,79 @@ function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
     classifierColumns = {};
     for i = 1:length(dataStruct)
         
-        %makeshift progress bar
-        fprintf('..');
-        if (i == length(dataStruct))
-            fprintf('\n');
-        end
-        
         %extract data from structure
         classifierData = dataStruct(i).classifierData;
         coordinateData = dataStruct(i).coordinateData;
         
         [m n] = size(coordinateData);
-       
         
-        %create struct s that includes each classifier. i.e. s.start_frame
-        %outputs start frame value.
-        for j = 1:length(dataStruct(i).classifierData(1,:))
-            s.(classifierData{1,j}) = str2double(classifierData{2,j});
-            if isnan(s.(classifierData{1,j}))
-                s.(classifierData{1,j}) = [];
+        if ~all(all(cellfun(@isempty,classifierData)))
+            
+            %makeshift progress bar
+            fprintf('..');
+            if (i == length(dataStruct))
+                fprintf('\n');
             end
+        
+            %create struct s that includes each classifier. i.e. s.start_frame
+            %outputs start frame value.
+            for j = 1:length(dataStruct(i).classifierData(1,:))
+                s.(classifierData{1,j}) = str2double(classifierData{2,j});
+                if isnan(s.(classifierData{1,j}))
+                    s.(classifierData{1,j}) = [];
+                end
+            end
+
+            %if no start frame, pick first frame as start frame. if no end
+            %frame, pick last frame as end frame
+            if isempty(s.start_frame)
+                s.start_frame = 1;
+            end
+            if isempty(s.end_frame)
+                s.end_frame = m-1;
+            end
+
+            %calculate which frames are in each phase.
+            Frames_preO  = s.start_frame:(s.hold_position-1);
+            Frames_O     = s.hold_position:(s.hyoid_burst-2);
+            Frames_P     = (s.hyoid_burst-1):s.ues_closure;
+            Frames_E     = (s.ues_closure+1):s.at_rest;
+            Frames_postE = (s.at_rest+1):s.end_frame;
+
+            if isempty(s.at_rest) || s.at_rest > s.end_frame
+                Frames_E = (s.ues_closure+1):s.end_frame;
+            end
+
+            swallowPhaseData = cell(m-1,1);
+            swallowPhaseData(Frames_preO)  = {'Pre-Oral Transport'};
+            swallowPhaseData(Frames_O)     = {'Oral Transport'};
+            swallowPhaseData(Frames_P)     = {'Pharyngeal Stage'};
+            swallowPhaseData(Frames_E)     = {'Esophageal Stage'};
+            swallowPhaseData(Frames_postE) = {'Post-Esophageal Stage'};
+
+            %select only frames within start-end frame
+            swallowPhaseData_no_blanks = swallowPhaseData(s.start_frame:s.end_frame);
+
+            %create second column
+            secondColumn = [secondColumn;swallowPhaseData_no_blanks];
+            
+            %finds the independent variables inputted by user into uitable and
+            %repeats them for every frame, creating extra long column.
+            ind_vars = outputData(1+i,2:end);
+            %[m n] = size(coordinateData);
+            long_col_of_ind_vars = repmat(ind_vars,[length(swallowPhaseData_no_blanks),1]);
+            classifierColumns = [classifierColumns;long_col_of_ind_vars];
+        else
+            fprintf('\nWARNING: Classifier data not found in %s file',fileNames{i});
+            %finds the independent variables inputted by user into uitable and
+            %repeats them for every frame, creating extra long column.
+            ind_vars = outputData(1+i,2:end);
+            %[m n] = size(coordinateData);
+            long_col_of_ind_vars = repmat(ind_vars,[m-1,1]);
+            classifierColumns = [classifierColumns;long_col_of_ind_vars];
         end
         
-        %if no start frame, pick first frame as start frame. if no end
-        %frame, pick last frame as end frame
-        if isempty(s.start_frame)
-            s.start_frame = 1;
-        end
-        if isempty(s.end_frame)
-            s.end_frame = m-1;
-        end
-        
-        %calculate which frames are in each phase.
-        Frames_preO  = s.start_frame:(s.hold_position-1);
-        Frames_O     = s.hold_position:(s.hyoid_burst-2);
-        Frames_P     = (s.hyoid_burst-1):s.ues_closure;
-        Frames_E     = (s.ues_closure+1):s.at_rest;
-        Frames_postE = (s.at_rest+1):s.end_frame;
-        
-        if isempty(s.at_rest) || s.at_rest > s.end_frame
-            Frames_E = (s.ues_closure+1):s.end_frame;
-        end
-        
-        swallowPhaseData = cell(m-1,1);
-        swallowPhaseData(Frames_preO)  = {'Pre-Oral Transport'};
-        swallowPhaseData(Frames_O)     = {'Oral Transport'};
-        swallowPhaseData(Frames_P)     = {'Pharyngeal Stage'};
-        swallowPhaseData(Frames_E)     = {'Esophageal Stage'};
-        swallowPhaseData(Frames_postE) = {'Post-Esophageal Stage'};
-        
-        %select only frames within start-end frame
-        swallowPhaseData_no_blanks = swallowPhaseData(s.start_frame:s.end_frame);
-        
-        %create second column
-        secondColumn = [secondColumn;swallowPhaseData_no_blanks];
-        
-        %finds the independent variables inputted by user into uitable and
-        %repeats them for every frame, creating extra long column.
-        ind_vars = outputData(1+i,2:end);
-        %[m n] = size(coordinateData);
-        long_col_of_ind_vars = repmat(ind_vars,[length(swallowPhaseData_no_blanks),1]);
-        classifierColumns = [classifierColumns;long_col_of_ind_vars];
+
     end
   
     %add 'Swallow Phase' to top of second column
@@ -314,8 +326,11 @@ function compile_classifierData(dataStruct, fileNames, finalCell, pathName)
     end
     classifierColumns = [outputData(1,2:end);classifierColumns];
     
-    finalTable = cell2table([firstColumn secondColumn classifierColumns]);
-    
+    if all(all(cellfun(@isempty,classifierData)))
+        finalTable = cell2table([firstColumn classifierColumns]);
+    else
+        finalTable = cell2table([firstColumn secondColumn classifierColumns]);
+    end
     %write table with correct filename
     formatOut = 'dd-mm-yy HH-MM AM';
     date = datestr(now,formatOut);
