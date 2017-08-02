@@ -1506,7 +1506,7 @@ function estSize_Callback(hObject, eventdata, handles)
     
     %Change the font color of the calibration button if calibration has
     %been completed.
-    if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0
+    if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0 && globalStudyInfo.pixelspercm < 10e6
         handles.unitCalibrationButton.ForegroundColor = [0 1 0];
     else
         handles.unitCalibrationButton.ForegroundColor = [1 0 0];
