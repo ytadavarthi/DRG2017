@@ -1152,14 +1152,14 @@ function std = stageTransitionDuration (phasesCell)
     end
 end
 
-%Pharyngeal Transit Time; Needs T3 (Hyoid Burst), T5 (UES Closes)
+%Pharyngeal Transit Time; Needs T2 (Ramus Mandible), T5 (UES Closes)
 function ptt = pharyngealTransitTime (phasesCell)
-    if (isnan(phasesCell(5)) || isnan(phasesCell(4)))
+    if (isnan(phasesCell(5)) || isnan(phasesCell(3)))
         ptt = 0;
     elseif length(phasesCell)<13 ||(isnan(phasesCell(13)))
-        ptt = (phasesCell(5) - phasesCell(4)) / 30;
+        ptt = (phasesCell(5) - phasesCell(3)) / 30;
     else    
-        ptt = (phasesCell(5) - phasesCell(4)) / phasesCell(13);
+        ptt = (phasesCell(5) - phasesCell(3)) / phasesCell(13);
     end
 end
 
