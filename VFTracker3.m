@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 01-Aug-2017 21:47:38
+% Last Modified by GUIDE v2.5 02-Aug-2017 09:18:52
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -2270,3 +2270,19 @@ else
 end
    
 setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+
+% --------------------------------------------------------------------
+function Save_as_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to Save_as (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+oldFeedbackLabelMessage = get(handles.feedbackLabel, 'String');
+% set(handles.feedbackLabel, 'String', 'Saving...');
+showFeedbackPopup(handles, 'Saving...',1);
+
+drawnow()
+Utilities.save_as_ResultFileWriter(globalStudyInfo);
+showFeedbackPopup(handles, 'Saved', 2);
+

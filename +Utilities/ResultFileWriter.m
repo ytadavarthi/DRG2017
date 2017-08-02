@@ -55,6 +55,7 @@ function ResultFileWriter(globalStudyInfo)
     fullVideoFileName = vfVideoStructure.fileName;
     [pathString, name, ~] = fileparts(fullVideoFileName);
     fullResultFileName = fullfile(pathString, strcat(name, '.txt'));
+    
     Utilities.CustomPrinters.printInfo(sprintf('Writing annotation results to %s', fullResultFileName));
     
     %add kinematics frame numbers
