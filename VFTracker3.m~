@@ -313,13 +313,6 @@ pointerShape = [ ...
             end
         end
 
-        %set calibration button font to red if calibration is not found, to
-        %green if calibration is found
-        if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0
-            handles.unitCalibrationButton.ForegroundColor = [0 1 0];
-        else
-            handles.unitCalibrationButton.ForegroundColor = [1 0 0];
-        end
         
         [a, b] = enumeration('Data.JoveLandmarks');
         numLandmarks = numel(b);
@@ -1504,15 +1497,6 @@ function estSize_Callback(hObject, eventdata, handles)
 
     end
     
-    %Change the font color of the calibration button if calibration has
-    %been completed.
-    if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0
-        handles.unitCalibrationButton.ForegroundColor = [0 1 0];
-    else
-        handles.unitCalibrationButton.ForegroundColor = [1 0 0];
-        
-    end
-    
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
 
@@ -2101,14 +2085,20 @@ function piriarea_toggle_Callback(hObject, eventdata, handles)
         end
     end
         
-
+<<<<<<< HEAD
     if numPoints>2
         globalStudyInfo.nrrs_totalpiri_points = allPoints;
         globalStudyInfo.nrrs_totalpiri_area = totalpiri_area;
-        handles.nrrs_totalpiri_area_text.String = num2str(totalpiri_area);
         setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     end
     
+=======
+    globalStudyInfo.nrrs_totalpiri_points = allPoints;
+    globalStudyInfo.nrrs_totalpiri_area = totalpiri_area;
+    handles.nrrs_totalpiri_area_text.String = num2str(totalpiri_area);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+
+>>>>>>> 93551396f0d5a83cb52db5ad3e3d78e9f12c930d
 % --- Executes on button press in uesd_toggle.
 function uesd_toggle_Callback(hObject, eventdata, handles)
 % hObject    handle to uesd_toggle (see GCBO)
@@ -2136,10 +2126,17 @@ function uesd_toggle_Callback(hObject, eventdata, handles)
     uesd = coordinates_dist(allPoints);
     showFeedbackPopup(handles,sprintf('UES Distension: %-.2f', uesd), 2);
 
+<<<<<<< HEAD
     if size(allPoints,1)>1
+=======
+    globalStudyInfo.uesd_points = allPoints;
+    globalStudyInfo.uesd_dist = uesd;
+    handles.uesd_dist_text.String = num2str(uesd);
+    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+>>>>>>> 93551396f0d5a83cb52db5ad3e3d78e9f12c930d
+
         globalStudyInfo.uesd_points = allPoints;
         globalStudyInfo.uesd_dist = uesd;
-        handles.uesd_dist_text.String = num2str(uesd);
         setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     end
 
