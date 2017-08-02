@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 28-Jul-2017 17:19:30
+% Last Modified by GUIDE v2.5 28-Jul-2017 17:44:41
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -313,7 +313,11 @@ pointerShape = [ ...
             end
         end
 
-        
+        %set calibration button font to red if calibration is not found, to
+        %green if calibration is found
+        if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0
+            
+        end
         [a, b] = enumeration('Data.JoveLandmarks');
         numLandmarks = numel(b);
         numFrames = size(inputDataArray, 1);
@@ -1497,6 +1501,15 @@ function estSize_Callback(hObject, eventdata, handles)
 
     end
     
+    %Change the font color of the calibration button if calibration has
+    %been completed.
+    if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0
+        handles.unitCalibrationButton.ForegroundColor = [0 1 0];
+    else
+        handles.unitCalibrationButton.ForegroundColor = [1 0 0];
+        
+    end
+    
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
 
@@ -1798,7 +1811,7 @@ function pcr_min_area_button_Callback(hObject, eventdata, handles)
         
     globalStudyInfo.pcr_min_points = allPoints;
     globalStudyInfo.pcr_min_area = pcr;
-    handles.pcr_min_area_text = num2str(pcr);
+    handles.pcr_min_area_text.String = num2str(pcr);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
 % --- Executes on button press in pcr_max_area_button.
@@ -1845,6 +1858,7 @@ function pcr_max_area_button_Callback(hObject, eventdata, handles)
         
     globalStudyInfo.pcr_max_points = allPoints;
     globalStudyInfo.pcr_max_area = pcr;
+    handles.pcr_max_area_text.String = num2str(pcr);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
 
@@ -1926,6 +1940,7 @@ function valres_toggle_Callback(hObject, eventdata, handles)
         
     globalStudyInfo.nrrs_valres_points = allPoints;
     globalStudyInfo.nrrs_valres_area = valres_area;
+    handles.nrrs_valres_area_text.String = num2str(valres_area);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
 % --- Executes on button press in valarea_toggle.
@@ -1974,6 +1989,7 @@ function valarea_toggle_Callback(hObject, eventdata, handles)
         
     globalStudyInfo.nrrs_totalval_points = allPoints;
     globalStudyInfo.nrrs_totalval_area = totalval_area;
+    handles.nrrs_totalval_area_text.String = num2str(totalval_area);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
 % --- Executes on button press in pirires_toggle.
@@ -2022,6 +2038,7 @@ function pirires_toggle_Callback(hObject, eventdata, handles)
         
     globalStudyInfo.nrrs_pirires_points = allPoints;
     globalStudyInfo.nrrs_pirires_area = pirires_area;
+    handles.nrrs_pirires_area_text.String = num2str(pirires_area);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
 % --- Executes on button press in piriarea_toggle.
@@ -2070,6 +2087,7 @@ function piriarea_toggle_Callback(hObject, eventdata, handles)
         
     globalStudyInfo.nrrs_totalpiri_points = allPoints;
     globalStudyInfo.nrrs_totalpiri_area = totalpiri_area;
+    handles.nrrs_totalpiri_area_text.String = num2str(totalpiri_area);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
 % --- Executes on button press in uesd_toggle.
@@ -2101,6 +2119,7 @@ function uesd_toggle_Callback(hObject, eventdata, handles)
 
     globalStudyInfo.uesd_points = allPoints;
     globalStudyInfo.uesd_dist = uesd;
+    handles.uesd_dist_text.String = num2str(uesd);
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
 
@@ -2180,6 +2199,7 @@ a = 2;
 toggle_state = get(hObject,'Value');
 if toggle_state == 1
     %make visible
+    handles.pas_text_in_panel.String = handles.pas_text.String;
     handles.results_panel.Visible = 'On';
 elseif toggle_state == 0
     %make invisible

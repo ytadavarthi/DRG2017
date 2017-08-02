@@ -313,6 +313,13 @@ pointerShape = [ ...
             end
         end
 
+        %set calibration button font to red if calibration is not found, to
+        %green if calibration is found
+        if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0
+            handles.unitCalibrationButton.ForegroundColor = [0 1 0];
+        else
+            handles.unitCalibrationButton.ForegroundColor = [1 0 0];
+        end
         
         [a, b] = enumeration('Data.JoveLandmarks');
         numLandmarks = numel(b);
@@ -1495,6 +1502,15 @@ function estSize_Callback(hObject, eventdata, handles)
         set(handles.pixelspercm_text, 'String', num2str(globalStudyInfo.pixelspercm));
         showFeedbackPopup(handles,'SI Scalar Calculated',2);
 
+    end
+    
+    %Change the font color of the calibration button if calibration has
+    %been completed.
+    if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0
+        handles.unitCalibrationButton.ForegroundColor = [0 1 0];
+    else
+        handles.unitCalibrationButton.ForegroundColor = [1 0 0];
+        
     end
     
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
