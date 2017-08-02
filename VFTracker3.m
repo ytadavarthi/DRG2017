@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 28-Jul-2017 17:44:41
+% Last Modified by GUIDE v2.5 01-Aug-2017 21:47:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1864,7 +1864,7 @@ function pcr_max_area_button_Callback(hObject, eventdata, handles)
     if numPoints>2
         globalStudyInfo.pcr_max_points = allPoints;
         globalStudyInfo.pcr_max_area = pcr;
-        handles.pcr_min_area_text.String = num2str(pcr);
+        handles.pcr_max_area_text.String = num2str(pcr);
 
         setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
     end
@@ -2215,7 +2215,6 @@ function results_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of results
-a = 2;
 toggle_state = get(hObject,'Value');
 if toggle_state == 1
     %make visible
@@ -2225,3 +2224,49 @@ elseif toggle_state == 0
     %make invisible
     handles.results_panel.Visible = 'Off';
 end
+
+
+% --------------------------------------------------------------------
+function erase_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to erase (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+
+non_erasable_properties = {'vfVideoStructure','studyImageProcessingInfo','studyCoordinates', ...
+                           'ues_point1','ues_point2','uesd_points','nrrs_valres_points',...
+                           'nrrs_totalval_points','nrrs_pirires_points','nrrs_totalpiri_points',...
+                           'pcr_min_points','pcr_max_points','currentlyTrackedLandmark','vfTracker',...
+                           'harrisCorner','kltNumPyramidLevels','kltBlockSize','kltMaxIterations',...
+                           'harrisFeatureDetectorParameters', 'kltTrackerParameters'};
+                       
+all_properties = properties(globalStudyInfo);
+
+erasable_properties = {};
+for i = 1:length(all_properties)
+    is_non_erasable = any(strcmp(all_properties{i},non_erasable_properties));
+    if is_non_erasable
+    elseif ~is_non_erasable
+        erasable_properties = [erasable_properties;all_properties{i}];
+    else
+        error('something went wrong! try again')
+    end
+end
+
+[listbox_selection,~] = listdlg('ListString',erasable_properties,'InitialValue',[],'PromptString','Use CTRL and/or SHIFT to select multiple landmarks');
+
+for i = listbox_selection
+    globalStudyInfo.(erasable_properties{i}) = [];
+    handles.([erasable_properties{i} '_text']).String = '';
+end
+
+%Change the font color of the calibration button if calibration has
+%been completed.
+if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0 && globalStudyInfo.pixelspercm < 10e6
+    handles.unitCalibrationButton.ForegroundColor = [0 1 0];
+else
+    handles.unitCalibrationButton.ForegroundColor = [1 0 0];
+
+end
+   
+setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);

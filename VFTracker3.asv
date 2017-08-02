@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 28-Jul-2017 17:44:41
+% Last Modified by GUIDE v2.5 01-Aug-2017 21:47:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -316,8 +316,11 @@ pointerShape = [ ...
         %set calibration button font to red if calibration is not found, to
         %green if calibration is found
         if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0
-            
+            handles.unitCalibrationButton.ForegroundColor = [0 1 0];
+        else
+            handles.unitCalibrationButton.ForegroundColor = [1 0 0];
         end
+        
         [a, b] = enumeration('Data.JoveLandmarks');
         numLandmarks = numel(b);
         numFrames = size(inputDataArray, 1);
@@ -1503,7 +1506,7 @@ function estSize_Callback(hObject, eventdata, handles)
     
     %Change the font color of the calibration button if calibration has
     %been completed.
-    if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0
+    if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0 && globalStudyInfo.pixelspercm < 10e6
         handles.unitCalibrationButton.ForegroundColor = [0 1 0];
     else
         handles.unitCalibrationButton.ForegroundColor = [1 0 0];
@@ -1787,7 +1790,7 @@ function pcr_min_area_button_Callback(hObject, eventdata, handles)
     end
     
     pcr = 0;
-    numPoints = length(allPoints);
+    numPoints = size(allPoints,1);
     
     for i = 1:numPoints
         if numPoints == 1
@@ -1808,11 +1811,13 @@ function pcr_min_area_button_Callback(hObject, eventdata, handles)
                 - (allPoints(i,2) * allPoints(i+1,1)));
         end
     end
-        
-    globalStudyInfo.pcr_min_points = allPoints;
-    globalStudyInfo.pcr_min_area = pcr;
-    handles.pcr_min_area_text.String = num2str(pcr);
-    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    
+    if numPoints>2
+        globalStudyInfo.pcr_min_points = allPoints;
+        globalStudyInfo.pcr_min_area = pcr;
+        handles.pcr_min_area_text.String = num2str(pcr);
+        setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    end
 
 % --- Executes on button press in pcr_max_area_button.
 function pcr_max_area_button_Callback(hObject, eventdata, handles)
@@ -1834,7 +1839,7 @@ function pcr_max_area_button_Callback(hObject, eventdata, handles)
     end
     
     pcr = 0;
-    numPoints = length(allPoints);
+    numPoints = size(allPoints,1);
     
     for i = 1:numPoints
         if numPoints == 1
@@ -1855,12 +1860,14 @@ function pcr_max_area_button_Callback(hObject, eventdata, handles)
                 - (allPoints(i,2) * allPoints(i+1,1)));
         end
     end
-        
-    globalStudyInfo.pcr_max_points = allPoints;
-    globalStudyInfo.pcr_max_area = pcr;
-    handles.pcr_max_area_text.String = num2str(pcr);
-    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    
+    if numPoints>2
+        globalStudyInfo.pcr_max_points = allPoints;
+        globalStudyInfo.pcr_max_area = pcr;
+        handles.pcr_min_area_text.String = num2str(pcr);
 
+        setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    end
 
 
 % --------------------------------------------------------------------
@@ -1916,7 +1923,7 @@ function valres_toggle_Callback(hObject, eventdata, handles)
     end
     
     valres_area = 0;
-    numPoints = length(allPoints);
+    numPoints = size(allPoints,1);
     
     for i = 1:numPoints
         if numPoints == 1
@@ -1937,12 +1944,15 @@ function valres_toggle_Callback(hObject, eventdata, handles)
                 - (allPoints(i,2) * allPoints(i+1,1)));
         end
     end
-        
-    globalStudyInfo.nrrs_valres_points = allPoints;
-    globalStudyInfo.nrrs_valres_area = valres_area;
-    handles.nrrs_valres_area_text.String = num2str(valres_area);
-    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
+    
+    if numPoints>2
+        globalStudyInfo.nrrs_valres_points = allPoints;
+        globalStudyInfo.nrrs_valres_area = valres_area;
+        handles.nrrs_valres_area_text.String = num2str(valres_area);
+        setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    end
+    
 % --- Executes on button press in valarea_toggle.
 function valarea_toggle_Callback(hObject, eventdata, handles)
 % hObject    handle to valarea_toggle (see GCBO)
@@ -1965,7 +1975,7 @@ function valarea_toggle_Callback(hObject, eventdata, handles)
     end
     
     totalval_area = 0;
-    numPoints = length(allPoints);
+    numPoints = size(allPoints,1);
     
     for i = 1:numPoints
         if numPoints == 1
@@ -1986,12 +1996,15 @@ function valarea_toggle_Callback(hObject, eventdata, handles)
                 - (allPoints(i,2) * allPoints(i+1,1)));
         end
     end
-        
-    globalStudyInfo.nrrs_totalval_points = allPoints;
-    globalStudyInfo.nrrs_totalval_area = totalval_area;
-    handles.nrrs_totalval_area_text.String = num2str(totalval_area);
-    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    
+    if numPoints>2
+        globalStudyInfo.nrrs_totalval_points = allPoints;
+        globalStudyInfo.nrrs_totalval_area = totalval_area;
+        handles.nrrs_totalval_area_text.String = num2str(totalval_area);
 
+        setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    end
+    
 % --- Executes on button press in pirires_toggle.
 function pirires_toggle_Callback(hObject, eventdata, handles)
 % hObject    handle to pirires_toggle (see GCBO)
@@ -2014,7 +2027,7 @@ function pirires_toggle_Callback(hObject, eventdata, handles)
     end
     
     pirires_area = 0;
-    numPoints = length(allPoints);
+    numPoints = size(allPoints,1);
     
     for i = 1:numPoints
         if numPoints == 1
@@ -2035,11 +2048,14 @@ function pirires_toggle_Callback(hObject, eventdata, handles)
                 - (allPoints(i,2) * allPoints(i+1,1)));
         end
     end
-        
-    globalStudyInfo.nrrs_pirires_points = allPoints;
-    globalStudyInfo.nrrs_pirires_area = pirires_area;
-    handles.nrrs_pirires_area_text.String = num2str(pirires_area);
-    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    
+    if numPoints>2
+        globalStudyInfo.nrrs_pirires_points = allPoints;
+        globalStudyInfo.nrrs_pirires_area = pirires_area;
+        handles.nrrs_pirires_area_text.String = num2str(pirires_area);
+        setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    end
+    
 
 % --- Executes on button press in piriarea_toggle.
 function piriarea_toggle_Callback(hObject, eventdata, handles)
@@ -2063,7 +2079,7 @@ function piriarea_toggle_Callback(hObject, eventdata, handles)
     end
     
     totalpiri_area = 0;
-    numPoints = length(allPoints);
+    numPoints = size(allPoints,1);
     
     for i = 1:numPoints
         if numPoints == 1
@@ -2085,11 +2101,14 @@ function piriarea_toggle_Callback(hObject, eventdata, handles)
         end
     end
         
-    globalStudyInfo.nrrs_totalpiri_points = allPoints;
-    globalStudyInfo.nrrs_totalpiri_area = totalpiri_area;
-    handles.nrrs_totalpiri_area_text.String = num2str(totalpiri_area);
-    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
+    if numPoints>2
+        globalStudyInfo.nrrs_totalpiri_points = allPoints;
+        globalStudyInfo.nrrs_totalpiri_area = totalpiri_area;
+        handles.nrrs_totalpiri_area_text.String = num2str(totalpiri_area);
+        setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    end
+    
 % --- Executes on button press in uesd_toggle.
 function uesd_toggle_Callback(hObject, eventdata, handles)
 % hObject    handle to uesd_toggle (see GCBO)
@@ -2104,12 +2123,12 @@ function uesd_toggle_Callback(hObject, eventdata, handles)
     if (button_state == get(hObject,'Max'))
         %getting all points for distension distance
         allPoints = getline(handles.frameViewer);
-        showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(allPoints)), 2);
+        showFeedbackPopup(handles,sprintf('Total %d Points Tracked', size(allPoints, 1)), 2);
         set(hObject,'String','UES Distension');
         set(hObject,'Value',0);
     end
     
-    if length(allPoints) == 1
+    if size(allPoints, 1) == 1
         disp('Only 1 point selected, UES distension will not be calculated');
         return;
     end
@@ -2117,11 +2136,12 @@ function uesd_toggle_Callback(hObject, eventdata, handles)
     uesd = coordinates_dist(allPoints);
     showFeedbackPopup(handles,sprintf('UES Distension: %-.2f', uesd), 2);
 
-    globalStudyInfo.uesd_points = allPoints;
-    globalStudyInfo.uesd_dist = uesd;
-    handles.uesd_dist_text.String = num2str(uesd);
-    setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
-
+    if size(allPoints,1)>1
+        globalStudyInfo.uesd_points = allPoints;
+        globalStudyInfo.uesd_dist = uesd;
+        handles.uesd_dist_text.String = num2str(uesd);
+        setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
+    end
 
 % --- Executes on button press in pas_toggle.
 function pas_toggle_Callback(hObject, eventdata, handles)
@@ -2195,7 +2215,6 @@ function results_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of results
-a = 2;
 toggle_state = get(hObject,'Value');
 if toggle_state == 1
     %make visible
@@ -2205,3 +2224,40 @@ elseif toggle_state == 0
     %make invisible
     handles.results_panel.Visible = 'Off';
 end
+
+
+% --------------------------------------------------------------------
+function erase_ClickedCallback(hObject, eventdata, handles)
+% hObject    handle to erase (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
+
+non_erasable_properties = {'vfVideoStructure','studyImageProcessingInfo','studyCoordinates', ...
+                           'ues_point1','ues_point2','uesd_points','nrrs_valres_points',...
+                           'nrrs_totalval_points','nrrs_pirires_points','nrrs_totalpiri_points',...
+                           'pcr_min_points','pcr_max_points','currentlyTrackedLandmark','vfTracker',...
+                           'harrisCorner','kltNumPyramidLevels','kltBlockSize','kltMaxIterations',...
+                           'harrisFeatureDetectorParameters', 'kltTrackerParameters'};
+                       
+all_properties = properties(globalStudyInfo);
+
+erasable_properties = {};
+for i = 1:length(all_properties)
+    is_non_erasable = any(strcmp(all_properties{i},non_erasable_properties));
+    if is_non_erasable
+    elseif ~is_non_erasable
+        erasable_properties = [erasable_properties;all_properties{i}];
+    else
+        error('something went wrong! try again')
+    end
+end
+
+[listbox_selection,~] = listdlg('ListString',erasable_properties,'InitialValue',[],'PromptString','Use CTRL and/or SHIFT to select multiple landmarks');
+
+for i = listbox_selection
+    globalStudyInfo.(erasable_properties{i}) = [];
+    handles.([erasable_properties{i} '_text']).String = '';
+end
+   
+setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
