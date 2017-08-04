@@ -24,7 +24,7 @@ function varargout = VFTracker3(varargin)
 
 % Edit the above text to modify the response to help VFTracker3
 
-% Last Modified by GUIDE v2.5 04-Aug-2017 14:51:58
+% Last Modified by GUIDE v2.5 03-Aug-2017 21:15:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -267,25 +267,23 @@ pointerShape = [ ...
                         if isnan(calibration_points.(strcat('si_', morphoJTable{1,j})))
                            calibration_points.(strcat('si_', morphoJTable{1,j})) = [];
                         end
-                        
                     %converting number from morphoJ into an array for
                     %pas_classifiers
-                    elseif strcmp(morphoJTable{1,j},'pas_classifiers')
+                    elseif strcmp(morphoJTable{1,j},'pas_classifiers') || strcmp(morphoJTable{1,j},'')
                         globalStudyInfo.(morphoJTable{1,j}) = ...
                             [floor(str2double(morphoJTable{2,j}) / 100), ...
                             floor(mod(str2double(morphoJTable{2,j}),100) / 10) , ...
                             mod(str2double(morphoJTable{2,j}),10)];
                         
                         if(globalStudyInfo.pas_classifiers(1) == 2)
-                            set(handles.beforePAS, 'Value', 1);
+                            set(handles.BeforePAS, 'Value', 'Max');
                         end
                         if(globalStudyInfo.pas_classifiers(2) == 2)
-                            set(handles.duringPAS, 'Value', 1);
+                            set(handles.duringPAS, 'Value', 'Max');
                         end
-                        if(globalStudyInfo.pas_classifiers(3) == 2)
-                            set(handles.afterPAS, 'Value', 1);
+                        if(globalStudyInfo.pas_classifiers(2) == 2)
+                            set(handles.afterPAS, 'Value', 'Max');
                         end
-                        
                     elseif strcmp(morphoJTable{1,j},'frameRate') || strcmp(morphoJTable{1,j},'')
                         %if frameRate is stored, we do not want to load it.
                         %The value will be extracted from video file later.
@@ -1801,7 +1799,7 @@ function pcr_min_area_button_Callback(hObject, eventdata, handles)
     allPoints = [0,0];
     
     if (button_state == get(hObject,'Max'))
-        [x, y] = mygetline(handles.frameViewer);
+        [x, y] = getline(handles.frameViewer);
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
@@ -1850,7 +1848,7 @@ function pcr_max_area_button_Callback(hObject, eventdata, handles)
     allPoints = [0,0];
     
     if (button_state == get(hObject,'Max'))
-        [x, y] = mygetline(handles.frameViewer);
+        [x, y] = getline(handles.frameViewer);
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
@@ -1933,7 +1931,7 @@ function valres_toggle_Callback(hObject, eventdata, handles)
     
     if (button_state == get(hObject,'Max'))
         
-        [x, y] = mygetline(handles.frameViewer);
+        [x, y] = getline(handles.frameViewer);
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
@@ -1985,7 +1983,7 @@ function valarea_toggle_Callback(hObject, eventdata, handles)
     
     if (button_state == get(hObject,'Max'))
         
-        [x, y] = mygetline(handles.frameViewer);
+        [x, y] = getline(handles.frameViewer);
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
@@ -2037,7 +2035,7 @@ function pirires_toggle_Callback(hObject, eventdata, handles)
     
     if (button_state == get(hObject,'Max'))
         
-        [x, y] = mygetline(handles.frameViewer);
+        [x, y] = getline(handles.frameViewer);
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
@@ -2089,7 +2087,7 @@ function piriarea_toggle_Callback(hObject, eventdata, handles)
     
     if (button_state == get(hObject,'Max'))
         
-        [x, y] = mygetline(handles.frameViewer);
+        [x, y] = getline(handles.frameViewer);
         allPoints = [x,y];
         
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', length(x)), 2);
@@ -2141,7 +2139,7 @@ function uesd_toggle_Callback(hObject, eventdata, handles)
     
     if (button_state == get(hObject,'Max'))
         %getting all points for distension distance
-        allPoints = mygetline(handles.frameViewer);
+        allPoints = getline(handles.frameViewer);
         showFeedbackPopup(handles,sprintf('Total %d Points Tracked', size(allPoints, 1)), 2);
         set(hObject,'String','UES Distension');
         set(hObject,'Value',0);
@@ -2240,8 +2238,6 @@ toggle_state = get(hObject,'Value');
 if toggle_state == 1
     %make visible
     handles.pas_text_in_panel.String = handles.pas_text.String;
-    handles.pas_panel.Visible = 'Off';
-    handles.pas_toggle.Value = 0;
     handles.results_panel.Visible = 'On';
 elseif toggle_state == 0
     %make invisible
@@ -2323,13 +2319,13 @@ function goToStartFrame_Callback(hObject, eventdata, handles)
     end
 
 
-% --- Executes on button press in beforePAS.
-function beforePAS_Callback(hObject, eventdata, handles)
-% hObject    handle to beforePAS (see GCBO)
+% --- Executes on button press in BeforePAS.
+function BeforePAS_Callback(hObject, eventdata, handles)
+% hObject    handle to BeforePAS (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of beforePAS
+% Hint: get(hObject,'Value') returns toggle state of BeforePAS
 
 globalStudyInfo = getappdata(handles.appFigure, 'globalStudyInfo');
 

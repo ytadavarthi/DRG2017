@@ -169,10 +169,10 @@ function pasc = pas_coordinates_number(pas_coordinates)
     pasc = 0;
 
     if length(pas_coordinates) == 3
-        pasc = pas_coordinates(1)*100 + pas_coordinates(2)*10 + pas_coordinates(3)*1 ;
+        pasc = strcat(num2str(~isempty(pas_coordinates{1}) && pas_coordinates{1}),num2str((~isempty(pas_coordinates{2}) && pas_coordinates{2})), num2str((~isempty(pas_coordinates{2}) && pas_coordinates{2}));
     elseif length(pas_coordinates) == 2
-        pasc = pas_coordinates(1)*100 + pas_coordinates(2)*10 + pas_coordinates(3)*1 ;
+        pasc = (~isempty(pas_coordinates{1}) && pas_coordinates{1})*100 + (~isempty(pas_coordinates{2}) && pas_coordinates{2})*10;
     elseif length(pas_coordinates) == 1
-        pasc = pas_coordinates(1)*100 + pas_coordinates(2)*10 + pas_coordinates(3)*1 ;
+        pasc = (~isempty(pas_coordinates{1}) && pas_coordinates{1})*100;
     end
 end

@@ -51,6 +51,7 @@ classdef GlobalStudyInfo < handle
       
       %Penetration Aspiration Ratio
       pas;
+      pas_classifiers;
       
       %Global sessoin info
       currentlyTrackedLandmark = Data.JoveLandmarks.Mandible;
