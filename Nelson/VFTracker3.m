@@ -2654,32 +2654,54 @@ for k = 1:length(frames)
     %back one to get the index where the current_time is the closest to the
     %expected_time, but still greater. (hence index = index-1)
     current_time = 0;
-    while expected_time >= current_time
+    while expected_time >= current_time && expected_time <= times(end)
         index = index+1;
         current_time = times(index);
+
     end
     index = index-1;
     
     %take the pressure data from the correct time, and fill them into the
     %final data table for the corresponding frame. 
-    final_data(k,2:num_sensors+1) = num(index,2:end);
+    if expected_time <= times(end)
+        final_data(k,2:num_sensors+1) = num(index,2:end);
+    else
+        final_data(k,2:num_sensors+1) = nan(1,length(num(index,2:end)));
+    end
 end
 
 
 %initialize ues pressures column.
 ues_pressures = cell(length(ues_nums),1);
+ues_pressures_minus_1 = cell(length(ues_nums),1);
+ues_pressures_plus_1 = cell(length(ues_nums),1);
 for i = 1:length(ues_pressures)
     %find the sensor number for the correct frame
     ues_sensor_num = ues_nums{i};
     if ~isempty(ues_sensor_num)
-        %find the pressure corresponding to that frame
+        %find the pressure corresponding to that frame. The pressure values
+        %for the sensor selected by the user, as well as the sensor above
+        %and below are stored
         ues_pressures{i} = final_data(i,ues_sensor_num+1);
+        ues_pressures_minus_1{i} = final_data(i,ues_sensor_num);
+        ues_pressures_plus_1{i} = final_data(i,ues_sensor_num+2);
     end
 end
 
+%add additional columns requested by Nelson
+%first: column of pressures of sensor that is deemed UES at rest. 
+initial_ues = ues_nums(~cellfun('isempty',ues_nums));
+initial_ues = initial_ues{1};
+initial_ues_col = num2cell(final_data(:,initial_ues+1));
+
+%second: column of pressures from the sensor 1 before and 1 after the initial ues
+initial_ues_col_minus_1 = num2cell(final_data(:,initial_ues));
+initial_ues_col_plus_1  = num2cell(final_data(:,initial_ues+2));
+
+
 %create final cell matrix that will include column headers
-col_headers = [{'Frame Numbers'} num2cell(1:num_sensors) {'UES Sens #','UES Pressrue'}];
-final_cell = [col_headers;[num2cell(final_data),ues_nums,ues_pressures]];
+col_headers = [{'Frame Numbers'} num2cell(1:num_sensors) {'UES Sens #','UES-1 Pressures','UES Pressrue','UES+1 Pressures','UES_i-1','UES_i','UES_i+1'}];
+final_cell = [col_headers;[num2cell(final_data),ues_nums,ues_pressures_minus_1, ues_pressures, ues_pressures_plus_1, initial_ues_col_minus_1,initial_ues_col,initial_ues_col_plus_1]];
 final_table = cell2table(final_cell);
 
 [path,name,ext] = fileparts(globalStudyInfo.pressure.fullfile);
