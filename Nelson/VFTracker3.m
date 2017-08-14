@@ -2663,8 +2663,10 @@ for k = 1:length(frames)
     
     %take the pressure data from the correct time, and fill them into the
     %final data table for the corresponding frame. 
-    if expected_time <= times(end)
+    if expected_time <= times(end) && index > 0
         final_data(k,2:num_sensors+1) = num(index,2:end);
+    elseif index == 0
+        final_data(k,2:num_sensors+1) = nan(1,length(num(index+1,2:end)));
     else
         final_data(k,2:num_sensors+1) = nan(1,length(num(index,2:end)));
     end
