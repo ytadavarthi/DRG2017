@@ -2735,10 +2735,6 @@ all_col_headers = [{'Frame Numbers'} tableColumnLabels num2cell(1:num_sensors) {
 combined_final_cell = [all_col_headers; ...
     horzcat(t2, [num2cell(final_data(:,2:end)),ues_nums,ues_pressures_minus_1, ues_pressures, ues_pressures_plus_1, initial_ues_col_minus_1,initial_ues_col,initial_ues_col_plus_1])];
 final_combined_table = cell2table(combined_final_cell);
-[path,name,ext] = fileparts(globalStudyInfo.pressure.fullfile);
-full_combined_name = fullfile(path,[name '_calibrated_withCoordinates' '.txt']);
-
-writetable(final_combined_table, full_combined_name, 'Delimiter', '\t', 'WriteVariableNames', false);
 
 %%%%%%%end combining
 
