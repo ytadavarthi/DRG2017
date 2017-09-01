@@ -154,7 +154,7 @@ function [newTips] = adjustTips(coordinates)
 %define variables that store the coordinates of the tips and the dots
     %for coordinates 1 through 5
     dots_to_fit = coordinates(3:5,[1,3]);
-    tips_to_fit = coordinates(3:5,[2,4]);
+    tips_to_fit = coordinates(1:5,[2,4]);
     
     %use a procrustes fit to fit the tips to the dots.
     %The tr variable is a structure array with fields:
@@ -170,14 +170,31 @@ function [newTips] = adjustTips(coordinates)
     %
     %This formula will be used to transform all the tips and find the new
     %value for the tips.
-    [~,~,tr] = procrustes(dots_to_fit,tips_to_fit,'reflection',false);
+    [~,fitted_spine,tr] = procrustes(dots_to_fit,tips_to_fit);
+   
+    %this plot can help with debugging
+%     hold on
+%     plot(fittedTips(:,1),fittedTips(:,2),'ko')
 
     %define original coordinate points for all the tips, and then use the
     %transformation to make new tips
     tips = coordinates(:,[2,4]);
-    newTipsMinusC = tr.b*tips*tr.T;
-    for i = 1:length(newTipsMinusC(:,1))
-        newTips(i,:) = newTipsMinusC(i,:) + tr.c(1,:);
+%     newTipsMinusC = tr.b*tips*tr.T;
+%     for i = 1:length(newTipsMinusC(:,1))
+%         newTips(i,:) = newTipsMinusC(i,:) + tr.c(1,:);
+%     end
+    dots = coordinates(:,[1,3]);
+    figure
+    plot(tips(:,1),tips(:,2),'rx')
+    hold on
+    plot(dots(:,1),dots(:,2),'bx')
+    hold on
+    plot(fitted_spine(:,1),fitted_spine(:,2),'bo')
+    hold on
+
+    for i = 1:length(tips(:,1))
+        newTips(i,:) = tr.b*tips(i,:)*tr.T + tr.c(1,:);
+        plot(newTips(i,1),newTips(i,2),'go')
     end
     
 %     dots = coordinates(:,[1,3]);
@@ -190,6 +207,9 @@ function [newTips] = adjustTips(coordinates)
 %     hold on
 %     plot(newTips(:,1),newTips(:,2),'go')
 %     axis ij
+    %this plot can help with debugging
+%     figure
+%     plot(coordinates(:,1),coordinates(:,3),'rx',coordinates(:,2),coordinates(:,4),'bx',newTips(:,1),newTips(:,2),'gs');
 end
 
 function [before_defs_line,arrowhead_lines,post_arrowhead_lines,circle_lines,text_lines,final_lines,new_vectors_blue,new_vectors_red,orig_vectors_blue,orig_anchor,tips_anchor,new_anchor] = splitRaw(raw,triangle_width,triangle_height,coordinates,newTips,line_numbers,circle_numbers,text_numbers,defs_line)
