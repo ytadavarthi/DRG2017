@@ -2700,10 +2700,51 @@ initial_ues_col = num2cell(final_data(:,initial_ues+1));
 initial_ues_col_minus_1 = num2cell(final_data(:,initial_ues));
 initial_ues_col_plus_1  = num2cell(final_data(:,initial_ues+2));
 
+[a, b] = enumeration('Data.JoveLandmarks');
+numLandmarks = numel(b);
+%disp(numLandmarks)
+%disp(b)
+tableColumnLabels = {};
+
+for i = 1:numLandmarks
+   tableColumnLabels{end+1} = strcat(b{i}, '_x');
+   tableColumnLabels{end+1} = strcat(b{i}, '_y');
+end
+    
+%combining both coordinates and the sensor information
+morphoJCoordinatesArray = zeros(numFrames, numLandmarks*2, 'double');
+studyCoordinates = globalStudyInfo.studyCoordinates;
+imageHeight = globalStudyInfo.vfVideoStructure.resolution(1);
+
+for frameNumberIterator = 1:numFrames
+   for landmarkNumberIterator = 1:numLandmarks
+       currentCoordinate = studyCoordinates.getCoordinate(frameNumberIterator, landmarkNumberIterator);
+       if (isempty(currentCoordinate))
+           currentCoordinate = [ 0 0 ];
+       end
+
+       morphoJCoordinatesArray(frameNumberIterator, landmarkNumberIterator*2-1) = currentCoordinate(1);
+       morphoJCoordinatesArray(frameNumberIterator, landmarkNumberIterator*2) = imageHeight - currentCoordinate(2) + 1;
+   end        
+end
+morphoJCoordinatesArray= horzcat((1:1:numFrames)', morphoJCoordinatesArray);
+
+t2 = num2cell(morphoJCoordinatesArray);
+
+all_col_headers = [{'Frame Numbers'} tableColumnLabels num2cell(1:num_sensors) {'UES Sens #','UES-1 Pressures','UES Pressrue','UES+1 Pressures','UES_i-1','UES_i','UES_i+1'}];
+combined_final_cell = [all_col_headers; ...
+    horzcat(t2, [num2cell(final_data(:,2:end)),ues_nums,ues_pressures_minus_1, ues_pressures, ues_pressures_plus_1, initial_ues_col_minus_1,initial_ues_col,initial_ues_col_plus_1])];
+final_combined_table = cell2table(combined_final_cell);
+[path,name,ext] = fileparts(globalStudyInfo.pressure.fullfile);
+full_combined_name = fullfile(path,[name '_calibrated_withCoordinates' '.txt']);
+
+writetable(final_combined_table, full_combined_name, 'Delimiter', '\t', 'WriteVariableNames', false);
+
+%%%%%%%end combining
 
 %create final cell matrix that will include column headers
 col_headers = [{'Frame Numbers'} num2cell(1:num_sensors) {'UES Sens #','UES-1 Pressures','UES Pressrue','UES+1 Pressures','UES_i-1','UES_i','UES_i+1'}];
-final_cell = [col_headers;[num2cell(final_data),ues_nums,ues_pressures_minus_1, ues_pressures, ues_pressures_plus_1, initial_ues_col_minus_1,initial_ues_col,initial_ues_col_plus_1]];
+final_cell = [col_headers; [num2cell(final_data),ues_nums,ues_pressures_minus_1, ues_pressures, ues_pressures_plus_1, initial_ues_col_minus_1,initial_ues_col,initial_ues_col_plus_1]];
 final_table = cell2table(final_cell);
 
 [path,name,ext] = fileparts(globalStudyInfo.pressure.fullfile);
