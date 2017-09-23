@@ -341,7 +341,7 @@ end
 %Gets all kinematic values for all files and stores in variable for GUI display
 function output = compile_kinematicsButton(dataStruct, fileNames)
     lengthDataStruct = length(dataStruct);
-    numKinematicsFunctions = 11;
+    numKinematicsFunctions = 10;
     % numKinematicsFunctions*2 + 9 for the timing variables + 4 for nrrs + 3 for pcr + 2 for ues_dist +  1 for filename
     numColumns = numKinematicsFunctions*2 + 9 + 4 + 3 + 2 + 1;
     kinematicsArray = cell(lengthDataStruct+1, numColumns);    
@@ -354,7 +354,6 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         'hyExC4_vert', 'hyExC4_si',  ...
         'hyExVert_vert', 'hyExVert_si',  ...
         'alm_vert',  'alm_si',     ...
-        'slm_vert', 'slm_si',    ...
         'hla_vert', 'hla_si',    ...
         'le_vert',  'le_si',   ...
         'ps_vert', 'ps_si',    ...
@@ -399,7 +398,7 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
         hyExC4 = hyoidExcursionToC4(doubleCell, vertScalar, siScalar, startFrame, endFrame);
         hyExVert = hyoidExcursionToVertebrae(doubleCell, vertScalar,  siScalar, startFrame, endFrame);
         alm = antLargyngealMovement(doubleCell, vertScalar,  siScalar, startFrame, endFrame);
-        slm = supLargyngealMovement(doubleCell, vertScalar, siScalar, startFrame, endFrame);
+%         slm = supLargyngealMovement(doubleCell, vertScalar, siScalar, startFrame, endFrame);
         hla = hyolaryngealApproximation(doubleCell, vertScalar, siScalar, startFrame, endFrame);
         le = laryngealElevation(doubleCell, vertScalar, siScalar, startFrame, endFrame);
         ps = pharyngealShortening(doubleCell, vertScalar, siScalar, startFrame, endFrame);
@@ -433,7 +432,6 @@ function output = compile_kinematicsButton(dataStruct, fileNames)
                                                 hyExC4{1}, hyExC4{2},  ...
                                                 hyExVert{1}, hyExVert{2},  ...
                                                 alm{1}, alm{2},      ...
-                                                slm{1}, slm{2},    ...
                                                 hla{1}, hla{2},    ...
                                                 le{1}, le{2},    ...
                                                 ps{1}, ps{2},    ...
@@ -462,7 +460,7 @@ end
 %Gets all kinematic values for all files and stores in a cell for output
 function compile_kinematicsData(dataStruct, fileNames, pathName)
     lengthDataStruct = length(dataStruct);
-    numKinematicsFunctions = 11;
+    numKinematicsFunctions = 10;
     % numKinematicsFunctions*2 + 9 for the timing variables + 4 for nrrs + 3 for pcr/pas + 2 for ues + 1 for filename
     numColumns = numKinematicsFunctions*2 + 9 + 4 + 4 + 2 + 1;
     
@@ -476,7 +474,6 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         'hyExC4_vert', 'hyExC4_si',  ...
         'hyExVert_vert', 'hyExVert_si',  ...
         'alm_vert',  'alm_si',     ...
-        'slm_vert', 'slm_si',    ...
         'hla_vert', 'hla_si',    ...
         'le_vert',  'le_si',   ...
         'ps_vert', 'ps_si',    ...
@@ -542,7 +539,7 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
         hyExC4 = hyoidExcursionToC4(doubleCell, vertScalar, siScalar, startFrame, endFrame);
         hyExVert = hyoidExcursionToVertebrae(doubleCell, vertScalar,  siScalar, startFrame, endFrame);
         alm = antLargyngealMovement(doubleCell, vertScalar,  siScalar, startFrame, endFrame);
-        slm = supLargyngealMovement(doubleCell, vertScalar, siScalar, startFrame, endFrame);
+%         slm = supLargyngealMovement(doubleCell, vertScalar, siScalar, startFrame, endFrame);
         hla = hyolaryngealApproximation(doubleCell, vertScalar, siScalar, startFrame, endFrame);
         le = laryngealElevation(doubleCell, vertScalar, siScalar, startFrame, endFrame);
         ps = pharyngealShortening(doubleCell, vertScalar, siScalar, startFrame, endFrame);
@@ -577,7 +574,6 @@ function compile_kinematicsData(dataStruct, fileNames, pathName)
                                                 hyExC4{1}, hyExC4{2},  ...
                                                 hyExVert{1}, hyExVert{2},  ...
                                                 alm{1}, alm{2},      ...
-                                                slm{1}, slm{2},    ...
                                                 hla{1}, hla{2},    ...
                                                 le{1}, le{2},    ...
                                                 ps{1}, ps{2},    ...
@@ -921,8 +917,72 @@ function alm = antLargyngealMovement(doubleCell, vertScalar, siScalar, startFram
     alm = {vertalm sialm};
 end
 
-%Superior Laryngeal Movements; Needs C1, C4, Hyoid, Ant.Cricoid
+%Superior Laryngeal Movement - Updated; Needs C1, C4, Hyoid, Ant.Cricoid
 function slm = supLargyngealMovement(doubleCell,vertScalar, siScalar, startFrame, endFrame)
+  
+    doubleCellSize = size(doubleCell);    
+    allVertMovements = zeros(1,doubleCellSize(1));
+    allSIMovements = zeros(1,doubleCellSize(1));
+
+    for i = startFrame:endFrame
+        c1x = doubleCell(i,5);
+        c1y = doubleCell(i,6);
+        c4x = doubleCell(i,9);
+        c4y = doubleCell(i,10);
+        hyx = doubleCell(i,17);
+        hyy = doubleCell(i,18);
+        antCricX = doubleCell(i,15);
+        antCricY = doubleCell(i,16);
+
+        if(find([c1x c1y c4x c4y hyx hyy antCricX antCricY]==0))
+            slm = {0,0};
+            return;
+        end
+        
+        c1c4_points = [c1x, c1y; c4x, c4y];
+        
+        c1hy_points = [c1x, c1y; hyx, hyy];
+        c4hy_points = [c4x, c4y; hyx, hyy];
+        
+        c1antCric_points = [c1x, c1y; antCricX, antCricY];
+        c4antCric_points = [c4x, c4y; antCricX, antCricY];
+
+        %get lengths of each set of points to form edges of triangle
+
+        c1c4_dist = coordinates_dist(c1c4_points);
+        c1hy_dist = coordinates_dist(c1hy_points);
+        c4hy_dist = coordinates_dist(c4hy_points);
+        
+        c1antCric_dist = coordinates_dist(c1antCric_points);
+        c4antCric_dist = coordinates_dist(c4antCric_points);
+ 
+        %Using Law of Cosines to find angle at mandible
+        hyc1c4angle = acos(( c1hy_dist ^ 2 + c1c4_dist ^ 2 - c4hy_dist ^ 2) / (2 * c1hy_dist * c1c4_dist));
+        
+        antCricc1c4angle = acos(( c1antCric_dist ^ 2 + c1c4_dist ^ 2 - c4antCric_dist ^ 2) / (2 * c1antCric_dist * c1c4_dist));
+
+        %approximating vertical movement of larynx
+        current_orthogonal_dist = cos(antCricc1c4angle) * c1antCric_dist;
+        
+        
+        if(~isnan(vertScalar))
+            allVertMovements(i) = current_orthogonal_dist / vertScalar;
+        end 
+        
+        if(siScalar)
+            allSIMovements(i) = current_orthogonal_dist / siScalar;
+        end
+    end
+    
+    %superior largyngeal movement is difference between max and min
+    %movements for all frames
+    vertslm = max(allVertMovements) - min(allVertMovements(allVertMovements>0));
+    sislm = max(allSIMovements) - min(allSIMovements(allSIMovements>0));
+    slm = {vertslm sislm};
+end
+
+%Superior Laryngeal Movements; Needs C1, C4, Hyoid, Ant.Cricoid
+function slm = supLargyngealMovement2(doubleCell,vertScalar, siScalar, startFrame, endFrame)
   
     doubleCellSize = size(doubleCell);    
     allVertMovements = zeros(1,doubleCellSize(1));
