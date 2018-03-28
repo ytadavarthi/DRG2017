@@ -325,8 +325,10 @@ pointerShape = [ ...
                     bothPoints = [globalStudyInfo.si_point1(1),globalStudyInfo.si_point1(2);globalStudyInfo.si_point2(1),globalStudyInfo.si_point2(2)];
                     bothPoints_dist = coordinates_dist(bothPoints);
 
-                    estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
-                    set(handles.estSize, 'String', num2str(estSize));
+                    if (~isempty(globalStudyInfo.pixelspercm))
+                        estSize = bothPoints_dist / globalStudyInfo.pixelspercm;
+                        set(handles.estSize, 'String', num2str(estSize));
+                    end
                 end
 
             end
@@ -1571,7 +1573,29 @@ function calibrateSIbutton_Callback(hObject, eventdata, handles)
         set(hObject,'String','Calibrate SI Units');
         set(hObject,'Value',0);
         showFeedbackPopup(handles,'Point 2 Tracked',2);
+        if(isnan(str2double(get(hObject,'String'))))
+            showFeedbackPopup(handles,'Please Enter Valid Number',1);
+        end
+        
+        estSize = str2double(handles.estSize.String);
+        if estSize > 0
+            bothPoints = [globalStudyInfo.si_point1(1),globalStudyInfo.si_point1(2);globalStudyInfo.si_point2(1),globalStudyInfo.si_point2(2)];
+            bothPoints_dist = coordinates_dist(bothPoints);
+            %bothPoints_dist2 = pdist(bothPoints, 'euclidean');
+
+            globalStudyInfo.pixelspercm = bothPoints_dist / estSize;
+            set(handles.pixelspercm_text, 'String', num2str(globalStudyInfo.pixelspercm));
+            showFeedbackPopup(handles,'SI Scalar Calculated',2);
+        end
+        
+        if ~isempty(globalStudyInfo.pixelspercm) && globalStudyInfo.pixelspercm > 0 && globalStudyInfo.pixelspercm < 10e6
+            handles.unitCalibrationButton.ForegroundColor = [0 1 0];
+        else
+            handles.unitCalibrationButton.ForegroundColor = [1 0 0];
+        end
+        
     end
+
         
     setappdata(handles.appFigure, 'globalStudyInfo', globalStudyInfo);
 
