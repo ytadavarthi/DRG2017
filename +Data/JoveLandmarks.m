@@ -9,8 +9,8 @@ classdef JoveLandmarks < uint8
       C2 (4);
       C4 (5);
       UES (6);
-      PostCric (7);
-      AntCric (8);
+      PostVF (7);
+      AntVF (8);
       Hyoid (9);
       Valleculae (10);
       SPC (11);

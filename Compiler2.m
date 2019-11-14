@@ -1,7 +1,7 @@
 function varargout = Compiler(varargin)
     
     if isempty(varargin)
-        choice = menu('Select an option','Compile selected files','Compile all _morphoj files in a selected folder', 'Compile all files with Normalization');
+        choice = menu('Select an option','Compile selected files','Compile all _morphoj files in a selected folder');
         kinematicsButton = false;
         
         %if compile selected files is chosen
@@ -33,27 +33,6 @@ function varargout = Compiler(varargin)
             end
             fprintf('Found %d morphoj files. Hold on...\n', length(fileNames));
 
-        %if compile all morphoj files in selected folder is chosen and
-        %NORMALIZED
-        elseif choice == 3
-            folder_name = uigetdir();
-            [P, F] = subdir(folder_name); %gathers all folder paths and file names in the chosen directory.
-                   
-            %un-nests the nested F cell matrix where each cell in the
-            %matrix represents the name of each morphoJ file. Also creates 
-            %pathName cell matrix where each cell in the matrix
-            %represents the path for each morphoJ file, such that
-            %[pathname(1) fileName 1] is the full path for each file.
-            fileNames = {};
-            pathName = {};
-            for i = 1:length(F)
-                for j = 1:length(F{i})
-                    fileNames{end+1} = F{i}{j};
-                    pathName{end+1} = P{i};
-                end
-            end
-            fprintf('Found %d morphoj files. Hold on...\n', length(fileNames));
-            
             
         % if neither is chosen or something weird happens.
         else
@@ -122,19 +101,15 @@ function varargout = Compiler(varargin)
         %information, the classifier data text file will not be written.
         %Making makeshift progress bar
         fprintf('Compiling Classifier Data..');
-      
-        %if ~strcmpi(cell1{1,1},'FrameNumber')
-%  old  compile_classifierData(dataStruct,fileNames,finalCell,folder_name);
-        compile_classifierDataNormalized(dataStruct,fileNames,finalCell,folder_name);
-
+         %if ~strcmpi(cell1{1,1},'FrameNumber')
+        compile_classifierData(dataStruct,fileNames,finalCell,folder_name);
         disp('\nDone writing combined classifier file');
-        
-        %else
+         %else
           %   fprintf('\nWARNING: Classifier data not found in _morphoj_ file\nClassifier data not written');
          %end
         
         fprintf('Compiling Kinematics Data..');
-% undo  compile_kinematicsData(dataStruct, fileNames,folder_name);
+        compile_kinematicsData(dataStruct, fileNames,folder_name);
         fprintf('\nDone writing combined kinematics file\n');
     end
 end
@@ -261,9 +236,6 @@ function compile_classifierDataNormalized(dataStruct, fileNames, finalCell, path
     %[m n] = size(finalCell);
     secondColumn = {};
     classifierColumns = {};
-    
-    numPharyngealFrames = {};
-    
     for i = 1:length(dataStruct)
         
         %extract data from structure
@@ -302,8 +274,6 @@ function compile_classifierDataNormalized(dataStruct, fileNames, finalCell, path
             Frames_preO  = s.start_frame:(s.hold_position-1);
             Frames_O     = s.hold_position:(s.hyoid_burst-2);
             Frames_P     = (s.hyoid_burst-1):s.ues_closure;
-            numPharyngealFrames{i} = length(Frames_P);
-            
             Frames_E     = (s.ues_closure+1):s.at_rest;
             Frames_postE = (s.at_rest+1):s.end_frame;
 
@@ -360,9 +330,6 @@ function compile_classifierDataNormalized(dataStruct, fileNames, finalCell, path
     else
         finalTable = cell2table([firstColumn secondColumn classifierColumns]);
     end
-    
-    fprintf('\n Least pharyngeal frames: ' + string(min(cell2mat(numPharyngealFrames))));
-    
     %write table with correct filename
     formatOut = 'dd-mm-yy HH-MM AM';
     date = datestr(now,formatOut);
