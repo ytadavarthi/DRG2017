@@ -6,9 +6,7 @@ function varargout = VFTracker3(varargin)
 %      singleton*.
 %
 %      H = VFTRACKER3 returns the handle to a new VFTRACKER3 or the handle to
-%      the existing singleton*.
-%
-%      VFTRACKER3('CALLBACK',hObject,eventData,handles,...) calls the local
+%      the existing singleton*.m
 %      function named CALLBACK in VFTRACKER3.M with the given input arguments.
 %
 %      VFTRACKER3('Property','Value',...) creates a new VFTRACKER3 or raises the
