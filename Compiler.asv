@@ -280,31 +280,17 @@ function [normalizedCompiledClassifierData, normalizedCompiledCoordinateData] = 
     end
     min_phar_frames = min(num_phar_rows);
     
-    %initialize the normalized data
+    
     normalizedCompiledClassifierData = compiledClassifierData(1,:);
     normalizedCompiledCoordinateData = compiledCoordinateData(1,:);
-    
-    %for 1 through number of total files
     for i = 1:numel(all_fields)
-        %recreate the currentFile
         currentFile = structData.(all_fields{i});
-        
-        %calculate the total number of pharyngeal rows
         num_phar_rows = length(currentFile.phar_rows);
-        
-        %find the starting row for the pharyngeal phase in the current file
         starting_phar_row = currentFile.phar_rows(1);
-        
-        %find rows in the currentFile that must be deleted to create the
-        %minimum number of pharyngeal phrames.
         rand_phar_rows_to_delete = sort(randperm(num_phar_rows, (num_phar_rows - min_phar_frames))+starting_phar_row-1);       
-        
-        %find rows that must be kept in order to delete the rows that are
-        %to be deleted
         raw_rows_to_keep = setdiff(1:length(currentFile.raw_compiled_data(:,1)),rand_phar_rows_to_delete);
         raw_rows_to_keep = raw_rows_to_keep(2:end);
         
-        %delete the random rows required to normalize data.
         normalizedCompiledClassifierData = [normalizedCompiledClassifierData; currentFile.raw_compiled_data(raw_rows_to_keep,:)];
         normalizedCompiledCoordinateData = [normalizedCompiledCoordinateData; currentFile.raw_coordinate_data(raw_rows_to_keep,:)];
     end
@@ -414,6 +400,131 @@ function finalCell = compile_coordinateData(dataStruct,fileNames,pathName)
 %     formatOut = 'dd-mm-yy HH-MM AM';
 %     date = datestr(now,formatOut);
 %     writetable(finalTable,fullfile(pathName, ['coordinates_' date '.txt']), 'Delimiter', '\t', 'WriteVariableNames', false);
+end
+function compile_classifierDataNormalized(dataStruct, fileNames, finalCell, pathName)
+    %change directory
+    cd Compiler
+    
+    %Create GUI for use-input independent variables
+    [~, outputData] = GUI(fileNames);
+
+    
+    %return directory
+    cd ../
+
+    %create first column from compile_coordinateData function
+    firstColumn = finalCell(:,1);
+%     
+    %[m n] = size(finalCell);
+    secondColumn = {};
+    classifierColumns = {};
+    
+    numPharyngealFrames = {};
+    
+    for i = 1:length(dataStruct)
+        
+        %extract data from structure
+        classifierData = dataStruct(i).classifierData;
+        coordinateData = dataStruct(i).coordinateData;
+        
+        [m n] = size(coordinateData);
+        
+        if ~all(all(cellfun(@isempty,classifierData)))
+            
+            %makeshift progress bar
+            fprintf('..');
+            if (i == length(dataStruct))
+                fprintf('\n');
+            end
+        
+            %create struct s that includes each classifier. i.e. s.start_frame
+            %outputs start frame value.
+            for j = 1:length(dataStruct(i).classifierData(1,:))
+                s.(classifierData{1,j}) = str2double(classifierData{2,j});
+                if isnan(s.(classifierData{1,j}))
+                    s.(classifierData{1,j}) = [];
+                end
+            end
+
+            %if no start frame, pick first frame as start frame. if no end
+            %frame, pick last frame as end frame
+            if isempty(s.start_frame)
+                s.start_frame = 1;
+            end
+            if isempty(s.end_frame)
+                s.end_frame = m-1;
+            end
+
+            %calculate which frames are in each phase.
+            Frames_preO  = s.start_frame:(s.hold_position-1);
+            Frames_O     = s.hold_position:(s.hyoid_burst-2);
+            Frames_P     = (s.hyoid_burst-1):s.ues_closure;
+            numPharyngealFrames{i} = length(Frames_P);
+            
+            Frames_E     = (s.ues_closure+1):s.at_rest;
+            Frames_postE = (s.at_rest+1):s.end_frame;
+
+            if isempty(s.at_rest) || s.at_rest > s.end_frame
+                Frames_E = (s.ues_closure+1):s.end_frame;
+            end
+
+            swallowPhaseData = cell(m-1,1);
+            swallowPhaseData(Frames_preO)  = {'Pre-Oral Transport'};
+            swallowPhaseData(Frames_O)     = {'Oral Transport'};
+            swallowPhaseData(Frames_P)     = {'Pharyngeal Stage'};
+            swallowPhaseData(Frames_E)     = {'Esophageal Stage'};
+            swallowPhaseData(Frames_postE) = {'Post-Esophageal Stage'};
+
+            %select only frames within start-end frame
+            swallowPhaseData_no_blanks = swallowPhaseData(s.start_frame:s.end_frame);
+
+            %create second column
+            secondColumn = [secondColumn;swallowPhaseData_no_blanks];
+            
+            %finds the independent variables inputted by user into uitable and
+            %repeats them for every frame, creating extra long column.
+            ind_vars = outputData(1+i,2:end);
+            %[m n] = size(coordinateData);
+            long_col_of_ind_vars = repmat(ind_vars,[length(swallowPhaseData_no_blanks),1]);
+            classifierColumns = [classifierColumns;long_col_of_ind_vars];
+        else
+            fprintf('\nWARNING: Classifier data not found in %s file',fileNames{i});
+            %finds the independent variables inputted by user into uitable and
+            %repeats them for every frame, creating extra long column.
+            ind_vars = outputData(1+i,2:end);
+            %[m n] = size(coordinateData);
+            long_col_of_ind_vars = repmat(ind_vars,[m-1,1]);
+            classifierColumns = [classifierColumns;long_col_of_ind_vars];
+        end
+        
+
+    end
+  
+    %add 'Swallow Phase' to top of second column
+    secondColumn = [{'Swallow Stage'}; secondColumn];
+    
+    %add classifier titles to classifierColumns
+    for i = 2:length(outputData(1,:))
+        title = outputData{1,i};
+        if length(title) > 8 && strcmp(title(1:9), '<html><b>')
+            outputData{1,i} = title(length('<html><b>')+1:end-length('</b></html>'));
+        end
+    end
+    classifierColumns = [outputData(1,2:end);classifierColumns];
+    
+    if all(all(cellfun(@isempty,classifierData)))
+        finalTable = cell2table([firstColumn classifierColumns]);
+    else
+        finalTable = cell2table([firstColumn secondColumn classifierColumns]);
+    end
+    
+    fprintf('\n Least pharyngeal frames: ' + string(min(cell2mat(numPharyngealFrames))));
+    
+    %write table with correct filename
+    formatOut = 'dd-mm-yy HH-MM AM';
+    date = datestr(now,formatOut);
+    writetable(finalTable,fullfile(pathName, ['classifiers_' date '.txt']), 'Delimiter', '\t', 'WriteVariableNames', false);
+        
 end
 
 function finalCell = compile_classifierData(dataStruct, fileNames, finalCell, pathName)
