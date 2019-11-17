@@ -4,7 +4,7 @@ function varargout = Compiler(varargin)
         %opens dialogue box giving user option to select files or select
         %entire folder. Also allows user to chose whether or not to
         %normalize
-        [files_button_clicked, folder_button_clicked, normalize, normalizeNum] = dialog_box();
+        [files_button_clicked, folder_button_clicked, normalize] = dialog_box();
         kinematicsButton = false;
         
         %if compile selected files is chosen
@@ -112,7 +112,7 @@ function varargout = Compiler(varargin)
             %except that they have random rows removed from pharyngeal
             %stage such that all files have equal number of pharyngeal
             %stage frames
-            [normalizedCompiledClassifierData, normalizedCompiledCoordinateData] = normalize_classifier_data(compiledClassifierData, compiledCoordinateData, normalizeNum);
+            [normalizedCompiledClassifierData, normalizedCompiledCoordinateData] = normalize_classifier_data(compiledClassifierData, compiledCoordinateData);
             
             %convert cells to table
             normalizedCompiledCoordinateTable = cell2table(normalizedCompiledCoordinateData);
@@ -1831,7 +1831,7 @@ function [sub,fls] = subfolder(CurrPath,sub,fls)
 end
 
 
-function [files_button_clicked, folder_button_clicked, normalize, normalizeNum] = dialog_box()
+function [files_button_clicked, folder_button_clicked, normalize] = dialog_box()
     files_button_clicked = false;
     folder_button_clicked = false;
     normalize = false;
